@@ -1,4 +1,4 @@
-#include "SparsePosterior_types.h"
+#include "limbs_types.h"
 #include "wasserstein.h"
 
 using namespace Rcpp;

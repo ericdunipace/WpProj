@@ -1,4 +1,4 @@
-#include "SparsePosterior_types.h"
+#include "limbs_types.h"
 #include <vector>
 #include "SufficientStatistics.h"
 #include "utils.h"

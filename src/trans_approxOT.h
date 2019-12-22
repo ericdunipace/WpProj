@@ -1,7 +1,7 @@
 #ifndef TRANS_APPROX_OT_H
 #define TRANS_APPROX_OT_H
 
-#include "SparsePosterior_types.h"
+#include "limbs_types.h"
 #include "round_feasible.h"
 #include "trans_sinkhorn.h"
 #include "trans_greenkhorn.h"

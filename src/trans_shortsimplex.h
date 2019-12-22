@@ -1,7 +1,7 @@
 #ifndef TRANS_SHORTSIMPLEX_H
 #define TRANS_SHORTSIMPLEX_H
 
-#include "SparsePosterior_types.h"
+#include "limbs_types.h"
 extern "C" {
 #include "shortsimplex.h"
 }

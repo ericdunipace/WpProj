@@ -1,7 +1,7 @@
 #ifndef WASSERSTEIN_H
 #define WASSERSTEIN_H
 
-#include "SparsePosterior_types.h"
+#include "limbs_types.h"
 #include "sort.h"
 
 double wasserstein(const refVec & mass_a, const refVec & mass_b,

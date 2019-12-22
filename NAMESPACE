@@ -1,4 +1,4 @@
-useDynLib(SparsePosterior)
+useDynLib(limbs)
 import(RcppEigen)
 importFrom(Rcpp, evalCpp)
 exportPattern("^[[:alpha:]]+")

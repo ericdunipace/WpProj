@@ -1,7 +1,7 @@
 #ifndef TRANS_SINKHORN_H
 #define TRANS_SINKHORN_H
 
-#include "SparsePosterior_types.h"
+#include "limbs_types.h"
 #include "utils.h"
 
 void trans_sinkhorn(const refVecConst & mass_a, const refVecConst & mass_b, 

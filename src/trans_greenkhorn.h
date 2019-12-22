@@ -1,7 +1,7 @@
 #ifndef TRANS_GREENKHORN_H
 #define TRANS_GREENKHORN_H
 
-#include "SparsePosterior_types.h"
+#include "limbs_types.h"
 #include "utils.h"
 
 void trans_greenkhorn(const refVecConst & mass_a, const refVecConst & mass_b, 

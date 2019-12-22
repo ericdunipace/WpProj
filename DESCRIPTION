@@ -1,12 +1,12 @@
-Package: SparsePosterior
+Package: limbs
 Type: Package
-Title: Sparsifies posterior distributions
+Title: Generates interpretable summaries of Bayesian posterior models
 Version: 0.1
 Date: 2019-03-12
 Author: Eric Dunipace
 Maintainer: Eric Dunipace <eduniapce@g.harvard.edu>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Description: Uses interpretable linear models to generate summaries of any predictive Bayesian model.
+License: GPL 2.0
 Imports: 
   ggplot2,
   ggsci,

@@ -1,7 +1,7 @@
 #ifndef COST_H
 #define COST_H
 
-#include "SparsePosterior_types.h"
+#include "limbs_types.h"
 
 void cost_calculation_L2sq(const refMatConst & A, const refMatConst & B, matrix & cost_matrix);
 void cost_calculation_L2(const refMatConst & A, const refMatConst & B, matrix & cost_matrix);

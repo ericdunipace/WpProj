@@ -1,7 +1,7 @@
 #ifndef TRANS_GRANDKHORN_H
 #define TRANS_GRANDKHORN_H
 
-#include "SparsePosterior_types.h"
+#include "limbs_types.h"
 #include "utils.h"
 #include "systematic_sample.h"
 

@@ -1,23 +1,23 @@
-\name{SparsePosterior-package}
-\alias{SparsePosterior-package}
-\alias{SparsePosterior}
+\name{limbs-package}
+\alias{limbs-package}
+\alias{limbs}
 \docType{package}
 \title{
-\packageTitle{SparsePosterior}
+\packageTitle{limbs}
 }
 \description{
-\packageDescription{SparsePosterior}
+\packageDescription{limbs}
 }
 \details{
 
-\packageDESCRIPTION{SparsePosterior}
-\packageIndices{SparsePosterior}
+\packageDESCRIPTION{limbs}
+\packageIndices{limbs}
 ~~ An overview of how to use the package, including the most important functions ~~
 }
 \author{
-\packageAuthor{SparsePosterior}
+\packageAuthor{limbs}
 
-Maintainer: \packageMaintainer{SparsePosterior}
+Maintainer: \packageMaintainer{limbs}
 }
 \references{
 ~~ Literature or other references for background information ~~

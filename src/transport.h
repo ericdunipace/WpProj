@@ -1,7 +1,7 @@
 #ifndef TRANSPORT_H
 #define TRANSPORT_H
 
-#include "SparsePosterior_types.h"
+#include "limbs_types.h"
 #include "cost.h"
 #include <string>
 #include "utils.h"

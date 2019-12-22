@@ -1,4 +1,4 @@
-#include "SparsePosterior_types.h"
+#include "limbs_types.h"
 
 //[[Rcpp::export]]
 Rcpp::NumericMatrix selVarMeanGen(const SEXP & X_,

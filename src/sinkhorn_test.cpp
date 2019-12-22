@@ -1,4 +1,4 @@
-#include "SparsePosterior_types.h"
+#include "limbs_types.h"
 
 // [[Rcpp::export]]
 Rcpp::List sinkhorn_(Rcpp::NumericVector p_, Rcpp::NumericVector q_, Rcpp::NumericMatrix cost_matrix_,

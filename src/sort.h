@@ -1,7 +1,7 @@
 #ifndef SORT_H
 #define SORT_H
 
-#include "SparsePosterior_types.h"
+#include "limbs_types.h"
 #include <vector>
 
 
