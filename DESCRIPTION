@@ -1,0 +1,31 @@
+Package: SparsePosterior
+Type: Package
+Title: Sparsifies posterior distributions
+Version: 0.1
+Date: 2019-03-12
+Author: Eric Dunipace
+Maintainer: Eric Dunipace <eduniapce@g.harvard.edu>
+Description: More about what it does (maybe more than one line)
+License: What license is it under?
+Imports: 
+  ggplot2,
+  ggsci,
+  ggridges,
+  glmnet,
+  oem,
+  ROI,
+  ROI.plugin.ecos,
+  ECOSolveR,
+  ROI.plugin.lpsolve,
+  parallel,
+  doRNG
+LinkingTo: 
+  BH,
+  Rcpp (>= 1.0.0), 
+  RcppEigen (>= 0.3.3.4.0), 
+  RcppProgress,
+  RcppCGAL
+Suggests: 
+  testthat (>= 2.1.0),
+  microbenchmark,
+  transport
