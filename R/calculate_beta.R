@@ -43,7 +43,7 @@ calc.beta <- function(xtx = NULL, xty = NULL, active.idx = NULL,
     
     #set up data for loop
     # wt <- n/(n+pseudo.obs)
-    U <- chol(xtx[active.idx,active.idx])
+    U <- chol(xtx[active.idx,active.idx,drop=FALSE])
     # x_temp <- x[active.idx, ,drop=FALSE]
     # theta_temp <- theta[active.idx, , drop=FALSE]
     # mu_temp <- crossprod(x_temp, theta_temp)

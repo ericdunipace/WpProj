@@ -3,7 +3,7 @@ W2IP <- function(X, Y=NULL, theta,
                  model.size = NULL,
                  infimum.maxit = 100,
                  tol = 1e-7,
-                 solution.method = c("cone","lp"),
+                 solution.method = c("cone","lp", "cplex"),
                  display.progress=FALSE, parallel = NULL, ...) 
 {
   this.call <- as.list(match.call()[-1])
@@ -44,14 +44,16 @@ W2IP <- function(X, Y=NULL, theta,
   translate <- function(QP, solution.method) {
     switch(solution.method, 
            cone = ROI::ROI_reformulate(QP,to = "socp"),
-           lp = ROI::ROI_reformulate(QP,"lp",method = "bqp_to_lp" )
+           lp = ROI::ROI_reformulate(QP,"lp",method = "bqp_to_lp" ),
+           cplex = ROI::ROI_reformulate(QP,to = "socp")#QP
     )
   }
   
   solver <- function(obj, control, solution.method) {
     switch(solution.method, 
            cone = ROI.plugin.ecos:::solve_OP(obj, control),
-           lp =  ROI.plugin.lpsolve:::solve_OP(obj, control)
+           lp =  ROI.plugin.lpsolve:::solve_OP(obj, control),
+           cplex = ROI.plugin.cplex:::solve_OP(obj, control)
     )
   }
   
@@ -142,7 +144,7 @@ W2IP <- function(X, Y=NULL, theta,
                     epsilon = epsilon,
                     niter = OTmaxit)
   
-  ss <- SparsePosterior::sufficientStatistics(X, Y_, theta_, OToptions)
+  ss <- limbs:::sufficientStatistics(X, Y_, theta_, OToptions)
   xtx <- ss$XtX
   xty <- xty_init <- ss$XtY
   Ytemp <- Y_
@@ -152,7 +154,7 @@ W2IP <- function(X, Y=NULL, theta,
     setTxtProgressBar(pb, 0)
   }
   
-  QP <- QP_orig <- SparsePosterior::qp_w2(ss$XtX,ss$XtY,1)
+  QP <- QP_orig <- limbs:::qp_w2(ss$XtX,ss$XtY,1)
   # LP <- ROI::ROI_reformulate(QP,"lp",method = "bqp_to_lp" )
   alpha <- alpha_save <- rep(0,p)
   beta <- matrix(0, nrow = p, ncol = p_star)
@@ -175,20 +177,22 @@ W2IP <- function(X, Y=NULL, theta,
        results <- list(NULL, NULL)
        for(inf in 1:options$infm_maxit) {
          TP <- translate(QP, solution.method)
+         # browser()
          # sol <- ROI::ROI_solve(LP, "glpk")
          # can use ROI.plugin.glpk:::.onLoad("ROI.plugin.glpk","ROI.plugin.glpk") to use base solver ^
          sol <- solver(TP, control, solution.method)
+         # print(ROI::solution(sol))
          alpha <- ROI::solution(sol)[1:p]
          if(all(is.na(alpha))) {
            warning("Likely terminated early")
            break
          }
-         if(SparsePosterior::not.converged(alpha, alpha_save, tol)){
+         if(limbs:::not.converged(alpha, alpha_save, tol)){
            alpha_save <- alpha
-           Ytemp <- SparsePosterior::selVarMeanGen(X_, theta_, alpha)
-           xty <- SparsePosterior::xtyUpdate(X, Ytemp, theta_, result_ = alpha, 
+           Ytemp <- limbs:::selVarMeanGen(X_, theta_, alpha)
+           xty <- limbs:::xtyUpdate(X, Ytemp, theta_, result_ = alpha, 
                                              OToptions)
-           QP <- SparsePosterior::qp_w2(xtx,xty,m)
+           QP <- limbs:::qp_w2(xtx,xty,m)
          } else {
            break
          }

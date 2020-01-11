@@ -1,3 +1,3 @@
 .onUnload <- function (libpath) {
-  library.dynam.unload("SparsePosterior", libpath)
+  library.dynam.unload("limbs", libpath)
 }

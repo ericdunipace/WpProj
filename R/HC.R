@@ -114,6 +114,7 @@ HC <- function(X, Y=NULL, theta, family="gaussian",
     et <- output$E_theta[,i]
     coefs <- matrix(0, p, s) 
     idx <- which(et != 0)
+    if(length(idx) == 0) return(coefs)
     if ( method == "selection.variable" ) {
       coefs[idx,] <- theta[idx,]
     } else {
