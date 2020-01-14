@@ -106,7 +106,7 @@ WPSA <- function(X, Y=NULL, theta,
     } else {
       temp_mu <- crossprod(X_, beta_temp)
     }
-    const <- SparsePosterior::wasserstein(temp_mu, 
+    const <- limbs::wasserstein(temp_mu, 
                                           Y_, p, ground_p, 
                                           obs.direction, transmeth)
   } else if (is.null(const)) {
@@ -123,7 +123,7 @@ WPSA <- function(X, Y=NULL, theta,
       {
         beta_temp <- calc.beta(xtx=xtx, xty=xty, i, meth, OToptions = OToptions, x=X_, theta_, Y_, niter=500)
         temp_mu <- mu_calc(X_, theta_, beta_temp)
-        return(SparsePosterior::wasserstein(temp_mu, Y_, p, ground_p, obs.direction, transmeth) )
+        return(limbs::wasserstein(temp_mu, Y_, p, ground_p, obs.direction, transmeth) )
       }
     const <- max(w2s)
   }
@@ -386,7 +386,7 @@ dist.fun <- function(X=NULL, active.idx=NULL, theta = NULL, Y = NULL, xtx=NULL, 
   if(OToptions$method == "projection") {
     mu <- crossprod(X, beta)
     # } else if (method == "selection.variable") {
-    #   # wp <- SparsePosterior::wasserstein(mu, Y, p = p, ground_p = p, "colwise", "exact")
+    #   # wp <- limbs::wasserstein(mu, Y, p = p, ground_p = p, "colwise", "exact")
     #   mu <- crossprod(X[active.idx, , drop = FALSE], theta[active.idx,, drop = FALSE])
   } else {
     mu <- selVarMeanGen(X,theta,beta)
@@ -395,7 +395,7 @@ dist.fun <- function(X=NULL, active.idx=NULL, theta = NULL, Y = NULL, xtx=NULL, 
   wp <- if(shortcut){
       (((sum((mu - Y)^ground_p)^(1/ground_p))^p)^(1/p))/ncol(Y)
     } else {
-      SparsePosterior::wasserstein(mu, Y, p = p, ground_p = ground_p, obs.direction, OToptions$transport.method)
+      limbs::wasserstein(mu, Y, p = p, ground_p = ground_p, obs.direction, OToptions$transport.method)
     }
   return(wp)
 }

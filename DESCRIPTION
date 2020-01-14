@@ -28,4 +28,5 @@ LinkingTo:
 Suggests: 
   testthat (>= 2.1.0),
   microbenchmark,
-  transport
+  transport,
+  ROI.plugin.cplex

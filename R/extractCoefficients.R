@@ -76,28 +76,42 @@ annealCoef <- function(fit, theta) {
     idx <- lapply(fit$optimal, function(f) f$index)
     numActive <- sapply(idx, length)
     beta <- lapply(fit$optimal, function(f) f$beta)
+    keep <- numActive >0
+    idx <- idx[keep]
+    numActive <- numActive[keep]
+    beta <- beta[keep]
     p <- length(numActive)
     force <- fit$force
+    if(missing(theta)) theta <- NULL
+    if(length(beta) == 0 & !is.null(theta)) {
+      d <- nrow(theta)
+    } else if (length(beta) == 0 & is.null(theta)) {
+      d <- 0
+    } else {
+      d <- length(beta[[1]])
+    }
     
-    coefs <- matrix(0, nrow=length(beta[[1]]), ncol=p)
+    coefs <- matrix(0, nrow=d, ncol=p)
     # coefs[force,1:length(force)] <- 1
     # coefs[,p] <- 1
     
-    for(j in seq_along(numActive)){
+    if(d > 0) {
+      for(j in seq_along(numActive)){
       jj <- numActive[j]
       coefs[, j] <- c(beta[[j]])
+      }
+      numActive <- c(numActive)
     }
-    numActive <- c(numActive) 
-    } else if(inherits(fit, "sparse-posterior")) {
-    if(is.matrix(fit$optimal$beta)){
-      nr <- nrow(fit$optimal$beta)
-      nc <- ncol(fit$optimal$beta)
-    } else {
-      nr <- length(fit$optimal$beta)
-      nc <- 1
-    }
-    coefs <- matrix(c(fit$optimal$beta), nrow = nr, ncol = nc)
-    numActive <- length(fit$optimal$index)
+  } else if(inherits(fit, "sparse-posterior")) {
+  if(is.matrix(fit$optimal$beta)){
+    nr <- nrow(fit$optimal$beta)
+    nc <- ncol(fit$optimal$beta)
+  } else {
+    nr <- length(fit$optimal$beta)
+    nc <- 1
+  }
+  coefs <- matrix(c(fit$optimal$beta), nrow = nr, ncol = nc)
+  numActive <- length(fit$optimal$index)
   } else {
     stop("Not of class 'sparse-posterior'")
   }
@@ -126,10 +140,10 @@ extractTheta <- function(fit, theta) {
     coefficient_trajectory <- extractCoef(fit)
     method <- fit$method
   } else if ( any(class(fit)=="stepwise" ) ) {
-    coefficient_trajectory <- stepCoef(fit)
+    coefficient_trajectory <- stepCoef(fit, theta)
     method <- fit$method
   } else if ( any(class(fit)=="annealing" )) {
-    coefficient_trajectory <- annealCoef(fit)
+    coefficient_trajectory <- annealCoef(fit, theta)
     method <- fit$method
   } else if ( inherits(fit, "IP") ) {
     coefficient_trajectory <- IPCoef(fit)

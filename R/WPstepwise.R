@@ -57,8 +57,8 @@ WPSW <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
   
   direction <- match.arg(direction)
   not.force.logical <- !(1:d %in% force)
-  l_force <-length(force)
-  max_iter <- (d - l_force)
+  l_force <- length(force)
+  max_iter <- (d - max(l_force, 1))
   sel.idx <- rep(NA, max_iter)
   wP_traj <- rep(NA, max_iter+1)
  
@@ -82,7 +82,7 @@ WPSW <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
                         OToptions, obs.direction, ...) {
       idx <- c(which(in.idx),j)
       temp_mu <- crossprod(X[idx,, drop=FALSE], theta[idx,, drop=FALSE])
-      wp <- SparsePosterior::wasserstein(X = sort_mu, Y = temp_mu, 
+      wp <- limbs::wasserstein(X = sort_mu, Y = temp_mu, 
                                          p = p, ground_p = ground_p, 
                                          observation.orientation = obs.direction, 
                                          method = OToptions$transport.method, 
@@ -97,7 +97,7 @@ WPSW <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
       temp.in.idx[ j ] <- FALSE
       idx <- which( temp.in.idx )
       temp_mu <- crossprod(X[idx,, drop=FALSE], theta[idx,, drop=FALSE])
-      wp <- SparsePosterior::wasserstein(X = sort_mu, Y = temp_mu, 
+      wp <- limbs::wasserstein(X = sort_mu, Y = temp_mu, 
                                          p = p, ground_p = ground_p, 
                                          observation.orientation = obs.direction, 
                                          method = OToptions$transport.method, 
@@ -122,13 +122,13 @@ WPSW <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
       # tsortmu <- t(sort_mu)
       # if(method == "projection") {
         # transp <- transport_plan(sortmu, temp_mu, p, p, "colwise", "exact")
-      wp <- SparsePosterior::wasserstein(X = sort_mu, Y = temp_mu, 
+      wp <- limbs::wasserstein(X = sort_mu, Y = temp_mu, 
                                          p = p, ground_p = ground_p, 
                                          observation.orientation = obs.direction, 
                                          method = OToptions$transport.method, 
                                          epsilon = OToptions$epsilon, niter = OToptions$niter)
       # } else {
-      #   wp <- SparsePosterior::wasserstein(sort_mu, temp_mu, p = p, ground_p = p, "colwise", 
+      #   wp <- limbs::wasserstein(sort_mu, temp_mu, p = p, ground_p = p, "colwise", 
       #                                      method=transport.method)
       # }
       return(list(wp = wp, beta = beta))
@@ -150,13 +150,13 @@ WPSW <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
       # tsortmu <- t(sort_mu)
       # if(method == "projection") {
         # transp <- transport_plan(tsortmu, temp_mu, p, p, "colwise", "exact")
-      wp <- SparsePosterior::wasserstein(X = sort_mu, Y = temp_mu, 
+      wp <- limbs::wasserstein(X = sort_mu, Y = temp_mu, 
                                          p = p, ground_p = ground_p, 
                                          observation.orientation = obs.direction, 
                                          method = OToptions$transport.method, 
                                          epsilon = OToptions$epsilon, niter = OToptions$niter)
       # } else {
-      #   wp <- SparsePosterior::wasserstein(sort_mu, temp_mu, p = p, ground_p = p, "colwise", 
+      #   wp <- limbs::wasserstein(sort_mu, temp_mu, p = p, ground_p = p, "colwise", 
       #                                      method=transport.method)
       # }
       return (list(wp = wp, beta = beta))
@@ -192,7 +192,7 @@ WPSW <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
     wP <- rep(Inf,d)
     temp_idx <- which(in.idx)
     temp_mu <- crossprod(X_[temp_idx, , drop=FALSE], theta[temp_idx, ,drop=FALSE])
-    wP_traj[1] <- SparsePosterior::wasserstein(temp_mu, Y_, p, ground_p, obs.direction, transport.method, epsilon = epsilon, niter = OTmaxit)
+    wP_traj[1] <- limbs::wasserstein(temp_mu, Y_, p, ground_p, obs.direction, transport.method, epsilon = epsilon, niter = OTmaxit)
     # wP_traj[1] <- mean((Y_ - temp_mu)^2)
      
     for(i in 1:max_iter){
@@ -210,7 +210,7 @@ WPSW <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
       sel.idx[i] <- add
       beta_store[,i] <- c(wP_list[[min_cand]]$beta)
       wP_traj[i+1] <- wP[min_cand] 
-      if(!is.null(model.size)) if((force + i) == model.size) break
+      if(!is.null(model.size)) if((l_force + i) == model.size) break
       if(display.progress) setTxtProgressBar(pb, i)
     }
   }
@@ -243,14 +243,17 @@ WPSW <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
   }
   if(display.progress) close(pb)
   wP_traj[max_iter + 1] <- 0
-  num_coef <- (0:max_iter) + l_force
-  
+  sel.idx <- sel.idx[!is.na(sel.idx)]
+  num_coef <- (0 + max(l_force,1)):max_iter
   indices <- if(direction=="forward") {
     lapply(seq_along(sel.idx), function(i) sort(c(force, sel.idx[1:i])))
   } else {
-    lapply(seq_along(sel.idx), function(i) sort(c(force, sel.idx[(max_iter-i+1):max_iter])))
+    lapply(seq_along(sel.idx), function(i) sort(c(force, sel.idx[(length(sel.idx)-i+1):length(sel.idx)])))
   }
-  indices <- c(list(force), indices)
+  if(l_force != 0) {
+    indices <- c(list(force), indices)
+  }
+  
   
   # if(direction == "backward") {
   #   beta_store <- beta_store[,rev(1:ncol(beta_store))]
@@ -258,11 +261,24 @@ WPSW <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
   if(direction == "backward") {
     beta <- calc.beta(xtx, xty,1:ncol(X), method, OToptions, X_, theta)
     beta_store <- cbind(beta_store, c(beta))
-  } else if(direction == "forward") {
-    beta <- calc.beta(xtx, xty,force, method, OToptions, X_, theta)
-    beta_store <- cbind(c(beta), beta_store)
+    num_coef <- c(num_coef, ncol(X))
+  } else if( direction == "forward" ) {
+    if(!is.null(force)) {
+      beta <- calc.beta(xtx, xty,force, method, OToptions, X_, theta)
+      beta_store <- cbind(c(beta), beta_store)
+      num_coef <- c(num_coef, max_iter + l_force)
+    }
+    # beta <- calc.beta(xtx, xty,1:ncol(X), method, OToptions, X_, theta)
+    # beta_store <- cbind(beta_store, c(beta))
+    
   }
-  output <- list(index = indices, path = sel.idx, wP = wP_traj, p = p, nzero=num_coef, force = force, beta= beta_store, call = formals(WPSW), method=method, direction = direction)
+  num_coef <- num_coef[apply(beta_store,2,function(x) all(!is.na(x)))]
+  beta_store <- beta_store[,apply(beta_store,2,function(x) all(!is.na(x)))]
+  output <- list(index = indices, 
+                 path = sel.idx, wP = wP_traj, p = p, 
+                 nzero=num_coef, force = force, 
+                 beta= beta_store, call = formals(WPSW), 
+                 method=method, direction = direction)
   output$call[names(this.call)] <- this.call
   class(output) <- c("sparse-posterior","stepwise")
   output$method <- method

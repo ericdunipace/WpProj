@@ -1,4 +1,4 @@
-test_that("WPSA code works for covar", {
+testthat::test_that("WPSA code works for covar", {
   set.seed(111)
   
   ##### Testing R Functions ####
@@ -143,7 +143,7 @@ test_that("WPSA code works for covar", {
   testthat::expect_equal(sv7$optimal$index, c(1,9,10))
 })
 
-test_that("WPSA code works for random", {
+testthat::test_that("WPSA code works for random", {
   set.seed(111)
   
   ##### Testing R Functions ####
@@ -289,7 +289,7 @@ test_that("WPSA code works for random", {
   testthat::expect_equal(sv7$optimal$index, c(1,9,10))
 })
 
-test_that("WPSA timing works", {
+testthat::test_that("WPSA timing works", {
   set.seed(111)
   
   ##### Testing R Functions ####
@@ -339,8 +339,8 @@ test_that("WPSA timing works", {
   sv <-  WPSA(X=x, Y=t(post_mu), t(post_beta), 
               force = 1, p = 2, model.size = 2:(p-1),
               # groups = NULL,
-              iter=50, temps = 50,
-              max.time = 30,
+              iter=5, temps = 5,
+              max.time = 300,
               proposal = proposal.fun,
               options = list(method = c("selection.variable"),
                              energy.distribution = "boltzman",
@@ -352,7 +352,7 @@ test_that("WPSA timing works", {
   testthat::expect_equal(sv$message, "completed")
 })
 
-test_that("WPSA projection", {
+testthat::test_that("WPSA projection", {
   set.seed(111)
   
   ##### Testing R Functions ####

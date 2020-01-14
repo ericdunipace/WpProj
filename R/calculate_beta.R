@@ -13,6 +13,8 @@ calc.beta <- function(xtx = NULL, xty = NULL, active.idx = NULL,
 
   p <- length(active.idx)
   
+  stopifnot(length(active.idx) > 0)
+  
   if (method == "projection") {
     
     if(is.null(xtx)){
@@ -43,6 +45,7 @@ calc.beta <- function(xtx = NULL, xty = NULL, active.idx = NULL,
     
     #set up data for loop
     # wt <- n/(n+pseudo.obs)
+    # if(length(active.idx) <= 0) browser()
     U <- chol(xtx[active.idx,active.idx,drop=FALSE])
     # x_temp <- x[active.idx, ,drop=FALSE]
     # theta_temp <- theta[active.idx, , drop=FALSE]
@@ -105,7 +108,7 @@ calc.beta <- function(xtx = NULL, xty = NULL, active.idx = NULL,
     beta <- beta_old <- rep(Inf, p)
     
     #set up data for loop
-    U <- chol(xtx[active.idx,active.idx])
+    U <- chol(xtx[active.idx,active.idx, drop = FALSE])
     x_temp <- x[active.idx, , drop=FALSE]
     theta_temp <- theta[active.idx,, drop=FALSE]
     xty_temp <- xty[active.idx]
