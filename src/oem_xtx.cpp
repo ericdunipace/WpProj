@@ -12,7 +12,7 @@ void oemXTX_gen::get_group_indexes()
     {
       // find all variables in group number g
       std::vector<int> idx_tmp;
-      for (int v = 0; v < nvars; ++v)
+      for (int v = 0; v < betadim; ++v)
       {
         if (groups(v) == unique_groups(g))
         {
@@ -189,6 +189,29 @@ void oemXTX_gen::next_beta(MatrixXd &res)
     if ( penalty == "projection.elastic.net" || penalty == "projection.scad.net"  || penalty == "projection.mcp.net") {
       denom += (1.0 - alpha) * lambda;
     }
+    if (found_grp_idx) {
+      P = ngroups;
+      vector gnorm_vec(P);
+      for (int g = 0; g < ngroups; g++) {
+        double gnorm = 0.0;
+        std::vector<int> grp_tmp = grp_idx[g];
+        
+        for(std::vector<int>::iterator it = std::begin(grp_tmp); it != std::end(grp_tmp); ++it) {
+          // Rcpp::Rcout << *it << ", ";
+          gnorm += norms(*it) * norms(*it);
+        }
+        gnorm_vec(g) = std::sqrt(gnorm);
+        // for(std::vector<int>::iterator it = std::begin(grp_tmp); it != std::end(grp_tmp); ++it) {
+        //   norms(*it) = gnorm;
+        //   // Rcpp::Rcout << gnorm << ", " << norms(*it) << ", ";
+        // }
+        // Rcpp::Rcout << "\n";
+      }
+      norms.resize(P);
+      norms = gnorm_vec;
+    }
+    // Rcpp::Rcout << "\n"<< P <<","<<thresh.size() << ", " << penalty_factor.size() << ", " << norms.size() <<"\n";
+    // Rcpp::stop("before loop");
     for(int p = 0; p < P; p++) {
       if (penalty_factor(p) != 0) {
         double pen = lambda * penalty_factor(p);
@@ -209,14 +232,30 @@ void oemXTX_gen::next_beta(MatrixXd &res)
           pen *= alpha;
           thresh(p) = soft_threshold_mcp_norm(val, pen, denom, gamma);
         }
+        // Rcpp::Rcout << thresh(p) <<", ";
       } else {
         thresh(p) = 1.0;
       }
       
     }
-
+    if (found_grp_idx) {
+      vector thresh_temp(P);
+      for(int i = 0; i <P ; i++) thresh_temp(i) = thresh(i);
+      for(int g = 0; g < ngroups; g++){
+        double tt_copy = thresh_temp(g);
+        std::vector<int> grp_tmp = grp_idx[g];
+        for(std::vector<int>::iterator it = std::begin(grp_tmp); it != std::end(grp_tmp); ++it) {
+          // Rcpp::Rcout << *it << ", ";
+          thresh(*it) =  tt_copy;
+        }
+      }
+      
+    }
+    // Rcpp::Rcout <<"\n\n";
+    // Rcpp::stop("ok through loop");
     beta = u.array().colwise() * thresh.array();
     beta.array() /= denom;
+    // Rcpp::Rcout << u(7,0) << "," <<  thresh(7,0) << "," <<  thresh(17,0) << beta(7,0)<< "\n";
   } else {
     Rcpp::stop("Penalty factor not found!");
   }
@@ -303,5 +342,11 @@ void oemXTX_gen::init(double lambda_, std::string penalty_,
   {
     get_group_indexes();
   }
-  
+  // Rcpp::Rcout << penalty <<"\n";
+  if(found_grp_idx && is_projection) {
+    penalty.erase(11,4);
+    penalty_factor.resize(ngroups);
+    for(int i = 0; i < ngroups; i ++) penalty_factor(i) = group_weights(i);
+  }
+  // Rcpp::Rcout << penalty <<"\n";
 }

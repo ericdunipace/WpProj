@@ -655,3 +655,125 @@ testthat::test_that("W2L1 function for projection", {
                                 display.progress = FALSE, 
                                 penalty.factor = penalty.factor, method="projection"))
 })
+
+testthat::test_that("W2L1 function for grouped projection", {
+  set.seed(283947)
+  
+  n <- 256
+  p <- 100
+  s <- 99
+  
+  x <- matrix(rnorm(p*n), nrow=n, ncol=p)
+  beta <- rep((1:10)/10, 10)
+  groups <- rep(1:10, 10)
+  y <- x %*% beta + rnorm(n)
+  
+  #posterior
+  prec <- crossprod(x) + diag(1,p,p)*1
+  mu_post <- solve(prec, crossprod(x,y))
+  alpha <- 1 + n/2
+  beta <- 1 + 0.5 * (crossprod(y) + t(mu_post) %*% prec %*% mu_post )
+  sigma_post <- 1/rgamma(s, alpha, 1/beta)
+  theta <- sapply(sigma_post, function(ss) mu_post + t(chol(ss * solve(prec))) %*% matrix(rnorm(p, 0, 1),p,1))
+  
+  post_mu <- x %*% theta
+  post_diff <- matrix(c(y),nrow=n,ncol=s) + matrix(rnorm(s*n,0,0.01),nrow=n,ncol=s)
+  post_vdiff <- matrix(rnorm(n*s),nrow=n,ncol=s)
+  xtx <- crossprod(x)/n 
+  xty <- crossprod(x, post_mu)/n 
+  lambda <- 0
+  nlambda <- 10
+  lambda.min.ratio <- 1e-10
+  gamma <- 1
+  penalty.factor <- 1/rowMeans(theta^2)
+  penalty.factor.null <- rep(1,p)
+  transp <- "hilbert"
+  projectionols_nogroup <- W2L1(X=x, Y=NULL, 
+                               theta=theta, penalty="ols",
+                               nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                               infimum.maxit=1, maxit = 1e3, gamma = gamma,
+                               display.progress = FALSE, lambda=lambda,
+                               penalty.factor = penalty.factor.null, method="projection",
+                               tol = 0)
+  projectionols <- W2L1(X=x, Y=NULL, 
+                        theta=theta, penalty="ols", groups = groups,
+                        nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                        infimum.maxit=1, maxit = 1e3, gamma = gamma,
+                        display.progress = FALSE, lambda=lambda,
+                        penalty.factor = penalty.factor.null, method="projection",
+                        tol = 0)
+  testthat::expect_equal(c(projectionols$beta), c(theta)) #should be pretty close
+  testthat::expect_equal(c(projectionols_nogroup$beta), c(theta)) #should be pretty close
+  testthat::expect_equal(c(projectionols$beta), c(coef(lm(post_mu ~ x + 0))))#should be pretty close
+  testthat::expect_equal(c(projectionols_nogroup$beta), c(coef(lm(post_mu ~ x + 0))))#should be pretty close
+  testthat::expect_equal(c(theta), c(coef(lm(post_mu ~ x + 0))))#should be pretty close
+  
+  
+  projectionmcp_nogroup <- W2L1(X=x, Y=NULL, 
+                        theta=theta, penalty="mcp",
+                        nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                        infimum.maxit=1, maxit = 1e3, gamma = gamma,
+                        display.progress = FALSE,
+                        penalty.factor = penalty.factor.null, method="projection",
+                        tol = 0)
+  projectionmcp <- W2L1(X=x, Y=NULL, 
+                        theta=theta, penalty="grp.mcp", groups = groups,
+                        nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                        infimum.maxit=1, maxit = 1e3, gamma = gamma,
+                        display.progress = FALSE,
+                        penalty.factor = penalty.factor.null, method="projection",
+                        tol = 0)
+  testthat::expect_equal(c(projectionmcp$beta[,11]), c(projectionmcp_nogroup$beta[,11])) #should be pretty close
+  testthat::expect_equal(c(projectionmcp$beta[,11]), c(theta)) #should be pretty close
+  testthat::expect_equal(c(projectionmcp_nogroup$beta[,11]), c(theta)) #should be pretty close
+  testthat::expect_equal(c(projectionmcp$beta[,11]), c(projectionols$beta)) #should be pretty close
+  testthat::expect_equal(c(projectionmcp_nogroup$beta[,11]), c(projectionols$beta)) #should be pretty close
+  for(i in 1:10) testthat::expect_true(length(unique(abs(projectionmcp$beta[seq(i,p*s,10),1])<1e-14))==1)
+  
+  
+  projectionscad <- W2L1(X=x, Y=NULL, 
+                         theta=theta, penalty="grp.scad", groups = groups,
+                         nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                         infimum.maxit=1, maxit = 1e3, gamma = gamma,
+                         display.progress = FALSE,
+                         penalty.factor = penalty.factor.null, method="projection",
+                         tol = 0)
+  testthat::expect_equal(c(projectionscad$beta[,11]), c(projectionmcp_nogroup$beta[,11])) #should be pretty close
+  testthat::expect_equal(c(projectionscad$beta[,11]), c(theta)) #should be pretty close
+  testthat::expect_equal(c(projectionscad$beta[,11]), c(projectionols$beta)) #should be pretty close
+  for(i in 1:10) testthat::expect_true(length(unique(abs(projectionscad$beta[seq(i,p*s,10),1])==0))==1)
+  
+  projectionlasso <- W2L1(X=x, Y=NULL, 
+                          theta=theta, penalty="grp.lasso",groups = groups,
+                          nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                          infimum.maxit=1, maxit = 1e3, gamma = gamma,
+                          display.progress = FALSE, 
+                          penalty.factor = penalty.factor.null, method="projection",
+                          tol= 0)
+  testthat::expect_equal(c(projectionlasso$beta[,11]), c(theta)) #should be pretty close
+  testthat::expect_equal(c(projectionlasso$beta[,11]), c(projectionols$beta)) #should be pretty close
+  for(i in 1:10) testthat::expect_true(length(unique(abs(projectionlasso$beta[seq(i,p*s,10),1])<1e-14))==1)
+  
+  projectionmcp.net <- W2L1(X=x, Y=NULL, 
+                       theta=theta, penalty="grp.mcp.net", groups = groups,
+                       nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                       infimum.maxit=1, maxit = 1e3, gamma = gamma,
+                       display.progress = FALSE, 
+                       penalty.factor = penalty.factor.null, method="projection",
+                       tol = 0)
+  testthat::expect_equal(c(projectionmcp.net$beta[,11]), c(theta)) #should be pretty close
+  testthat::expect_equal(c(projectionmcp.net$beta[,11]), c(projectionols$beta)) #should be pretty close
+  for(i in 1:10) testthat::expect_true(length(unique(abs(projectionmcp.net$beta[seq(i,p*s,10),1])<1e-14))==1)  
+  
+  projectionscad.net <- W2L1(X=x, Y=NULL, 
+                            theta=theta, penalty="grp.scad.net", groups = groups,
+                            nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                            infimum.maxit=1, maxit = 1e3, gamma = gamma,
+                            display.progress = FALSE, 
+                            penalty.factor = penalty.factor.null, method="projection",
+                            tol = 0)
+  testthat::expect_equal(c(projectionscad.net$beta[,11]), c(theta)) #should be pretty close
+  testthat::expect_equal(c(projectionscad.net$beta[,11]), c(projectionols$beta)) #should be pretty close
+  for(i in 1:10) testthat::expect_true(length(unique(abs(projectionscad.net$beta[seq(i,p*s,10),1])<1e-14))==1)  
+  
+})

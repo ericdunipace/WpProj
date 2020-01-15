@@ -10,6 +10,7 @@ class oemBase_gen
 protected:
   
   const int nvars;                  // dimension of beta
+  const int betadim;                // vector space of beta
   int nobs;                         // number of rows
   const int ngroups;                // number of groups for group lasso
   
@@ -59,6 +60,7 @@ public:
             bool standardize_,
             double tol_ = 1e-6) :
   nvars(p_*s_), //diff
+  betadim(p_),
   nobs(n_),
   ngroups(ngroups_),
   intercept(intercept_),

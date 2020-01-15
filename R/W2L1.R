@@ -113,7 +113,8 @@ W2L1 <- function(X, Y=NULL, theta, family="gaussian",
       lambda <- as.double(lambda)
     }
     lambda <- rep(list(lambda), length(penalty))
-  } else {
+  } 
+  else {
     if (length(lambda) != length(penalty)) {
       stop("If list of lambda vectors is provided, it must be the same length as the number of penalties fit")
     }
@@ -167,7 +168,8 @@ W2L1 <- function(X, Y=NULL, theta, family="gaussian",
   if(is.null(Y)) {
     same <- TRUE
     Y_ <- crossprod(X_,theta_)
-  } else{
+  } 
+  else {
     if(!any(dim(Y) %in% dim(X_))) stop("dimensions of Y must match X")
     if(!is.matrix(Y)) Y <- as.matrix(Y)
     if(nrow(Y) == ncol(X_)){ 
@@ -191,7 +193,7 @@ W2L1 <- function(X, Y=NULL, theta, family="gaussian",
   }
   
   if ( method == "projection") {
-    if(any(grep("grp", penalty) > 0)) stop("don't specify a group penalty")
+    # if(any(grep("grp", penalty) > 0)) stop("don't specify a group penalty")
     if(penalty == "selection.lasso") penalty <- "lasso"
     if(penalty != "ols") penalty <- paste0("projection.",penalty)
     if( infm.maxit != 1){
