@@ -30,7 +30,11 @@ void oemXTX_gen::get_group_indexes()
       group_weights.resize(ngroups);
       for (int g = 0; g < ngroups; ++g)
       {
-        group_weights(g) = std::sqrt(double(grp_idx[g].size()));
+        if(unique_groups(g) == 0){
+          group_weights(g) = 0;
+        } else {
+          group_weights(g) = std::sqrt(double(grp_idx[g].size()));
+        }
       }
     }
   }
@@ -46,17 +50,19 @@ void oemXTX_gen::compute_XtX_d_update_A()
   {
     XXmat = XX;
   }
+  // Rcpp::Rcout << "init obj"<< "\n";
   Spectra::DenseSymMatProd<double> op(XXmat);
   int ncv = 4;
   if (XX.cols() < 4)
   {
     ncv = XX.cols();
   }
-  
-  Spectra::SymEigsSolver< double, Spectra::LARGEST_ALGE, Spectra::DenseSymMatProd<double> > eigs(&op, 1, ncv);
-  
+  // Rcpp::Rcout << ncv << "\n";
+  // Rcpp::stop("safety");
+  Spectra::SymEigsSolver< double, Spectra::LARGEST_ALGE, Spectra::DenseSymMatProd<double> > eigs(&op, 1, ncv); //object, number eig val (nev), convergence speed >= 2*nev
+  // Rcpp::Rcout << "what's happening??\n";
   eigs.init();
-  eigs.compute(10000, 1e-10);
+  eigs.compute(10000, 1e-10); // values are iterations and tolerance
   Vector eigenvals = eigs.eigenvalues();
   d = eigenvals[0] * 1.005; // multiply by an increasing factor to be safe
   

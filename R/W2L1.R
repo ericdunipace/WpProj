@@ -1,4 +1,4 @@
-W2L1 <- function(X, Y=NULL, theta, family="gaussian", 
+W2L1 <- function(X, Y=NULL, theta = NULL, family="gaussian", 
                  penalty =  c("lasso", "ols", "mcp", "elastic.net", 
                               "selection.lasso",
                               "scad", "mcp.net", 
@@ -41,7 +41,13 @@ W2L1 <- function(X, Y=NULL, theta, family="gaussian",
   }
   method <- match.arg(method)
   if(!is.matrix(X)) X <- as.matrix(X)
-  if(!is.matrix(theta)) theta <- as.matrix(theta)
+  if(!is.null(theta)) {
+    if(!is.matrix(theta)) theta <- as.matrix(theta)
+  } else if (!is.null(Y) & method == "projection") {
+    theta <- matrix(1, nrow = ncol(X),ncol(Y))
+  } else {
+    stop("Must specify Y and/or theta if method == 'projection'. If method != 'projection' you must always specify theta. In the latter case, Y is optional")
+  }
   dims <- dim(X)
   # if (dims[1] != dims[2])
   #   stop("xtx must be a square matrix equal to X'X. do NOT provide design matrix")
@@ -186,8 +192,8 @@ W2L1 <- function(X, Y=NULL, theta, family="gaussian",
   if(any(apply(theta_,1, function(x) all(x == 0)))) {
     rmv.idx <- which(apply(theta_,1, function(x) all(x == 0)))
     
-    X_ <- X_[-rmv.idx, ]
-    theta_ <- theta_[-rmv.idx,]
+    X_ <- X_[-rmv.idx, ,drop=FALSE]
+    theta_ <- theta_[-rmv.idx,, drop = FALSE]
     penalty.factor <- penalty.factor[-rmv.idx]
     warning("Some dimensions of theta have no variation. These have been removed")
   }

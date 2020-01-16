@@ -47,7 +47,7 @@ SEXP W2penalized(SEXP X_,
   matrix Y = Rcpp::as<matMap >(Y_);//Y_copy;
   matrix theta = Rcpp::as<matMap >(theta_); //theta_copy;
   
-  const int S = theta.cols();
+  const int S = Y.cols();
   const int p = X.rows();
   const int N = X.cols();
   
@@ -135,6 +135,12 @@ SEXP W2penalized(SEXP X_,
   
   //order indices of x * theta
   matrixI idx_mu(S,N);
+  
+  // Rcpp::Rcout << "xtx: " << xtx.rows() << ", " << xtx.cols() <<"\n";
+  // Rcpp::Rcout << "xty: " << xty.rows() << ", " << xty.cols() <<"\n";
+  // Rcpp::Rcout << "X: " << X.rows() << ", " << X.cols() <<"\n";
+  // Rcpp::Rcout << "Y: " << Y.rows() << ", " << Y.cols() <<"\n";
+  // Rcpp::Rcout << "S: " << S <<"\n";
   
   //change scale factor to make estimation easier, let's say
   if ( scale_factor.size() == 0 ) {
