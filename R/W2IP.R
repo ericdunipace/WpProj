@@ -246,7 +246,7 @@ qp_w2 <- function(xtx, xty, K) {
   op <- ROI::OP(objective = ROI::Q_objective(Q = Q0, L = L0, names = as.character(1:d)),
                 maximum = FALSE)
   ## sum(alpha) = K 
-  A1 <- rep(1,d) # beta portion, gamma porition, t portion is 0. multiplies all vars each time!!!
+  A1 <- rep(1,d) 
   LC1 <- ROI::L_constraint(A1, ROI::eq(1), K)
   ROI::constraints(op) <- LC1
   ROI::types(op) <- rep.int("B", d)

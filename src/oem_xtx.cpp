@@ -66,17 +66,18 @@ void oemXTX_gen::compute_XtX_d_update_A()
   Vector eigenvals = eigs.eigenvalues();
   d = eigenvals[0] * 1.005; // multiply by an increasing factor to be safe
   
-  A = -XXmat;
+  Eigen::MatrixXd temp_A = -XXmat;
   
   
-  A.diagonal().array() += d;
+  temp_A.diagonal().array() += d;
+  A = temp_A.sparseView();
   
 }
 
 void oemXTX_gen::next_u(MatrixXd &res)
 {
   res = XY;
-  res.noalias() += A * beta_prev.sparseView();
+  res += A * beta_prev.sparseView();
   // res.noalias() += A * beta_prev;
 }
 
@@ -297,10 +298,23 @@ double oemXTX_gen::compute_lambda_zero(std::string penalty_)
     get_group_indexes();
   }
   
-  if ( XY.cols() > 1 ) {
+  if (XY.cols() > 1 && found_grp_idx) {
+    vector xy_temp = XY.rowwise().squaredNorm();
+    temp.resize(ngroups);
+    temp.fill(0.0);
+    
+    for ( int g = 0; g < ngroups; g++ ) {
+      std::vector<int> gr_idx = grp_idx[g];
+      for ( int i = 0; i < gr_idx.size(); i++ ) {
+        temp(g) += xy_temp(g);
+      }
+    }
+    temp = temp.cwiseSqrt().eval();
+    temp = temp.cwiseQuotient(penalty_factor);
+  } else if ( XY.cols() > 1 ) {
     temp = XY.rowwise().norm();
     temp = temp.cwiseQuotient(penalty_factor);
-  } else if (found_grp_idx) {
+  }  else if (found_grp_idx) {
     temp.resize(ngroups);
     temp.fill(0.0);
     

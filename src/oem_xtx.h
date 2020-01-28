@@ -52,7 +52,8 @@ protected:
   int penalty_factor_size;    // size of penalty_factor vector
   bool selection;
   
-  Eigen::MatrixXd A;                 // A = d * I - X'X
+  // Eigen::MatrixXd A;                 // A = d * I - X'X
+  Eigen::SparseMatrix<double> A;
   double d;                   // d value (largest eigenvalue of X'X)
   bool default_group_weights; // do we need to compute default group weights?
   

@@ -184,7 +184,7 @@ W2L1 <- function(X, Y=NULL, theta = NULL, family="gaussian",
     } else{
       Y_ <- t(Y)
     }
-    if(all(Y_==crossprod(X_, theta_))) same <- TRUE
+    if(method != "projection") if(all(Y_==crossprod(X_, theta_))) same <- TRUE
   }
   if(ncol(Y_) != ncol(theta_)) stop("ncol of Y should be same as ncols of theta")
   if(nrow(Y_) != ncol(X_)) stop("The number of observations in Y and X don't line up. Make sure X is input with observations in rows.")
