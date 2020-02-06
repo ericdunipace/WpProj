@@ -3,7 +3,7 @@ W2IP <- function(X, Y=NULL, theta,
                  model.size = NULL,
                  infimum.maxit = 100,
                  tol = 1e-7,
-                 solution.method = c("cone","lp", "cplex"),
+                 solution.method = c("cone","lp", "cplex", "gurobi","mosek"),
                  display.progress=FALSE, parallel = NULL, ...) 
 {
   this.call <- as.list(match.call()[-1])
@@ -45,7 +45,8 @@ W2IP <- function(X, Y=NULL, theta,
     switch(solution.method, 
            cone = ROI::ROI_reformulate(QP,to = "socp"),
            lp = ROI::ROI_reformulate(QP,"lp",method = "bqp_to_lp" ),
-           cplex = ROI::ROI_reformulate(QP,to = "socp")#QP
+           cplex = QP,
+           gurobi = QP
     )
   }
   
@@ -53,7 +54,8 @@ W2IP <- function(X, Y=NULL, theta,
     switch(solution.method, 
            cone = ROI.plugin.ecos:::solve_OP(obj, control),
            lp =  ROI.plugin.lpsolve:::solve_OP(obj, control),
-           cplex = ROI.plugin.cplex:::solve_OP(obj, control)
+           cplex = ROI.plugin.cplex:::solve_OP(obj, control),
+           gurobi = ROI.plugin.cplex:::solve_OP(obj, control)
     )
   }
   

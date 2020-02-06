@@ -21,6 +21,7 @@ typedef Eigen::Ref<vector> refVec;
 typedef Eigen::Ref<vectorI> refVecI;
 
 typedef Eigen::Ref<const matrix> refMatConst;
+typedef const Eigen::Ref<const matrix> constRefMatConst;
 typedef Eigen::Ref<const matrixI> refMatConstI;
 typedef Eigen::Ref<const Eigen::ArrayXd> refArrayConst;
 typedef Eigen::Ref<const Eigen::ArrayXi> refArrayConstI;
