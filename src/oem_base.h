@@ -98,7 +98,7 @@ public:
     for(i = 0; i < maxit; ++i)
     {
       // Rcpp::Rcout << "iteration " << i << "\n";
-      if(i % 200)  Rcpp::checkUserInterrupt(); 
+      if(i % 1000)  Rcpp::checkUserInterrupt(); 
       
       beta_prev = beta;
       

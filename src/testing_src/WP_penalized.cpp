@@ -1,4 +1,4 @@
-#include "SparsePosterior_types.h"
+#include "limbs_types.h"
 #include <vector>
 #include "SufficientStatistics.h"
 #include "utils.h"
@@ -20,10 +20,9 @@ using namespace Rcpp;
 
 
 //[[Rcpp::export]]
-SEXP WP_penalized(SEXP X_,
+SEXP W2penalized(SEXP X_,
                  SEXP Y_,
                  SEXP theta_,
-                 SEXP D_,
                  SEXP family_,
                  SEXP penalty_,
                  SEXP groups_,
@@ -37,19 +36,18 @@ SEXP WP_penalized(SEXP X_,
                  SEXP tau_,
                  SEXP scale_factor_,
                  SEXP penalty_factor_,
-                 SEXP pseudo_obs_,
                  SEXP opts_)
 {
   
   
   const matMap X(as<matMap >(X_));
-  const matMap Y_copy(as<matMap >(Y_));
-  const matMap theta_copy(as<matMap >(theta_));
+  // const matMap Y_copy(as<matMap >(Y_));
+  // const matMap theta_copy(as<matMap >(theta_));
   
-  matrix Y = Y_copy;
-  matrix theta = theta_copy;
+  matrix Y = Rcpp::as<matMap >(Y_);//Y_copy;
+  matrix theta = Rcpp::as<matMap >(theta_); //theta_copy;
   
-  const int S = theta.cols();
+  const int S = Y.cols();
   const int p = X.rows();
   const int N = X.cols();
   
@@ -86,47 +84,74 @@ SEXP WP_penalized(SEXP X_,
   const double alpha     = as<double>(alpha_);
   const double gamma     = as<double>(gamma_);
   const double tau       = as<double>(tau_);
-  const int D            = as<int>(D_);
   const int infm_maxit   = as<int>(opts["infm_maxit"]);
   const bool display_progress = as<bool>(opts["display_progress"]);
   CharacterVector method(as<CharacterVector>(opts["method"]));
-  std::string transport_method = Rcpp::as<std::string>(opts["transport_method"]);
+  std::string transport_method = as<std::string>(opts["transport_method"]);
+  const int model_size   = as<int>(opts["model_size"]);
+  const bool not_same    = as<bool>(opts["not_same"]);
+  double epsilon    = as<double>(opts["epsilon"]);
+  double OTmaxit    = as<int>(opts["OTmaxit"]);
+  const bool same = !(not_same);
+  bool selection;
+  if(method(0) == "selection.variable") {
+    selection = true;
+  } else {
+    selection = false;
+  }
   // const double pseudo_obs = as<double>(opts["pseudo_observations"]);
   
-  if(method(0) == "projection") Rcpp::stop("You are not using the projection function and the method is set to projection.");
-    
   CharacterVector family(as<CharacterVector>(family_));
   std::string penalty(as< std::string >(penalty_));
   vector penalty_factor(as<vector>(penalty_factor_));
   
+  matrix obs_weight(N,S);
+  obs_weight.fill(1.0);
+  
   // matrix xty_temp = matrix::Zero(p,N);
-  const double pseudo_obs = as<double>(pseudo_obs_);
+  // const double pseudo_obs = as<double>(pseudo_obs_);
   // const double wt = double(pseudo_obs)/(double(N) + double(pseudo_obs));
-  matrix theta_norm = matrix::Zero(p,1);
+  // matrix theta_norm = matrix::Zero(p,1);
   
   //fill xtx and xty and theta_norm. Also resize theta if location scale method
   // sufficient_stat(X, Y,
   //                 theta,
   //                 true, //true=not the same
   //                 S, p, N,
-  //                 pseudo_obs,
+  //                 wt,
   //                 xtx, xty, theta_norm,
   //                 method); //Y will be sorted by column if using scale or loc.scale
   sufficient_stat(X, Y,
                   theta,
-                  true, //true=not the same
+                  not_same, //true=not the same
                   S, p, N,
                   xtx, xty,
                   method,
-                  transport_method); //Y will be sorted by column if using scale or loc.scale
-  // Rcout << xty << std::endl;
-  // Rcout << xtx << std::endl;
-  // Rcout << theta_norm;
+                  transport_method,
+                  epsilon,
+                  OTmaxit);
+  // uncomment when ready
+  // sufficient_stat(X, Y,
+  //                 theta,
+  //                 not_same, //true=not the same
+  //                 S, p, N,
+  //                 xtx, xty,
+  //                 method,
+  //                 transport_method,
+  //                 epsilon,
+  //                 OTmaxit,
+  //                 obs_weight); 
   matrix xty_old = xty;
-  matrix xtx_old = xtx;
+  // matrix xtx_old = xtx;
   
   //order indices of x * theta
   matrixI idx_mu(S,N);
+  
+  // Rcpp::Rcout << "xtx: " << xtx.rows() << ", " << xtx.cols() <<"\n";
+  // Rcpp::Rcout << "xty: " << xty.rows() << ", " << xty.cols() <<"\n";
+  // Rcpp::Rcout << "X: " << X.rows() << ", " << X.cols() <<"\n";
+  // Rcpp::Rcout << "Y: " << Y.rows() << ", " << Y.cols() <<"\n";
+  // Rcpp::Rcout << "S: " << S <<"\n";
   
   //change scale factor to make estimation easier, let's say
   if ( scale_factor.size() == 0 ) {
@@ -138,8 +163,10 @@ SEXP WP_penalized(SEXP X_,
   //   scale_factor.fill(1.0);
   //   scale_factor.resize(0);
   // }
-
-  sort_matrix(Y);
+  
+  // if(method(0) != "projection"){
+  //   sort_matrix(Y);
+  // }
   
   // initialize pointers
   oemBase_gen<matrix> *solver = NULL; // solver doesn't point to anything yet
@@ -151,7 +178,7 @@ SEXP WP_penalized(SEXP X_,
     // sleep();
     solver = new oemXTX_gen(xtx, xty, groups, unique_groups,
                             group_weights, penalty_factor,
-                            scale_factor, tol);
+                            scale_factor, selection, tol);
   } else {
     if (family(0) == "binomial")
     {
@@ -174,8 +201,8 @@ SEXP WP_penalized(SEXP X_,
   if (nlambda < 1) {
     double lmin = as<double>(lmin_ratio_) * lmax;
     
-    lambda_base.setLinSpaced(nl, std::log(lmin), std::log(lmax));
-    // lambda_base.setLinSpaced(nl, std::log(lmax), std::log(lmin));
+    // lambda_base.setLinSpaced(nl, std::log(lmin), std::log(lmax));
+    lambda_base.setLinSpaced(nl, std::log(lmax), std::log(lmin));
     lambda_base = lambda_base.array().exp();
     // lambda_base(0) = 0.0;
     // lambda_base(nl-1) = 0.0;
@@ -216,39 +243,38 @@ SEXP WP_penalized(SEXP X_,
   innerIter.fill(0);
   
   // progress bar
+  if(display_progress) {
+    Rcpp::Rcout << "\n";
+  }
   ETAProgressBar pb;
   Progress prog( nlambda, display_progress, pb );
+  
   
   // if (method(0) == "projection") {
   //   lambda_tmp.reverseInPlace();
   // }
   
-  const matrix xty_original = xty;
+  // const matrix xty_original = xty;
   // vector best_lambda(p);
   
-  // if( method(0) == "projection") {
-  //   matrix xty_vec = xty.col(0)  
-  // } else {
-  //   
-  // }
   
   for (int i = 0; i < nlambda; i++)
   {
     // vectors to save current and last value of coefficients
     matrix res(xty.rows(), xty.cols());
     
-    if (i % 10 == 0) {
-      Rcpp::checkUserInterrupt();
-    }
+    // if (i % 10 == 0) {
+    Rcpp::checkUserInterrupt();
+    // }
     
     //set current lambda
     ilambda = lambda_tmp(i);
-    
+    // Rcpp::Rcout << ilambda <<"\n";
     if(i == 0) {
       //intitalize with lambda and other parameters
       solver->init(ilambda, penalty,
                    alpha, gamma, tau);
-      if(method(0) != "projection") solver->beta_ones();
+      // if(method(0) != "projection") solver->beta_ones();
     } else {
       solver->init_warm(ilambda);
     }
@@ -274,62 +300,54 @@ SEXP WP_penalized(SEXP X_,
       } else {
         old = res;
       } //fi stopRule
-      xtxy_update(X, Y,
-                  theta,
-                  theta_norm,
-                  res,
-                  mu,
-                  S, 
-                  N,
-                  D,
-                  pseudo_obs,
-                  0.0,
-                  xtx, 
-                  xty,
-                  idx_mu, 
-                  method);
+      if (nonZero(res) && ilambda > 0 && method(0) != "projection") {
+        //update mu and xty with some sorting for W2
+        // void xty_update(const refMatConst & X, const refMatConst & sorted_Y, //y needs to be pre-sorted for method = scale/loc.scale
+        //                 const refMatConst & theta,
+        //                 const refMatConst & result,
+        //                 matrix & mu,
+        //                 const int S, const int N, const int P,
+        //                 matrix & xty, matrixI & idx_mu,
+        //                 const Rcpp::CharacterVector & method,
+        //                 const std::string & transport_method)
+        xty_update(X, Y, theta, res, mu, S, N, p, xty, idx_mu, 
+                   method, transport_method,
+                   epsilon, OTmaxit);
         
-      //update solver with new xty
-      solver->init_warm_xty(); // still maps to original xty
-      //xtx should update automatically
+        //update solver with new xty
+        solver->init_warm_xty(); // still maps to original xty
+      } // fi sorting
     } // end loop alternating ordering and optimization
     
-    //save results
-    // vecMap store(res.data(), res.size());
-    // Rcout << res.rows()<<","<<res.cols()<<"\n";
-    // Rcout << beta(100,0) <<"\n";
-    // Rcout << store(100) <<"\n";
-    // Rcout << beta(100,0) <<"\n";
-    // Rcout << res(9,9)<<"\n";
-    // 
-    // beta.col(nlambda-1-i)  = res;
-    // Rcout << beta(100,0) <<"\n";
-    // beta.col(nlambda-1-i)  = store;
-    // Rcout << beta(100,0) <<"\n";
-    // if(method(0) != "projection") {
-      // beta.col(nlambda-1-i)  = vecMap(res.data(), res.size());
-      beta.col(nlambda-1-i)  = res;
-    // } else if (method(0) == "projection") {
-      // beta.col(i)  = res;
-    // }
-    // Rcout << beta(100,0) <<"\n";
     
-    // beta.col(i)  = res;
-    // numberActive = (res.array().abs() > num_tol).count();
+    // save coefficient otherwise
+    beta.col(i)  = res;
     
-    // if(ilambda <= num_tol) break;
+    // break if larger than max coef
+    if( countNonZero(res) > model_size) {
+      beta.conservativeResize(Eigen::NoChange, i+1);
+      lambda_tmp.conservativeResize(i+1);
+      break;
+    }
     
     //update progress bar
+    // if(display_progress){
     prog.increment();
+    // }
+    // if (innerIter[i] > 1 && same && method(0) != "projection") {
+    //   xty = xty_old;
+    //   solver->init_warm_xty();
+    // } //really slows things down!
   } //end loop over lambda values
   
   double d = solver->get_d();
   
   delete solver;
+  solver = NULL;
   
-  if (method(0) != "projection") {
-    lambda_tmp.reverseInPlace();
-  }
+  // if (method(0) != "projection") {
+  //   lambda_tmp.reverseInPlace();
+  // }
   
   return Rcpp::List::create(Named("beta")       = Rcpp::wrap(beta),
                             Named("lambda")     = lambda_tmp,
@@ -338,7 +356,7 @@ SEXP WP_penalized(SEXP X_,
                             Named("loss")       = loss,
                             Named("d")          = d,
                             Named("xtx")        = Rcpp::wrap(xtx),
-                            Named("xty")        = Rcpp::wrap(xty_original),
+                            Named("xty")        = Rcpp::wrap(xty_old),
                             Named("xtyFinal")   = Rcpp::wrap(xty));
   
 }
