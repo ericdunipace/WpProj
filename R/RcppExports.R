@@ -13,6 +13,10 @@ W2penalized <- function(X_, Y_, theta_, family_, penalty_, groups_, unique_group
     .Call('_limbs_W2penalized', PACKAGE = 'limbs', X_, Y_, theta_, family_, penalty_, groups_, unique_groups_, group_weights_, lambda_, nlambda_, lmin_ratio_, alpha_, gamma_, tau_, scale_factor_, penalty_factor_, opts_)
 }
 
+WPpenalized <- function(X_, Y_, theta_, power_, family_, penalty_, groups_, unique_groups_, group_weights_, lambda_, nlambda_, lmin_ratio_, alpha_, gamma_, tau_, scale_factor_, penalty_factor_, opts_) {
+    .Call('_limbs_WPpenalized', PACKAGE = 'limbs', X_, Y_, theta_, power_, family_, penalty_, groups_, unique_groups_, group_weights_, lambda_, nlambda_, lmin_ratio_, alpha_, gamma_, tau_, scale_factor_, penalty_factor_, opts_)
+}
+
 cost_calculation_ <- function(A_, B_, p) {
     .Call('_limbs_cost_calculation_', PACKAGE = 'limbs', A_, B_, p)
 }
