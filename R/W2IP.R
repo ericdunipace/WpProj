@@ -225,7 +225,7 @@ W2IP <- function(X, Y=NULL, theta,
   output$remove.idx <- rmv.idx
   output$nonzero_beta <- colSums(output$beta != 0)
   # output$nzero <- nz
-  class(output) <- c("sparse-posterior","IP")
+  class(output) <- c("limbs","IP")
   extract <- extractTheta(output, theta_)
   output$nzero <- extract$nzero
   output$eta <- lapply(extract$theta, function(tt) crossprod(X_, tt))

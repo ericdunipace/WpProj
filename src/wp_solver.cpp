@@ -1,16 +1,16 @@
 #include "wp_solver.h"
 
 void WpSolver::soft_threshold(vector &res, const vector &vec, const double &penalty,
-                    vector &pen_fact, double &d)
+                              vector &pen_fact, double &d)
 {
   int v_size = vec.size();
   res.setZero();
-
+  
   const double *ptr = vec.data();
   for(int i = 0; i < v_size; i++)
   {
     double total_pen = pen_fact(i) * penalty;
-
+    
     if(ptr[i] > total_pen)
       res(i) = (ptr[i] - total_pen)/d;
     else if(ptr[i] < -total_pen)
@@ -18,45 +18,44 @@ void WpSolver::soft_threshold(vector &res, const vector &vec, const double &pena
   }
 }
 
-
 void WpSolver::soft_threshold_mcp(vector &res, const vector &vec, const double &penalty,
-                        vector &pen_fact, double &d, double &gamma)
+                                  vector &pen_fact, double &d, double &gamma)
 {
   int v_size = vec.size();
   res.setZero();
   double gammad = gamma * d;
   double d_minus_gammainv = d - 1.0 / gamma;
-
-
+  
+  
   const double *ptr = vec.data();
   for(int i = 0; i < v_size; i++)
   {
     double total_pen = pen_fact(i) * penalty;
-
+    
     if (std::abs(ptr[i]) > gammad * total_pen){
       res(i) = ptr[i]/d;
     } else if(ptr[i] > total_pen)
       res(i) = (ptr[i] - total_pen)/(d_minus_gammainv);
     else if(ptr[i] < -total_pen)
       res(i) = (ptr[i] + total_pen)/(d_minus_gammainv);
-
+    
   }
-
+  
 }
 
 void WpSolver::soft_threshold_scad(vector &res, const vector &vec, const double &penalty,
-                         vector &pen_fact, double &d, double &gamma)
+                                   vector &pen_fact, double &d, double &gamma)
 {
   int v_size = vec.size();
   res.setZero();
   double gammad = gamma * d;
   double gamma_minus1_d = (gamma - 1.0) * d;
-
+  
   const double *ptr = vec.data();
   for(int i = 0; i < v_size; i++)
   {
     double total_pen = pen_fact(i) * penalty;
-
+    
     if (std::abs(ptr[i]) > gammad * total_pen)
       res(i) = ptr[i]/d;
     else if (std::abs(ptr[i]) > (d + 1.0) * total_pen)
@@ -72,17 +71,17 @@ void WpSolver::soft_threshold_scad(vector &res, const vector &vec, const double 
       res(i) = (ptr[i] - total_pen)/d;
     else if(ptr[i] < -total_pen)
       res(i) = (ptr[i] + total_pen)/d;
-
+    
   }
 }
 
 double WpSolver::soft_threshold_scad_norm(double &b, const double &pen, double &d, double &gamma)
 {
   double retval = 0.0;
-
+  
   double gammad = gamma * d;
   double gamma_minus1_d = (gamma - 1.0) * d;
-
+  
   if (std::abs(b) > gammad * pen)
     retval = 1.0;
   else if (std::abs(b) > (d + 1.0) * pen)
@@ -104,34 +103,34 @@ double WpSolver::soft_threshold_scad_norm(double &b, const double &pen, double &
 double WpSolver::soft_threshold_mcp_norm(double &b, const double &pen, double &d, double &gamma)
 {
   double retval = 0.0;
-
+  
   double gammad = gamma * d;
   double d_minus_gammainv = d - 1.0 / gamma;
-
+  
   if (std::abs(b) > gammad * pen)
     retval = 1.0;
   else if(b > pen)
     retval = d * (1.0 - pen / b)/(d_minus_gammainv);
   else if(b < -pen)
     retval = d * (1.0 + pen / b)/(d_minus_gammainv);
-
+  
   return retval;
 }
 
 void WpSolver::block_soft_threshold_scad(vector &res, const vector &vec, const double &penalty,
-                               vector &pen_fact, double &d,
-                               std::vector<std::vector<int> > &grp_idx,
-                               const int &ngroups, vectorI &unique_grps, vectorI &grps,
-                               double & gamma)
+                                         vector &pen_fact, double &d,
+                                         std::vector<std::vector<int> > &grp_idx,
+                                         const int &ngroups, vectorI &unique_grps, vectorI &grps,
+                                         double & gamma)
 {
   //int v_size = vec.size();
   res.setZero();
-
+  
   for (int g = 0; g < ngroups; ++g)
   {
     double thresh_factor;
     std::vector<int> gr_idx = grp_idx[g];
-
+    
     if (unique_grps(g) == 0) // the 0 group represents unpenalized variables
     {
       thresh_factor = 1.0;
@@ -161,19 +160,19 @@ void WpSolver::block_soft_threshold_scad(vector &res, const vector &vec, const d
 }
 
 void WpSolver::block_soft_threshold_mcp(vector &res, const vector &vec, const double &penalty,
-                              vector &pen_fact, double &d,
-                              std::vector<std::vector<int> > &grp_idx,
-                              const int &ngroups, vectorI &unique_grps, vectorI &grps,
-                              double & gamma)
+                                        vector &pen_fact, double &d,
+                                        std::vector<std::vector<int> > &grp_idx,
+                                        const int &ngroups, vectorI &unique_grps, vectorI &grps,
+                                        double & gamma)
 {
   //int v_size = vec.size();
   res.setZero();
-
+  
   for (int g = 0; g < ngroups; ++g)
   {
     double thresh_factor;
     std::vector<int> gr_idx = grp_idx[g];
-
+    
     if (unique_grps(g) == 0) // the 0 group represents unpenalized variables
     {
       thresh_factor = 1.0;
@@ -203,13 +202,13 @@ void WpSolver::block_soft_threshold_mcp(vector &res, const vector &vec, const do
 }
 
 void WpSolver::block_soft_threshold(vector &res, const vector &vec, const double &penalty,
-                          vector &pen_fact, double &d,
-                          std::vector<std::vector<int> > &grp_idx,
-                          const int &ngroups, vectorI &unique_grps, vectorI &grps)
+                                    vector &pen_fact, double &d,
+                                    std::vector<std::vector<int> > &grp_idx,
+                                    const int &ngroups, vectorI &unique_grps, vectorI &grps)
 {
   //int v_size = vec.size();
   res.setZero();
-
+  
   for (int g = 0; g < ngroups; ++g)
   {
     double thresh_factor;
@@ -298,15 +297,15 @@ void WpSolver::get_group_indexes()
 void WpSolver::init_wpsolve()
 {
   scale_len = scale_factor.size();
-
+  
   found_grp_idx = false;
-
+  
   if (scale_len)
   {
     scale_factor_inv = 1.0 / scale_factor.array();
   }
   X = X_orig.transpose() * scale_factor.asDiagonal();
-
+  
   X_sp.reserve(nobs * nvars);
   for (int j= 0; j < betadim; j ++) {
     for(int i = 0; i < nobs; i ++) {
@@ -314,21 +313,50 @@ void WpSolver::init_wpsolve()
     }
   }
   X_sp.makeCompressed();
-
+  
   // compute XtX or XXt (depending on if n > p or not)
   // and compute A = dI - XtX (if n > p)
   obs_weights = vector::Ones(nobs);
-  compute_XtX_d_update_A();
-
+  compute_XtX_d_init_A();
+  
   XY = X_sp.transpose() * Y;
+  
+}
 
+void WpSolver::compute_XtX_d_init_A()
+{
+  
+  matrix XtX = X.transpose() * X;
+  SpMat XtWX = X_sp.transpose() * X_sp;
+  
+  Spectra::DenseSymMatProd<double> op(XtX);
+  int ncv = 4;
+  if (XtX.cols() < 4)
+  {
+    ncv = XtX.cols();
+  }
+  // Rcpp::Rcout << ncv << "\n";
+  // Rcpp::stop("safety");
+  Spectra::SymEigsSolver< double, Spectra::LARGEST_ALGE, Spectra::DenseSymMatProd<double> > eigs(&op, 1, ncv); //object, number eig val (nev), convergence speed >= 2*nev
+  // Spectra::SymEigsSolver< double, Spectra::LARGEST_ALGE, Spectra::SparseSymMatProd<double> > eigs(&op, 1, ncv); //object, number eig val (nev), convergence speed >= 2*nev
+  // Rcpp::Rcout << "what's happening??\n";
+  eigs.init();
+  eigs.compute(10000, 1e-10); // values are iterations and tolerance
+  vector eigenvals = eigs.eigenvalues();
+  d = eigenvals[0] * 1.005; // multiply by an increasing factor to be safe
+  
+  A = -XtWX;
+  
+  
+  A.diagonal().array() += d;
+  
 }
 
 void WpSolver::compute_XtX_d_update_A()
 {
-
+  
   SpMat XtWX = X_sp.transpose() * obs_weights.asDiagonal() * X_sp;
-
+  
   // Spectra::DenseSymMatProd<double> op(XtWX);
   Spectra::SparseSymMatProd<double> op(XtWX);
   int ncv = 4;
@@ -345,21 +373,24 @@ void WpSolver::compute_XtX_d_update_A()
   eigs.compute(10000, 1e-10); // values are iterations and tolerance
   vector eigenvals = eigs.eigenvalues();
   d = eigenvals[0] * 1.005; // multiply by an increasing factor to be safe
-
+  
   A = -XtWX;
-
-
+  
+  
   A.diagonal().array() += d;
-
+  
 }
 
 void WpSolver::compute_weights() {
   vector res = Y;
   res -= X_sp * beta;
   obs_weights = res.array().abs().pow(power - 2.0);
-  if(power == 1.0) {
-    for(int n = 0; n < nvars; n ++) if( obs_weights(n) > 10000.0) obs_weights(n) = 10000.0;
+  if(power < 2.0) {
+    for(int n = 0; n < (nobs * nsamps); n ++) if( obs_weights(n) > 10000.0) obs_weights(n) = 10000.0;
   }
+  
+  double norm = obs_weights.sum();
+  for(int n = 0 ; n < (nobs * nsamps); n ++ ) obs_weights(n) /= norm;
 }
 
 double WpSolver::compute_lambda_zero(std::string penalty_)
@@ -367,17 +398,17 @@ double WpSolver::compute_lambda_zero(std::string penalty_)
   // lambda0 = XY.cwiseAbs().maxCoeff();
   int temp_size = XY.rows();
   vector temp(temp_size);
-
+  
   if (!found_grp_idx) {
     penalty = penalty_;
     get_group_indexes();
   }
-
+  
   if (found_grp_idx) {
     temp.resize(ngroups);
     temp.fill(0.0);
-
-
+    
+    
     for ( int g = 0; g < ngroups; g++ ) {
       std::vector<int> gr_idx = grp_idx[g];
       for ( int i = 0; i < gr_idx.size(); i++ ) {
@@ -386,41 +417,47 @@ double WpSolver::compute_lambda_zero(std::string penalty_)
       }
     }
     temp = temp.cwiseSqrt().eval();
-    temp = temp.cwiseQuotient(group_weights);
+    for(int i = 0; i < temp.size(); i++ ) temp(i) /= group_weights(i);
+    
+    if ( group_weights.cwiseEqual(0.0).any() ) {
+      for ( int i = 0; i < temp_size; i ++ ) {
+        if ( group_weights(i) < Eigen::NumTraits<double>::dummy_precision() ) temp(i) = 0.0;
+      }
+    }
+    
   } else {
     temp = XY.cwiseQuotient(penalty_factor).cwiseAbs().eval();
-  }
-  if ( penalty_factor.cwiseEqual(0.0).any() ) {
-    for ( int i = 0; i < temp_size; i ++ ) {
-      if ( penalty_factor(i) < Eigen::NumTraits<double>::dummy_precision() ) temp(i) = 0.0;
+    if ( penalty_factor.cwiseEqual(0.0).any() ) {
+      for ( int i = 0; i < temp_size; i ++ ) {
+        if ( penalty_factor(i) < Eigen::NumTraits<double>::dummy_precision() ) temp(i) = 0.0;
+      }
     }
   }
+  
   lambda0 = temp.maxCoeff();
-
+  
   return lambda0;
 }
 
 
 void WpSolver::init(double lambda_, std::string penalty_,
-                      double alpha_, double gamma_, double tau_)
+                    double alpha_, double gamma_, double tau_)
 {
   beta.setZero();
-
+  
   lambda = lambda_;
   penalty = penalty_;
-
+  
   alpha = alpha_;
   gamma = gamma_;
   tau   = tau_;
-
+  
   // get indexes of members of each group.
   // best to do just once in the beginning
   if (!found_grp_idx)
   {
     get_group_indexes();
   }
-  // Rcpp::Rcout << penalty <<"\n";
-  // Rcpp::Rcout << penalty <<"\n";
 }
 
 
@@ -545,4 +582,53 @@ void WpSolver::next_beta(vector &res)
   } else {
     Rcpp::stop("Penalty factor not found!");
   }
+}
+
+void WpSolver::solve_param(int maxit)
+{
+  
+  for(int i = 0; i < maxit; ++i)
+  {
+    if(i % 1000)  Rcpp::checkUserInterrupt(); 
+    
+    beta_prev = beta;
+    
+    update_u();
+    
+    update_beta();
+    
+    if(converged()) break;
+    
+  }
+  
+}
+
+int WpSolver::solve(int maxit)
+{
+  int i;
+  
+  for(i = 0; i < maxit; ++i)
+  {
+    // Rcpp::Rcout << "iteration " << i << ", ";
+    if(i % 200)  Rcpp::checkUserInterrupt(); 
+    
+    beta_prev_irls = beta;
+    // Rcpp::Rcout << "solve";
+    solve_param(maxit);
+    // Rcpp::Rcout << ", converge check";
+    if(converged_irls()) break;
+    // Rcpp::Rcout << ", compute weights";
+    
+    compute_weights();
+    // Rcpp::Rcout << "XY, ";
+    
+    XY = X_sp.transpose() * obs_weights.asDiagonal() * Y;
+    // Rcpp::Rcout << ", update eigenvals\n";
+    
+    compute_XtX_d_update_A();
+    
+  }
+  
+  
+  return i + 1;
 }

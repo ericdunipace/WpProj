@@ -280,7 +280,7 @@ WPSW <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
                  beta= beta_store, call = formals(WPSW), 
                  method=method, direction = direction)
   output$call[names(this.call)] <- this.call
-  class(output) <- c("sparse-posterior","stepwise")
+  class(output) <- c("limbs","stepwise")
   output$method <- method
   if(calc.theta) {
     extract <- extractTheta(output, theta)

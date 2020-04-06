@@ -17,6 +17,8 @@ Imports:
   ROI.plugin.ecos,
   ECOSolveR,
   ROI.plugin.lpsolve,
+  quantreg,
+  rqPen,
   parallel,
   doRNG
 LinkingTo: 

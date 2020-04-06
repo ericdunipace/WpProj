@@ -117,6 +117,8 @@ protected:
   
   void get_group_indexes();
   
+  void compute_XtX_d_init_A();
+    
   void compute_XtX_d_update_A();
   
   void compute_weights();
@@ -152,15 +154,15 @@ public:
   nsamps(s_),
   ngroups(unique_groups_.size()),
   power(power_),
-  obs_weights(X_.cols() * s_),
   tol(tol_),
+  obs_weights(X_.cols() * s_),
   u(X_.rows() * s_),               // allocate space but do not set values //diff
   beta(X_.rows() * s_),            // allocate space but do not set values //diff
   beta_prev(X_.rows() * s_),       // allocate space but do not set values //diff
   beta_prev_irls(X_.rows() * s_),
-                        X_orig(X_.data(), X_.rows(), X_.cols()),
-                        X_sp(X_.cols(), X_.rows()),
-                        X(X_.cols(), X_.rows()),
+  X(X_.cols(), X_.rows()),
+  X_orig(X_.data(), X_.rows(), X_.cols()),
+  X_sp(X_.cols()*s_, X_.rows()*s_),
                         Y(Y_.data(), Y_.rows() * Y_.cols()),
                         XY(X_.rows() * s_),
                         groups(groups_),
@@ -173,7 +175,7 @@ public:
                         default_group_weights(bool(group_weights_.size() < 1)), // compute default weights if none given
                                                                            grp_idx(unique_groups_.size())
                                                                            {}
-  
+  ~WpSolver() {};
   void init_wpsolve();
   
   
@@ -198,7 +200,7 @@ public:
   
   vector get_beta();
   
-  virtual double get_loss()
+  double get_loss()
   {
     return 1e99;
   }
@@ -217,51 +219,9 @@ public:
     //beta.swap(newbeta);
   }
   
-  virtual void solve_param(int maxit)
-  {
-    
-    for(int i = 0; i < maxit; ++i)
-    {
-      // Rcpp::Rcout << "iteration " << i << "\n";
-      if(i % 1000)  Rcpp::checkUserInterrupt(); 
-      
-      beta_prev = beta;
-      
-      update_u();
-      
-      update_beta();
-      
-      if(converged()) break;
-      
-    }
-    
-  }
+  void solve_param(int maxit);
   
-  
-  virtual int solve(int maxit)
-  {
-    int i;
-    
-    for(i = 0; i < maxit; ++i)
-    {
-      // Rcpp::Rcout << "iteration " << i << "\n";
-      if(i % 200)  Rcpp::checkUserInterrupt(); 
-      
-      beta_prev_irls = beta;
-      
-      solve_param(maxit);
-      
-      if(converged_irls()) break;
-      
-      compute_weights();
-      XY = X_sp.transpose() * obs_weights.asDiagonal() * Y;
-      compute_XtX_d_update_A();
-      
-    }
-    
-    
-    return i + 1;
-  }
+  int solve(int maxit);
   
 };
 
