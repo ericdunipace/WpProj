@@ -1,4 +1,4 @@
-W1L1 <- function(X, Y, theta = NULL, penalty = c("lasso", "scad","mcp"), 
+W1L1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "scad","mcp"), 
                  lambda = numeric(0), 
                  lambda.min.ratio = 1e-4, 
                  nlambda = 10, 
@@ -6,12 +6,15 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("lasso", "scad","mcp"),
   
   this.call <- as.list(match.call()[-1])
   
+  if(penalty == "ols") penalty <- "none"
+  penalty <- match.arg(penalty, choices = c("none","lasso", "scad","mcp"))
+  
   n <- nrow(X)
   d <- ncol(X)
   s <- ncol(Y)
   cols <- lapply(1:s, function(ss) Matrix::sparseMatrix(i = n*(ss-1) + rep(1:n,d), 
                                                         j = rep(1:d,each = n), 
-                                                        x = c(x),
+                                                        x = c(X),
                                                         dims = c(n*s, d)))
   Xmat <- do.call(cbind, cols)
   
@@ -19,8 +22,9 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("lasso", "scad","mcp"),
     lambda.max <- max(abs(colSums(x))/n)
     lambda <-  exp(log(lambda.max) + seq(0, log(lambda.min.ratio), length.out = nlambda))
   }
+  if(length(lambda) == 1) if(lambda == 0) penalty <- "none"
   
-  if(penalty != "ols") {
+  if(penalty != "none") {
     rqpenargs <-  list(
       x = as.matrix(Xmat),
       tau = 0.5,
@@ -51,7 +55,8 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("lasso", "scad","mcp"),
     if(length(lambda) ==1 ) {
       if(is.null(rqpenargs$alg)) rqpenargs$alg <- "QICD"
       
-      call <- as.call(c(list(as.name("rqPen::rq.group.fit")), rqpenargs))
+      call <- as.call(c(list(call("::", as.name("rqPen"), 
+                                  as.name("rq.group.fit"))), rqpenargs))
       # res <- do.call(rqPen::rq.group.fit, rqpenargs)
       # res <- rqPen::rq.group.fit(x = rqpenargs$x, y = rqpenargs$y, 
       #                            groups = rqpenargs$groups, tau = 0.5, lambda = rqpenargs$lambda,
@@ -101,7 +106,8 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("lasso", "scad","mcp"),
       }
     }
     
-    res <- as.call(c(list(as.name("quantreg::rq.fit")), rqargs))
+    call <- as.call(c(list(call("::", as.name("quantreg"), 
+                           as.name("rq.fit"))), rqargs))
     res <- eval(call, rqargs)
     # res <- do.call(quantreg::rq, rqargs)
     
@@ -111,7 +117,7 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("lasso", "scad","mcp"),
   output$beta <- beta
   output$penalty <- penalty
   output$lambda <- lambda
-  output$nvars <- p
+  output$nvars <- d
   output$call <- formals(W1L1)
   output$call[names(this.call)] <- this.call
   output$nonzero_beta <- colSums(output$beta != 0)
@@ -175,3 +181,4 @@ rqGroupLambda <- function(x, y, groups, tau = 0.5, lambda, intercept = FALSE,
   }
   return_val
 }
+

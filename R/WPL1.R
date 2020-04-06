@@ -22,9 +22,9 @@ WPL1 <- function(X, Y=NULL, theta = NULL, power = 1,
 {
   this.call <- as.list(match.call()[-1])
   if(power == 2.0) {
-    w2l1.arg.sel <- names(this.call) %in% formalArgs("W2L1")
-    w2l1.args <- this.call[w2l1.arg.sel]
-    output <- do.call("W2L1", w2l1.args)
+    w2l1.args <- c(as.list(environment()), list(...))
+    w2l1.arg.sel <- which(names(w2l1.args) %in% formalArgs("W2L1"))
+    output <- do.call("W2L1", w2l1.args[w2l1.arg.sel])
   } else {
     if ("penalty" %in% names(this.call)) {
       penalty <- match.arg(penalty, several.ok = TRUE)
