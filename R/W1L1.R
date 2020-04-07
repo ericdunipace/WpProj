@@ -19,7 +19,7 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "scad","mcp"),
   Xmat <- do.call(cbind, cols)
   
   if(length(lambda) == 0) {
-    lambda.max <- max(abs(colSums(x))/n)
+    lambda.max <- max(abs(colSums(X))/n)
     lambda <-  exp(log(lambda.max) + seq(0, log(lambda.min.ratio), length.out = nlambda))
   }
   if(length(lambda) == 1) if(lambda == 0) penalty <- "none"

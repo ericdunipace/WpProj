@@ -18,10 +18,10 @@ distCompare <- function(models, target = list(posterior = NULL, mean = NULL), p 
     foreach::registerDoSEQ()
   }
   
-  if (inherits(models, "sparse-posterior") ) {
+  if (inherits(models, "limbs") ) {
     models <- list(models)
   } else {
-    stopifnot(all(sapply(models, inherits, "sparse-posterior")))
+    stopifnot(all(sapply(models, inherits, "limbs")))
   }
   
   dist_df <- dist_mu_df <- nactive <- groups <- plot <- plot_mu <- NULL
@@ -87,7 +87,7 @@ distCompare <- function(models, target = list(posterior = NULL, mean = NULL), p 
   
   # if (parallel) parallel::stopCluster(cl)
   output <- list(posterior = dist_df, mean = dist_mu_df, p = p)
-  class(output) <- c("distcompare","sparse-posterior")
+  class(output) <- c("distcompare","limbs")
   
   return(output)
 }
@@ -193,7 +193,7 @@ set_dist_data <- function(target, models, quantity, method, transform) {
   
   
   ### model checks ###
-  if (inherits(models, "sparse-posterior")) {
+  if (inherits(models, "limbs")) {
     models <- list(models)
   } else {
     if(!is.list(models)) stop("models must be a SparsePosterior fit or a list of fits")
