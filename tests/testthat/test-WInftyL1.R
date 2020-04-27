@@ -41,12 +41,14 @@ testthat::test_that("WInfL1 lp generates", {
   # debugonce(limbs:::lp_prob_winf)
   testthat::expect_silent(problem_statement <- limbs:::lp_prob_winf(Xmat, Y, lambda = rep(1, d), groups = rep(1:d, s)))
   
-  # debugonce(limbs:::linf_norm)
-  output.gurobi <- limbs:::linf_norm(Xmat, Y, temp.deriv, soft_threshold, lambda = 1, groups = rep(1:d,s), solver = "gurobi",
+  # debugonce(limbs:::lp_norm)
+  output.gurobi <- limbs:::lp_norm(Xmat, Y, power = Inf, deriv_func = temp.deriv, 
+                                   thresholder = soft_threshold, lambda = 1, groups = rep(1:d,s), solver = "gurobi",
                     gamma = 1.5, opts = NULL, init = NULL, iter = 100, tol = 1e-7)
   # function(X, Y, deriv_func, thresholder, lambda, groups, solver, gamma = 1.5, opts = NULL, init = NULL, iter = 100, tol = 1e-7)
-  # debugonce(limbs:::linf_norm)
-  output.mosek <- limbs:::linf_norm(Xmat, Y, temp.deriv, soft_threshold, lambda = 1, groups = rep(1:d,s), solver = "mosek",
+  # debugonce(limbs:::lp_norm)
+  output.mosek <- limbs:::lp_norm(Xmat, Y, power = Inf, deriv_func = temp.deriv, 
+                                  thresholder = soft_threshold, lambda = 1, groups = rep(1:d,s), solver = "mosek",
                               gamma = 1.5, init = NULL, iter = 100, tol = 1e-7, opts= list(verbose = 0))
   
   testthat::expect_true(sum((output.gurobi-output.mosek)^2) < 1e-3)

@@ -1,4 +1,4 @@
-W1L1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "scad","mcp"), 
+W1L1 <- function(X, Y, theta = NULL, penalty = c("none","scad","mcp"), 
                  lambda = numeric(0), 
                  lambda.min.ratio = 1e-4, 
                  nlambda = 10, 
@@ -6,8 +6,9 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "scad","mcp"),
   
   this.call <- as.list(match.call()[-1])
   
+  if(penalty == "lasso") stop("Lasso group penalty is currently incorrect in rqPen package!")
   if(penalty == "ols") penalty <- "none"
-  penalty <- match.arg(penalty, choices = c("none","lasso", "scad","mcp"))
+  penalty <- match.arg(penalty, choices = c("none","scad","mcp"))
   
   n <- nrow(X)
   d <- ncol(X)
@@ -38,7 +39,7 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "scad","mcp"),
       lambda = lambda,
       ...)
     rqpenargs <- rqpenargs[!duplicated(names(rqpenargs))]
-    rqpenargs <- rqpenargs[names(rqpenargs) %in% names(c(formals(rqPen::rq.group.fit), formals(quantreg::rq.fit.pfn), formals(quantreg::rq.fit.br), formals(quantreg::rq.fit.fnb)))]
+    rqpenargs <- rqpenargs[names(rqpenargs) %in% names(c(formals(l1.group.fit), formals(quantreg::rq.fit.pfn), formals(quantreg::rq.fit.br), formals(quantreg::rq.fit.fnb)))]
     if(is.null(rqpenargs$method)) {
       rqpenargs$method <- if(nrow(Xmat) > 1000 & ncol(Xmat) > 100) { #sfn gives error
         #   "sfn"
@@ -56,23 +57,21 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "scad","mcp"),
       if(is.null(rqpenargs$alg)) rqpenargs$alg <- "QICD"
       
       call <- as.call(c(list(call("::", as.name("rqPen"), 
-                                  as.name("rq.group.fit"))), rqpenargs))
-      # res <- do.call(rqPen::rq.group.fit, rqpenargs)
-      # res <- rqPen::rq.group.fit(x = rqpenargs$x, y = rqpenargs$y, 
+                                  as.name("l1.group.fit"))), rqpenargs))
+      # res <- do.call(l1.group.fit, rqpenargs)
+      # res <- l1.group.fit(x = rqpenargs$x, y = rqpenargs$y, 
       #                            groups = rqpenargs$groups, tau = 0.5, lambda = rqpenargs$lambda,
       #                            intercept = FALSE, 
       #                            penalty = rqpenargs$penalty, 
       #                            alg = rqpenargs$alg, penGroups = NULL, ...)
     } else {
       call <- as.call(c(list(as.name("rqGroupLambda")), rqpenargs))
-      # res <- eval(call, rqpenargs) 
-      # res <- do.call(rqPen::groupMultLambda, rqpenargs)
       # if(is.null(rqpenargs$alg)) rqpenargs$alg <- "QICD_warm"
-      #     res <- rqGroupLambda(x = rqpenargs$x, y = rqpenargs$y, 
-      #                          groups = rqpenargs$groups, tau = 0.5, lambda = rqpenargs$lambda,
-      #                          intercept = FALSE, 
-      #                          penalty = rqpenargs$penalty, 
-      #                          alg = rqpenargs$alg, penGroups = NULL, ...)
+          # res <- rqGroupLambda(x = rqpenargs$x, y = rqpenargs$y,
+          #                      groups = rqpenargs$groups, tau = 0.5, lambda = rqpenargs$lambda,
+          #                      intercept = FALSE,
+          #                      penalty = rqpenargs$penalty,
+          #                      alg = rqpenargs$alg, penGroups = NULL, ...)
       
     }
     res <- eval(call, rqpenargs)
@@ -132,53 +131,3 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "scad","mcp"),
   output$model <- res
   return(output)
 } 
-
-
-rqGroupLambda <- function(x, y, groups, tau = 0.5, lambda, intercept = FALSE, 
-                          penalty = "LASSO", alg = "QICD_warm", penGroups = NULL, ...) 
-{
-  if (alg != "QICD_warm") {
-    return_val <- vector("list", length(lambda))
-    pos <- 1
-    for (lam in lambda) {
-      return_val[[pos]] <- rqPen::rq.group.fit(x = x, y = y, groups = groups, 
-                                               tau = tau, lambda = lam, intercept = intercept, 
-                                               penalty = penalty, alg = alg, penGroups = penGroups, 
-                                               ...)
-      pos <- pos + 1
-    }
-  }
-  else {
-    p <- dim(x)[2]
-    pos <- 1
-    alg = "QICD"
-    return_val <- vector("list", length(lambda))
-    if (intercept) {
-      initial_beta <- list(c(quantile(y, tau), rep(0, p)))
-    }
-    else {
-      initial_beta <- list(rep(0, p))
-    }
-    for (lam in lambda) {
-      return_val[[pos]] <- rqPen::rq.group.fit(x = x, y = y, groups = groups, 
-                                               tau = tau, lambda = lam, intercept = intercept, 
-                                               penalty = "LASSO", alg = alg, initial_beta = initial_beta, 
-                                               penGroups = penGroups, ...)
-      initial_beta[[1]] <- coefficients(return_val[[pos]])
-      pos <- pos + 1
-    }
-    if (penalty != "LASSO") {
-      pos <- 1
-      for (lam in lambda) {
-        initial_beta[[1]] <- coefficients(return_val[[pos]])
-        return_val[[pos]] <- rqPen::rq.group.fit(x = x, y = y, 
-                                                 groups = groups, tau = tau, lambda = lam, intercept = intercept, 
-                                                 penalty = penalty, alg = alg, initial_beta = initial_beta, 
-                                                 penGroups = penGroups, ...)
-        pos <- pos + 1
-      }
-    }
-  }
-  return_val
-}
-
