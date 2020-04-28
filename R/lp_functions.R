@@ -63,6 +63,8 @@ lp_norm <- function(X, Y, power = 1, problem = NULL, model = NULL, deriv_func, t
   
   d <- ncol(X)
   if(is.null(init)) init <- rep(0,d)
+  if(is.null(iter)) iter <- 100
+  if(is.null(tol)) tol <- 1e-7
   
   if( is.null(problem)  | is.null(model)) {
     problem <- switch(as.character(power), "Inf" = lp_prob_winf(X = X, Y = Y, lambda = lambda, groups = groups),

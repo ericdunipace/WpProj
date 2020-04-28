@@ -1,4 +1,4 @@
-W1L1 <- function(X, Y, theta = NULL, penalty = c("none","scad","mcp"), 
+W1L1 <- function(X, Y, theta = NULL, penalty = c("none", "lasso","scad","mcp"), 
                  lambda = numeric(0), 
                  lambda.min.ratio = 1e-4, 
                  nlambda = 10, 
@@ -6,9 +6,9 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none","scad","mcp"),
   
   this.call <- as.list(match.call()[-1])
   
-  if(penalty == "lasso") stop("Lasso group penalty is currently incorrect in rqPen package!")
+  # if(penalty == "lasso") stop("Lasso group penalty is currently incorrect in rqPen package!")
   if(penalty == "ols") penalty <- "none"
-  penalty <- match.arg(penalty, choices = c("none","scad","mcp"))
+  penalty <- match.arg(penalty, choices = c("none","lasso","scad","mcp"))
   
   n <- nrow(X)
   d <- ncol(X)
@@ -20,7 +20,11 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none","scad","mcp"),
   Xmat <- do.call(cbind, cols)
   
   if(length(lambda) == 0) {
-    lambda.max <- max(abs(colSums(X))/n)
+    if(penalty != "lasso") {
+      lambda.max <- max(colSums(abs(X))/n)
+    } else {
+      lambda.max <- max(sqrt(colSums(X^2)))
+    }
     lambda <-  exp(log(lambda.max) + seq(0, log(lambda.min.ratio), length.out = nlambda))
   }
   if(length(lambda) == 1) if(lambda == 0) penalty <- "none"
@@ -28,9 +32,9 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none","scad","mcp"),
   if(penalty != "none") {
     rqpenargs <-  list(
       x = as.matrix(Xmat),
-      tau = 0.5,
       y = c(Y),
       groups = rep(1:d, s),
+      tau = 0.5,
       intercept = FALSE,
       a = gamma,
       penalty = switch(penalty, "lasso" = "LASSO", 
@@ -55,9 +59,8 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none","scad","mcp"),
     
     if(length(lambda) ==1 ) {
       if(is.null(rqpenargs$alg)) rqpenargs$alg <- "QICD"
-      
-      call <- as.call(c(list(call("::", as.name("rqPen"), 
-                                  as.name("l1.group.fit"))), rqpenargs))
+      f.call <- as.call(c(list(call("::", as.name("rqPen"), 
+                                    as.name("l1.group.fit"))), rqpenargs))
       # res <- do.call(l1.group.fit, rqpenargs)
       # res <- l1.group.fit(x = rqpenargs$x, y = rqpenargs$y, 
       #                            groups = rqpenargs$groups, tau = 0.5, lambda = rqpenargs$lambda,
@@ -65,16 +68,18 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none","scad","mcp"),
       #                            penalty = rqpenargs$penalty, 
       #                            alg = rqpenargs$alg, penGroups = NULL, ...)
     } else {
-      call <- as.call(c(list(as.name("rqGroupLambda")), rqpenargs))
       # if(is.null(rqpenargs$alg)) rqpenargs$alg <- "QICD_warm"
-          # res <- rqGroupLambda(x = rqpenargs$x, y = rqpenargs$y,
-          #                      groups = rqpenargs$groups, tau = 0.5, lambda = rqpenargs$lambda,
-          #                      intercept = FALSE,
-          #                      penalty = rqpenargs$penalty,
-          #                      alg = rqpenargs$alg, penGroups = NULL, ...)
+      f.call <- as.call(c(list(as.name("rqGroupLambda")), rqpenargs))
+      # res1 <- rqGroupLambda(x = rqpenargs$x, y = rqpenargs$y,
+      #                      groups = rqpenargs$groups, tau = 0.5, lambda = rqpenargs$lambda,
+      #                      intercept = FALSE,
+      #                      penalty = rqpenargs$penalty,
+      #                      a = rqpenargs$a,
+      #                      # alg = rqpenargs$alg,
+      #                      ...)
       
     }
-    res <- eval(call, rqpenargs)
+    res <- eval(f.call, rqpenargs)
     beta <- sapply(res, function(r) r$coefficients)
   } else {
     lambda <- 0
@@ -106,7 +111,7 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none","scad","mcp"),
     }
     
     call <- as.call(c(list(call("::", as.name("quantreg"), 
-                           as.name("rq.fit"))), rqargs))
+                                as.name("rq.fit"))), rqargs))
     res <- eval(call, rqargs)
     # res <- do.call(quantreg::rq, rqargs)
     

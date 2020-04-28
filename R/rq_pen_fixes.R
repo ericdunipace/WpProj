@@ -5,6 +5,9 @@ l1.group.fit <- function (x, y, groups, lambda, intercept = TRUE,
   tau <- 0.5
   p <- ncol(x)
   n <- nrow(x)
+  if(is.null(alg) | missing(alg)) alg <- "QICD"
+  if(is.null(penalty) | missing(penalty)) penalty <- "MCP"
+  
   if (!penalty %in% c("SCAD", "MCP")) {
     stop("Penalty must be SCAD or MCP")
   }
@@ -29,8 +32,9 @@ l1.group.fit <- function (x, y, groups, lambda, intercept = TRUE,
   if (alg == "QICD") {
     if (length(lambda) != 1) 
       stop("QICD Algorithm only allows 1 lambda value")
-    coefs <- rqPen::QICD.group(y, x, groups, tau, lambda, intercept, 
-                        penalty, a = a, ...)
+    coefs <- rqPen::QICD.group(y = y, x = x, groups = groups, 
+                               lambda = lambda, intercept = intercept, 
+                               penalty = penalty, a = a, ...)
     coefnames <- paste("x", 1:p, sep = "")
     if (intercept) 
       coefnames <- c("(Intercept)", coefnames)
@@ -51,11 +55,11 @@ l1.group.fit <- function (x, y, groups, lambda, intercept = TRUE,
       pen_val <- sum(pen_func(tapply(abs(pen_vars), groups, 
                                      sum), lambda = lambda, a = a))
     }
-    rho <- sum(check(residuals))
+    rho <- sum(rqPen::check(residuals))
     PenRho <- rho + pen_val
     return_val <- list(coefficients = coefs, PenRho = PenRho, 
                        residuals = residuals, rho = rho, tau = tau, n = n, 
-                       intercept = intercept, penalty = penalty)
+                       intercept = intercept, penalty = penalty, alg = "QICD")
     class(return_val) <- c("rq.group.pen", "rq.pen")
   }
   else {
@@ -77,8 +81,9 @@ l1.group.fit <- function (x, y, groups, lambda, intercept = TRUE,
     }
     else {
       return_val <- rqPen::rq.group.lin.prog(x, y, groups, tau, 
-                                      lambda, intercept = intercept, penalty = penalty, 
-                                      penGroups = penGroups, a = a, ...)
+                                             lambda, intercept = intercept, penalty = penalty, 
+                                             penGroups = penGroups, a = a, ...)
+      return_val$alg <- "lin.prog"
       class(return_val) <- c("rq.group.pen", "rq.pen")
     }
   }
@@ -87,14 +92,16 @@ l1.group.fit <- function (x, y, groups, lambda, intercept = TRUE,
 
 
 rqGroupLambda <- function(x, y, groups, lambda, intercept = FALSE, tau = 0.5,
-                          penalty = "MCP", alg = "QICD_warm", penGroups = NULL, ...) 
+                          penalty = "MCP", alg = "QICD_warm", penGroups = NULL, a = 3.7,
+                          ...) 
 {
   return_val <- vector("list", length(lambda))
   pos <- 1
   tau <- 0.5
   intercept <- FALSE
-  if(is.null(alg)) alg <- "QICD_warm"
-  if(is.null(penalty)) penalty <- "MCP"
+  if(is.null(alg) | missing(alg)) alg <- "QICD_warm"
+  alg <- match.arg(alg, choices = c("QICD_warm","lin.prog"))
+  if(is.null(penalty) | missing(penalty)) penalty <- "MCP"
   
   
   if(penalty == "LASSO") {
@@ -106,17 +113,22 @@ rqGroupLambda <- function(x, y, groups, lambda, intercept = FALSE, tau = 0.5,
     #                                opts = dots$opts, init = dots$init)
     #   pos <- pos + 1L
     # }
+    # pen.lp <- switch(penalty,
+    #                  "MCP" = "mcp",
+    #                  "SCAD" = "scad",
+    #                  "LASSO" = "lasso")
     temp_beta <- GroupLambda(X = x, Y = y, power = 1, groups = groups, lambda = lambda,
-                             penalty = penalty,
+                             penalty = "lasso",
                              gamma = a, solver = list(...)$solver,
                              options = list(...)$options, ...)
-    return_val <- lapply(temp_beta)
+    return_val <- lapply(1:ncol(temp_beta), function(tt) list(coefficients = temp_beta[,tt]))
+    return(return_val)
   }
   if (alg != "QICD_warm") {
     pos <- 1
     for (lam in lambda) {
       return_val[[pos]] <- l1.group.fit(x = x, y = y, groups = groups,
-                                        tau = tau, lambda = lam, intercept = intercept, 
+                                        tau = tau, lambda = lam, intercept = intercept, a = a,
                                         penalty = penalty, alg = alg, penGroups = penGroups, 
                                         ...)
       pos <- pos + 1
@@ -132,30 +144,35 @@ rqGroupLambda <- function(x, y, groups, lambda, intercept = FALSE, tau = 0.5,
     else {
       initial_beta <- list(rep(0, p))
     }
-    # for (lam in lambda) {
-    #   return_val[[pos]] <- l1.group.fit(x = x, y = y, groups = groups, 
-    #                                     tau = tau, lambda = lam, intercept = intercept, 
-    #                                     penalty = "LASSO", alg = alg, initial_beta = initial_beta, 
-    #                                     penGroups = penGroups, ...)
-    #   initial_beta[[1]] <- coefficients(return_val[[pos]])
-    #   pos <- pos + 1
-    # }
-    temp_beta <- GroupLambda(X = x, Y = y, power = 1, groups = groups, lambda = lambda,
-                  penalty = penalty,
-                  gamma = a, solver = list(...)$solver,
-                  options = list(...)$options, ...)
-    return_val <- lapply(temp_beta)
-    if (penalty != "LASSO") {
-      pos <- 1
-      for (lam in lambda) {
-        initial_beta[[1]] <- coefficients(return_val[[pos]])
-        return_val[[pos]] <- l1.group.fit(x = x, y = y, a = a,
-                                          groups = groups, tau = tau, lambda = lam, intercept = intercept, 
-                                          penalty = penalty, alg = alg, initial_beta = initial_beta, 
-                                          penGroups = penGroups, ...)
-        pos <- pos + 1
-      }
+    for (lam in lambda) {
+      return_val[[pos]] <- rqPen::QICD.group(y = y, x = x, groups = groups, tau = tau, 
+                                             lambda = lam, intercept = intercept, initial_beta = initial_beta[[1]],
+                                             penalty = "LASSO", ...)
+      # return_val[[pos]] <- rqPen::rq.group.fit(x = x, y = y, groups = groups,
+      #                                   tau = tau, lambda = lam, intercept = intercept,
+      #                                   penalty = "LASSO", alg = alg, initial_beta = initial_beta[[1]],
+      #                                   penGroups = penGroups, ...)
+      initial_beta[[1]] <- return_val[[pos]]
+      pos <- pos + 1
     }
+    # temp_beta <- GroupLambda(X = x, Y = y, power = 1, groups = groups, lambda = lambda,
+    #               penalty = "lasso",
+    #               gamma = a, solver = list(...)$solver,
+    #               options = list(...)$options, ...)
+    # return_val <- lapply(1:ncol(temp_beta), function(tt) temp_beta[,tt])
+    # if (penalty != "LASSO") {
+    pos <- 1
+    for (lam in lambda) {
+      initial_beta[[1]] <- return_val[[pos]]
+      return_val[[pos]] <- l1.group.fit(x = x, y = y,
+                                        groups = groups, tau = tau, lambda = lam, intercept = intercept,
+                                        a = a,
+                                        penalty = penalty, alg = alg, initial_beta = initial_beta[[1]], 
+                                        penGroups = penGroups, ...)
+      pos <- pos + 1
+      
+    }
+    # }
   }
   return_val
 }

@@ -77,12 +77,11 @@ testthat::test_that("W1L1 works", {
   lambda <- 0
   nlambda <- 2
   lambda.min.ratio <- 1e-10
-  gamma <- 1.5
+  gamma <- 2.1
   penalty.factor <- 1/rowMeans(theta^2)
   penalty.factor.null <- rep(1,p)
   post_mu <- x %*% theta
   
-  debugonce(W1L1)
   projection_none <- W1L1(X=x, Y=post_mu, penalty="none",
                           nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
                           maxit = 1e2, gamma = gamma,
@@ -118,18 +117,24 @@ testthat::test_that("W1L1 works", {
   projection_mcp <- W1L1(X=x, Y=post_mu, penalty="mcp",
                          nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
                          gamma = gamma)
+  testthat::expect_lte(mean(projection_mcp$beta[,2] - c(theta)), 0.01)
+  testthat::expect_equivalent(c(projection_mcp$beta[,1]), rep(0, p * s))
+  testthat::expect_equivalent(c(projection_mcp$power), 1)
   
   projection_scad <-W1L1(X=x, Y=post_mu, penalty="scad",
                          nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
                          gamma = gamma, lambda=lambda)
-  testthat::expect_equal(c(projection_scad$beta[,1]), c(theta)) #should be pretty close
+  testthat::expect_equal(c(projection_scad$beta[,2]), c(theta)) #should be pretty close
   
   projection_scad <- W1L1(X=x, Y=post_mu, penalty="scad",
                           nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
                           gamma = gamma)
+  testthat::expect_lte(mean(projection_scad$beta[,2] - c(theta)), 0.01)
+  testthat::expect_equivalent(c(projection_scad$beta[,1]), rep(0, p * s))
+  testthat::expect_equivalent(c(projection_scad$power), 1)
   
-  
-  projection_lasso <-W1L1(X=x, Y=post_mu, penalty="lasso",
+  # debugonce(W1L1)
+  projection_lasso <- W1L1(X=x, Y=post_mu, penalty="lasso",
                           nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
                           gamma = gamma, lambda=lambda)
   testthat::expect_equal(c(projection_lasso$beta[,1]), c(theta)) #should be pretty close  
@@ -137,7 +142,9 @@ testthat::test_that("W1L1 works", {
   projection_lasso <- W1L1(X=x, Y=post_mu, penalty="lasso",
                            nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
                            gamma = gamma)
-  
+  testthat::expect_lte(mean(projection_lasso$beta[,2] - c(theta)), 0.01)
+  testthat::expect_equivalent(c(projection_lasso$beta[,1]), rep(0, p * s))
+  testthat::expect_equivalent(c(projection_lasso$power), 1)
   # projection_lasso <- W1L1(X=x, Y=post_mu, penalty="lasso",
   #                          nlambda = 1, lambda.min.ratio = lambda.min.ratio,
   #                          gamma = gamma, alg = "ip")
