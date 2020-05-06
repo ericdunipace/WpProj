@@ -11,7 +11,7 @@ WPL1 <- function(X, Y=NULL, theta = NULL, power = 2.0,
                  model.size = NULL,
                  lambda = numeric(0),
                  nlambda = 100L,
-                 lambda.min.ratio = NULL, alpha = 1,
+                 lambda.min.ratio = 1e-4,
                  gamma = 1, maxit = 500L,
                  tol = 1e-07, ...)
 {
@@ -29,7 +29,7 @@ WPL1 <- function(X, Y=NULL, theta = NULL, power = 2.0,
     #                )
   } else if (power == 1) {
     w1l1.args <- c(as.list(environment()), list(...))
-    w1l1.args$alpha <- w1l1.args$tau <- NULL
+    w1l1.args$alpha <- w1l1.args$tau <-  w1l1.args$power <- NULL
     # w2l1.arg.sel <- which(names(pot.args) %in% formalArgs("W2L1"))
     # w2l1.args <- pot.args[w2l1.arg.sel]
     argn <- lapply(names(w1l1.args), as.name)
@@ -38,7 +38,7 @@ WPL1 <- function(X, Y=NULL, theta = NULL, power = 2.0,
     output <- eval(f.call, envir = w1l1.args)
   } else if (power == Inf) {
     winfl1.args <- c(as.list(environment()), list(...))
-    winfl1.args$alpha <- winfl1.args$tau <- NULL
+    winfl1.args$alpha <- winfl1.args$tau <- winfl1.args$power <- NULL
     # w2l1.arg.sel <- which(names(pot.args) %in% formalArgs("W2L1"))
     # w2l1.args <- pot.args[w2l1.arg.sel]
     argn <- lapply(names(winfl1.args), as.name)
@@ -46,9 +46,12 @@ WPL1 <- function(X, Y=NULL, theta = NULL, power = 2.0,
     f.call <- as.call(c(list(as.name("WInfL1")), argn))
     output <- eval(f.call, envir = winfl1.args)
   } else {
+    dots <- list(...)
     output <- lp_reg(x = X, y = Y, theta = theta, power = power, gamma = gamma,
                      alpha = alpha,
-                     penalty = penalty,  lambda = lambda,
+                     penalty = penalty,  
+                     penalty.factor = dots$penalty.factor,
+                     lambda = lambda,
                      nlambda = nlambda,
                      model.size = model.size,
                      iter = maxit,
@@ -85,7 +88,7 @@ lp_reg <- function(x, y, theta = NULL, power, gamma, alpha, tau, penalty, penalt
   
   if(is.null(y) | missing(y)) {
     if(!(is.null(theta) | missing(theta))) {
-      if(nrow(theta) != ncol(X)) theta <- t(theta)
+      if(nrow(theta) != ncol(x)) theta <- t(theta)
       y <- x %*% theta
     }
   }
@@ -105,49 +108,59 @@ lp_reg <- function(x, y, theta = NULL, power, gamma, alpha, tau, penalty, penalt
   }
   
   Y <- as.matrix(c(y))
-  beta <- beta_old <- lapply(1:length(lambda), function(l) rep(Inf, d * s))
   obs.weights <- list(rep(1/(n*s),n*s))
   ow <- list()
   Xw <- list()
-  XtX <- list()
-  XtY <- list()
+  Yw <- list()
+  # XtX <- list()
+  # XtY <- list()
   oem_holder <- list()
   
   if(penalty != "ols" & !grepl("grp.", penalty)) penalty <- paste0("grp.",penalty)
   
-  if(length(penalty.factor) == 0) penalty.factor <- rep(1, d)
+  if(length(penalty.factor) == 0 | missing(penalty.factor) | is.null(penalty.factor)) {
+    penalty.factor <- rep(1, d)
+  }
+  penalty.factor <- penalty.factor * d /sum(penalty.factor)
+  
   groups <- rep(1:d, s)
-  penalty.factor <- rep(penalty.factor, s)
+  # penalty.factor <- rep(penalty.factor, s)
   groups[penalty.factor == 0] <- 0
   
   if(length(lambda) == 0 | is.null(lambda)) {
-    max.lambda <- sqrt(rowSums(crossprod(x,y)^2))
+    max.lambda <- max(sqrt(rowSums(crossprod(x,y)^2)))/(n*s)
     lambda <- max.lambda * exp( seq(0, log(lambda.min.ratio), length.out = nlambda))
   }
   
+  beta <- beta_old <- lapply(1:length(lambda), function(l) rep(Inf, d * s))
+  
   for(l in seq_along(lambda)) {
-    lam <- lambda[lam]
+    lam <- lambda[l]
     for(i in 1:iter) {
-      ow[[1]]  <- Matrix::sparseMatrix(i = 1:(n*s), j = 1:(n*s), x = obs.weights[[1]],
-                                      dims = c(n*s, n*s))
-      Xw[[1]]  <- ow[[1]] * Xmat
-      XtX[[1]] <- Matrix::crossprod( Xw[[1]], Xmat)
-      XtY[[1]] <- Matrix::crosprod(Xw[[1]], Y)
-      oem_holder[[1]] <- oem::oem.xtx(xtx = XtX[[1]], xty = XtY[[1]], family = "gaussian",
+      ow[[1]]  <- Matrix::Diagonal( n*s, sqrt(obs.weights[[1]]))
+        # Matrix::sparseMatrix(i = 1:(n*s), j = 1:(n*s), x = obs.weights[[1]],
+        #                               dims = c(n*s, n*s))
+      Xw[[1]]  <- ow[[1]] %*% Xmat
+      Yw[[1]]  <- ow[[1]] %*% Y
+      # XtX[[1]] <- Matrix::crossprod( Xw[[1]], Xmat)
+      # XtY[[1]] <- Matrix::crossprod(Xw[[1]], Y)
+      oem_holder[[1]] <- oem::oem(x = Xw[[1]], y = Yw[[1]], family = "gaussian",
                                       penalty = penalty, lambda = lam,
+                                      intercept = FALSE,
                                       gamma = gamma, alpha = alpha,
-                                      tol = tol, maxit = maxit, groups = groups,
+                                      standardize = FALSE,
+                                      tol = tol, maxit = iter*5, groups = groups,
                                       group.weights = penalty.factor)
-      beta[[l]] <-  c(oem_holder[[1]]$beta)
-      if(not.converged(beta[[l]], beta_old[[l]], 1e-7)){
+      beta[[l]] <-  c(oem_holder[[1]]$beta[[1]][-1])
+      if(not.converged(beta[[l]], beta_old[[l]], tol)){
         beta_old[[l]] <- beta[[l]]
         obs.weights[[1]] <- log(abs(Y - Xmat %*% beta[[1]])) * (power - 2)
         obs.weights[[1]] <- pmin(obs.weights[[1]], log(1e4))
-        obs.weights[[1]] <- exp(obs.weights[[1]] - log_sum_exp(obs.weights[[1]]) )
+        obs.weights[[1]] <- exp(obs.weights[[1]] - log_sum_exp(obs.weights[[1]]) )@x
       } else {
         break
       }
-      if(sum(beta[[l]] != 0) >= model.size) break
+      if(sum(beta[[l]] != 0) > model.size) break
       
     }
   }
@@ -166,9 +179,8 @@ lp_reg <- function(x, y, theta = NULL, power, gamma, alpha, tau, penalty, penalt
   
   extract <- extractTheta(output, matrix(0, d,s))
   output$nzero <- extract$nzero
-  output$eta <- lapply(extract$theta, function(tt) X %*%tt )
+  output$eta <- lapply(extract$theta, function(tt) x %*%tt )
   output$theta <- extract$theta
-  output$model <- res
   
   return(output)
 }
