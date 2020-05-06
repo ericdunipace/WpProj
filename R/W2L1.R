@@ -361,6 +361,7 @@ W2L1 <- function(X, Y=NULL, theta = NULL, family="gaussian",
   }
   
   output$nvars <- p
+  output$maxit <- maxit
   output$power <- 2.0
   output$penalty <- penalty
   # output$family <- family

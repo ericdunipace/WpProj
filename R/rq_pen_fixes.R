@@ -93,12 +93,14 @@ l1.group.fit <- function (x, y, groups, lambda, intercept = TRUE,
 
 rqGroupLambda <- function(x, y, groups, lambda, intercept = FALSE, tau = 0.5,
                           penalty = "MCP", alg = "QICD_warm", penGroups = NULL, a = 3.7,
+                          model.size = NULL,
                           ...) 
 {
   return_val <- vector("list", length(lambda))
   pos <- 1
   tau <- 0.5
   intercept <- FALSE
+  if(is.null(model.size) | length(model.size) == 0) model.size <- ncol(x)
   if(is.null(alg) | missing(alg)) alg <- "QICD_warm"
   alg <- match.arg(alg, choices = c("QICD_warm","lin.prog"))
   if(is.null(penalty) | missing(penalty)) penalty <- "MCP"
@@ -120,7 +122,9 @@ rqGroupLambda <- function(x, y, groups, lambda, intercept = FALSE, tau = 0.5,
     temp_beta <- GroupLambda(X = x, Y = y, power = 1, groups = groups, lambda = lambda,
                              penalty = "lasso",
                              gamma = a, solver = list(...)$solver,
-                             options = list(...)$options, ...)
+                             model.size = model.size, 
+                             options = list(...)$options, 
+                             ...)
     return_val <- lapply(1:ncol(temp_beta), function(tt) list(coefficients = temp_beta[,tt]))
     return(return_val)
   }
@@ -131,6 +135,10 @@ rqGroupLambda <- function(x, y, groups, lambda, intercept = FALSE, tau = 0.5,
                                         tau = tau, lambda = lam, intercept = intercept, a = a,
                                         penalty = penalty, alg = alg, penGroups = penGroups, 
                                         ...)
+      if(sum(return_val[[pos]]$coefficients != 0) > model.size) {
+        if(pos != length(lambda)) return_val[(pos):length(return_val)] <- NULL
+        break
+      }
       pos <- pos + 1
     }
   }
@@ -169,6 +177,10 @@ rqGroupLambda <- function(x, y, groups, lambda, intercept = FALSE, tau = 0.5,
                                         a = a,
                                         penalty = penalty, alg = alg, initial_beta = initial_beta[[1]], 
                                         penGroups = penGroups, ...)
+      if(sum(return_val[[pos]]$coefficients != 0) > model.size) {
+        if(pos != length(lambda)) return_val[(pos):length(return_val)] <- NULL
+        break
+      }
       pos <- pos + 1
       
     }

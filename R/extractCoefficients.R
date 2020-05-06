@@ -17,7 +17,7 @@ extractCoef <- function(fit, drop=FALSE) {
       nvar <- colSums(fit$beta != 0)
       extractCoefVar <- tapply(lambda, nvar, min)
       iters <- fit$niter
-      maxit <- eval(fit$call$maxit)
+      maxit <- fit$maxit
       if(length(dim(iters)) == 2) {
         lastHitMax <- (iters[nrow(iters),nlambda]>=maxit)
       } else {

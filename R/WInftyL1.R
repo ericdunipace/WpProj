@@ -8,6 +8,7 @@ WInfL1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "mcp","scad")
                                 init = NULL,
                                 tol = 1e-7,
                                 iter = 100),
+                 model.size = NULL,
                  ...) {
   
   this.call <- as.list(match.call()[-1])
@@ -19,6 +20,14 @@ WInfL1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "mcp","scad")
   
   n <- nrow(X)
   d <- ncol(X)
+  
+  if(is.null(Y) | missing(Y)) {
+    if(!(is.null(theta) | missing(theta))) {
+      if(nrow(theta) != ncol(X)) theta <- t(theta)
+      Y <- X %*% theta
+    }
+  }
+  
   s <- ncol(Y)
   cols <- lapply(1:s, function(ss) Matrix::sparseMatrix(i = n*(ss-1) + rep(1:n,d), 
                                                         j = rep(1:d,each = n), 
@@ -43,9 +52,16 @@ WInfL1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "mcp","scad")
   if(is.null(options$tol)) options$tol <- 1e-7
   if(is.null(options$iter)) options$iter <- 100
   
+  if(is.null(model.size) | length(model.size) == 0) {
+    model.size <- ncol(Xmat)
+  } else {
+    model.size <- model.size * s
+  }
+  
   beta <- GroupLambda(X = Xmat, Y = Y, power = Inf, groups = rep(1:d,s), lambda = lambda,
                            penalty = penalty,
                      gamma = gamma, solver = solver,
+                     model.size = model.size,
                      options = options, ...)
     # beta <- linf_norm(X = Xmat, Y = Y, deriv_func = deriv_func, thresholder = thresh_fun,
     #                  lambda = lambda, groups=rep(1:d, s), solver = solver, 
@@ -58,6 +74,7 @@ WInfL1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "mcp","scad")
   output$penalty <- penalty
   output$lambda <- lambda
   output$nvars <- p
+  output$maxit <- NULL
   output$call <- formals(WInfL1)
   output$call[names(this.call)] <- this.call
   output$nonzero_beta <- colSums(output$beta != 0)

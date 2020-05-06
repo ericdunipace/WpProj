@@ -1,5 +1,6 @@
 GroupLambda <- function(X, Y, groups, lambda, penalty = "lasso", power = 1,
                              gamma = 1.5, solver = c("mosek","gurobi"),
+                             model.size = NULL,
                              options = list(solver_opts = NULL,
                                             init = NULL,
                                             tol = 1e-7,
@@ -31,6 +32,10 @@ GroupLambda <- function(X, Y, groups, lambda, penalty = "lasso", power = 1,
                         "scad" = scad_threshold,
                         "none" = function(x, lambda, gamma){x})
   
+  if(is.null(model.size) | length(model.size) == 0) {
+    model.size <- ncol(X)
+  }
+  
   
   if(all(lambda == 0)) {
     return_val <- list( 
@@ -52,6 +57,10 @@ GroupLambda <- function(X, Y, groups, lambda, penalty = "lasso", power = 1,
                                      lambda = lambda[[pos]], groups=groups, solver= solver, 
                                      gamma = gamma, opts = opts, 
                                      init = options$init, iter = options$iter, tol = options$tol)
+      if(sum(return_val[[pos]] != 0) > model.size) {
+        if(pos != length(lambda)) return_val[(pos):length(return_val)] <- NULL
+        break
+      }
       options$init <- return_val[[pos]]
       
     }

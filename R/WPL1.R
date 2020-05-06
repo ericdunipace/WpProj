@@ -1,229 +1,174 @@
-WPL1 <- function(X, Y=NULL, theta = NULL, power = 1,
-                 penalty =  c("lasso", "ols", "mcp", "elastic.net", 
+WPL1 <- function(X, Y=NULL, theta = NULL, power = 2.0,
+                 penalty =  c("lasso", "ols", "mcp", "elastic.net",
                               "selection.lasso",
-                              "scad", "mcp.net", 
-                              "scad.net", 
-                              "grp.lasso", 
+                              "scad", "mcp.net",
+                              "scad.net",
+                              "grp.lasso",
                               "grp.lasso.net", "grp.mcp",
                               "grp.scad", "grp.mcp.net",
                               "grp.scad.net",
-                              "sparse.grp.lasso"), 
+                              "sparse.grp.lasso"),
                  model.size = NULL,
-                 lambda = numeric(0), 
-                 nlambda = 100L, 
-                 lambda.min.ratio = NULL, alpha = 1, 
-                 gamma = 1, tau = 0.5, 
-                 groups = numeric(0), 
-                 scale.factor = numeric(0), 
-                 penalty.factor = NULL, 
-                 group.weights = NULL, maxit = 500L, 
-                 tol = 1e-07,
-                 display.progress=FALSE, ...) 
+                 lambda = numeric(0),
+                 nlambda = 100L,
+                 lambda.min.ratio = NULL, alpha = 1,
+                 gamma = 1, maxit = 500L,
+                 tol = 1e-07, ...)
 {
   this.call <- as.list(match.call()[-1])
+  stopifnot(power >= 1)
   if(power == 2.0) {
-    w2l1.args <- c(as.list(environment()), list(...))
-    w2l1.arg.sel <- which(names(w2l1.args) %in% formalArgs("W2L1"))
-    output <- do.call("W2L1", w2l1.args[w2l1.arg.sel])
+    pot.args <- c(as.list(environment()), list(...))
+    w2l1.arg.sel <- which(names(pot.args) %in% formalArgs("W2L1"))
+    w2l1.args <- pot.args[w2l1.arg.sel]
+    argn <- lapply(names(w2l1.args), as.name)
+    names(argn) <- names(w2l1.args)
+    f.call <- as.call(c(list(as.name("W2L1")), argn))
+    output <- eval(f.call, envir = w2l1.args)
+    # output <- W2L1(X = X, Y = Y, theta = theta, penalty = penalty,
+    #                )
+  } else if (power == 1) {
+    w1l1.args <- c(as.list(environment()), list(...))
+    w1l1.args$alpha <- w1l1.args$tau <- NULL
+    # w2l1.arg.sel <- which(names(pot.args) %in% formalArgs("W2L1"))
+    # w2l1.args <- pot.args[w2l1.arg.sel]
+    argn <- lapply(names(w1l1.args), as.name)
+    names(argn) <- names(w1l1.args)
+    f.call <- as.call(c(list(as.name("W1L1")), argn))
+    output <- eval(f.call, envir = w1l1.args)
+  } else if (power == Inf) {
+    winfl1.args <- c(as.list(environment()), list(...))
+    winfl1.args$alpha <- winfl1.args$tau <- NULL
+    # w2l1.arg.sel <- which(names(pot.args) %in% formalArgs("W2L1"))
+    # w2l1.args <- pot.args[w2l1.arg.sel]
+    argn <- lapply(names(winfl1.args), as.name)
+    names(argn) <- names(winfl1.args)
+    f.call <- as.call(c(list(as.name("WInfL1")), argn))
+    output <- eval(f.call, envir = winfl1.args)
   } else {
-    if ("penalty" %in% names(this.call)) {
-      penalty <- match.arg(penalty, several.ok = TRUE)
-    }
-    else {
-      penalty <- match.arg(penalty, several.ok = FALSE)
-    }
-    if(!is.matrix(X)) X <- as.matrix(X)
-    dims <- dim(X)
-    
-    p <- dims[2]
-    power <- as.double(power)
-    power <- ifelse(power < 1 | is.null(power) | missing(power), 1.0, power)
-    
-    if (inherits(X, "sparseMatrix")) {
-      stop("Sparse matrices not allowed")
-    }
-    if (is.null(penalty.factor)) {
-      penalty.factor <- rep(1, p)
-    }
-    varnames <- colnames(X)
-    if (is.null(varnames))
-      varnames = paste("V", seq(p), sep = "")
-    if (length(penalty.factor) != p) {
-      stop("penalty.factor must have same length as number of columns in x")
-    }
-    if ( any(penalty.factor < 0) ) {
-      penalty.factor <- abs( penalty.factor )
-      warning("penalty.factor had negative values. These were turned to positive values via abs().")
-    }
-    penalty.factor <- penalty.factor * p/sum(penalty.factor)
-    penalty.factor <- drop(penalty.factor)
-    if (any(grep("grp", penalty) > 0) ) {
-      if (length(groups) != p) {
-        stop("groups must have same length as number of columns in x")
-      }
-      unique.groups <- sort(unique(groups))
-      zero.idx <- unique.groups[which(unique.groups == 0)]
-      groups <- drop(groups)
-      if (length(group.weights)!=0) {
-        if (length(zero.idx) > 0) {
-          group.weights[zero.idx] <- 0
-        }
-        group.weights <- drop(group.weights)
-        if (length(group.weights) != length(unique.groups)) {
-          stop("group.weights must have same length as the number of groups")
-        }
-        group.weights <- as.numeric(group.weights)
-      } else {
-        group.weights <- numeric(0)
-      }
-    } else {
-      unique.groups <- numeric(0)
-      group.weights <- numeric(0)
-    }
-    if (is.null(lambda.min.ratio)) {
-      lambda.min.ratio <- 1e-04
-    } else {
-      lambda.min.ratio <- as.numeric(lambda.min.ratio)
-    }
-    
-    if (lambda.min.ratio >= 1 | lambda.min.ratio <= 0) {
-      stop("lambda.min.ratio must be between 0 and 1")
-    }
-    
-    if (nlambda[1] <= 0) {
-      stop("nlambda must be a positive integer")
-    }
-    
-    if (!is.list(lambda)) {
-      lambda <- sort(as.numeric(lambda), decreasing = TRUE)
-      if (length(lambda) > 0) {
-        lambda <- as.double(lambda)
-      }
-      lambda <- rep(list(lambda), length(penalty))
-    } 
-    else {
-      if (length(lambda) != length(penalty)) {
-        stop("If list of lambda vectors is provided, it must be the same length as the number of penalties fit")
-      }
-      nlambda.tmp <- length(lambda[[1]])
-      for (l in 1:length(lambda)) {
-        if (is.null(lambda[[l]]) || length(lambda[[l]]) <
-            1) {
-          stop("Provided lambda vector must have at least one value")
-        }
-        if (length(lambda[[l]]) != nlambda.tmp) {
-          stop("All provided lambda vectors must have same length")
-        }
-        lambda[[l]] <- as.double(sort(as.numeric(lambda[[l]]),
-                                      decreasing = TRUE))
-      }
-    }
-    if (is.null(model.size)) {
-      model.size <- p
-    }
-    
-    #transpose X
-    X_ <- t(X)
-    
-    if(is.null(Y)) {
-      same <- TRUE
-      Y_ <- crossprod(X_,theta_)
-    } 
-    else {
-      if(!any(dim(Y) %in% dim(X_))) stop("Number of observations of Y must match X")
-      if(!is.matrix(Y)) Y <- as.matrix(Y)
-      if(nrow(Y) == ncol(X_)){ 
-        # print("Transpose")
-        Y_ <- Y
-      } else{
-        Y_ <- t(Y)
-      }
-    }
-    if(nrow(Y_) != ncol(X_)) stop("The number of observations in Y and X don't line up. Make sure X is input with observations in rows.")
-    nS <- dim(Y_)[2]
-    
-    #replicate groups to do multivariate regression
-    if(length(groups) == 0 ) {
-      
-      groups <- 1:p
-      groups[penalty.factor == 0] <- 0
-      group.weights <- rep(penalty.factor, nS)
-      groups <- rep(groups, nS)
-      penalty.factor <- rep(1, p * nS)
-      if(penalty != "ols") penalty <- paste0("grp.",penalty)
-      
-    } else {
-      groups <- rep(groups, nS)
-      group.weights <- rep(group.weights, nS)
-    }
-    
-    #make R types align with c types
-    groups <- as.integer(groups)
-    unique.groups <- as.integer(unique.groups)
-    nlambda <- as.integer(nlambda)
-    alpha <- as.double(alpha)
-    gamma <- as.double(gamma)
-    tau <- as.double(tau)
-    tol <- as.double(tol)
-    maxit <- as.integer(maxit)
-    display.progress <- as.logical(display.progress)
-    model.size <- as.integer(model.size)
-    
-    if (length(scale.factor) > 0) {
-      if (length(scale.factor) != p)
-        stop("scale.factor must be same length as xty (nvars)")
-      scale.factor <- as.double(scale.factor)
-    }
-    
-    if (maxit <= 0) {
-      stop("maxit should be greater than 0")
-    }
-    
-    if (tol < 0) {
-      stop("tol and irls.tol should be nonnegative")
-    }
-    options <- list(maxit = maxit, tol = tol,
-                    display_progress = display.progress, 
-                    model_size = model.size)
-    # function (X_, Y_, theta_, power_, penalty_, groups_, 
-    #           unique_groups_, group_weights_, lambda_, nlambda_, lmin_ratio_, 
-    #           alpha_, gamma_, tau_, scale_factor_, penalty_factor_, opts_) 
-    output <- WPpenalized(X_,Y_, power,
-                          penalty, groups, unique.groups, group.weights, 
-                          lambda, nlambda, lambda.min.ratio, alpha, gamma, tau, 
-                          scale.factor, penalty.factor, options)
-  
-    if ( penalty != "ols" ) {
-      options_ols <- options
-      options_ols$display_progress <- FALSE
-      penalty_ols <- "ols"
-      options_ols$model_size <- p
-      ols.out <- WPpenalized(X_,Y_, power,
-                             penalty_ols, groups, unique.groups, group.weights, 
-                             lambda, nlambda, lambda.min.ratio, alpha, gamma, tau, 
-                             scale.factor, penalty.factor, options_ols)[c("beta","niter")]
-        output$niter <- c(output$niter, 0)
-        output$niter[ncol(output$niter)] <- ols.out$niter[1]
-        output$lambda <- c(output$lambda, 0)
-        output$beta <- cbind(output$beta, ols.out$beta)
-        rm(ols.out)
-    }
-    
-    output$nvars <- p
-    output$power <- power
-    output$penalty <- penalty
-    output$method <- "projection"
-    output$varnames <- varnames
-    output$call <- formals(WPL1)
-    output$call[names(this.call)] <- this.call
-    output$nonzero_beta <- colSums(output$beta != 0)
-    class(output) <- c("limbs", "optimization")
-    extract <- extractTheta(output, matrix(output$beta[,ncol(output$beta)], p, nS))
-    output$nzero <- extract$nzero
-    output$eta <- lapply(extract$theta, function(tt) crossprod(X_, tt))
-    output$theta <- extract$theta
+    output <- lp_reg(x = X, y = Y, theta = theta, power = power, gamma = gamma,
+                     alpha = alpha,
+                     penalty = penalty,  lambda = lambda,
+                     nlambda = nlambda,
+                     model.size = model.size,
+                     iter = maxit,
+                     tol = tol)
   }
   
   return(output)
   
+}
+
+
+lp_reg <- function(x, y, theta = NULL, power, gamma, alpha, tau, penalty, penalty.factor = numeric(0),
+                    lambda = numeric(0),
+                   nlambda = 100,
+                   model.size = NULL,
+                   iter = 100,
+                   tol = 1e-7) {
+  this.call <- as.list(match.call()[-1])
+  
+  log_sum_exp <- function(x) {
+    # if(is.vector(x)) {
+    if(all(is.infinite(x))) return(x[1])
+    mx <- max(x)
+    x_temp <- x - mx
+    return(log(sum(exp(x_temp)))+ mx)
+    # } else if (is.matrix(x)) {
+    #   mx <- apply(x, 1, max)
+    #   x_temp <- x - mx
+    #   return(log(rowSums(exp(x_temp)))+ mx)
+    # }
+  }
+  n <- nrow(x)
+  d <- ncol(x)
+  
+  if(is.null(y) | missing(y)) {
+    if(!(is.null(theta) | missing(theta))) {
+      if(nrow(theta) != ncol(X)) theta <- t(theta)
+      y <- x %*% theta
+    }
+  }
+  
+  s <- ncol(y)
+  cols <- lapply(1:s, function(ss) Matrix::sparseMatrix(i = n*(ss-1) + rep(1:n,d),
+                                                        j = rep(1:d,each = n),
+                                                        x = c(x),
+                                                        dims = c(n*s, d)))
+  Xmat <- do.call(cbind, cols)
+  rm(cols)
+  
+  if(is.null(model.size) | length(model.size) == 0) {
+    model.size <- ncol(Xmat)
+  } else {
+    model.size <- model.size * s
+  }
+  
+  Y <- as.matrix(c(y))
+  beta <- beta_old <- lapply(1:length(lambda), function(l) rep(Inf, d * s))
+  obs.weights <- list(rep(1/(n*s),n*s))
+  ow <- list()
+  Xw <- list()
+  XtX <- list()
+  XtY <- list()
+  oem_holder <- list()
+  
+  if(penalty != "ols" & !grepl("grp.", penalty)) penalty <- paste0("grp.",penalty)
+  
+  if(length(penalty.factor) == 0) penalty.factor <- rep(1, d)
+  groups <- rep(1:d, s)
+  penalty.factor <- rep(penalty.factor, s)
+  groups[penalty.factor == 0] <- 0
+  
+  if(length(lambda) == 0 | is.null(lambda)) {
+    max.lambda <- sqrt(rowSums(crossprod(x,y)^2))
+    lambda <- max.lambda * exp( seq(0, log(lambda.min.ratio), length.out = nlambda))
+  }
+  
+  for(l in seq_along(lambda)) {
+    lam <- lambda[lam]
+    for(i in 1:iter) {
+      ow[[1]]  <- Matrix::sparseMatrix(i = 1:(n*s), j = 1:(n*s), x = obs.weights[[1]],
+                                      dims = c(n*s, n*s))
+      Xw[[1]]  <- ow[[1]] * Xmat
+      XtX[[1]] <- Matrix::crossprod( Xw[[1]], Xmat)
+      XtY[[1]] <- Matrix::crosprod(Xw[[1]], Y)
+      oem_holder[[1]] <- oem::oem.xtx(xtx = XtX[[1]], xty = XtY[[1]], family = "gaussian",
+                                      penalty = penalty, lambda = lam,
+                                      gamma = gamma, alpha = alpha,
+                                      tol = tol, maxit = maxit, groups = groups,
+                                      group.weights = penalty.factor)
+      beta[[l]] <-  c(oem_holder[[1]]$beta)
+      if(not.converged(beta[[l]], beta_old[[l]], 1e-7)){
+        beta_old[[l]] <- beta[[l]]
+        obs.weights[[1]] <- log(abs(Y - Xmat %*% beta[[1]])) * (power - 2)
+        obs.weights[[1]] <- pmin(obs.weights[[1]], log(1e4))
+        obs.weights[[1]] <- exp(obs.weights[[1]] - log_sum_exp(obs.weights[[1]]) )
+      } else {
+        break
+      }
+      if(sum(beta[[l]] != 0) >= model.size) break
+      
+    }
+  }
+  
+  output <- list()
+  output$beta <- do.call("cbind", beta)
+  output$penalty <- penalty
+  output$lambda <- lambda
+  output$nvars <- d
+  output$call <- formals(lp_reg)
+  output$call[names(this.call)] <- this.call
+  output$nonzero_beta <- colSums(output$beta != 0)
+  output$method <- "projection"
+  output$power <- power
+  class(output) <- c("limbs", "optimization")
+  
+  extract <- extractTheta(output, matrix(0, d,s))
+  output$nzero <- extract$nzero
+  output$eta <- lapply(extract$theta, function(tt) X %*%tt )
+  output$theta <- extract$theta
+  output$model <- res
+  
+  return(output)
 }

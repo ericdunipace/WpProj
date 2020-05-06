@@ -63,32 +63,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// WPpenalized
-SEXP WPpenalized(SEXP X_, SEXP Y_, SEXP power_, SEXP penalty_, SEXP groups_, SEXP unique_groups_, SEXP group_weights_, SEXP lambda_, SEXP nlambda_, SEXP lmin_ratio_, SEXP alpha_, SEXP gamma_, SEXP tau_, SEXP scale_factor_, SEXP penalty_factor_, SEXP opts_);
-RcppExport SEXP _limbs_WPpenalized(SEXP X_SEXP, SEXP Y_SEXP, SEXP power_SEXP, SEXP penalty_SEXP, SEXP groups_SEXP, SEXP unique_groups_SEXP, SEXP group_weights_SEXP, SEXP lambda_SEXP, SEXP nlambda_SEXP, SEXP lmin_ratio_SEXP, SEXP alpha_SEXP, SEXP gamma_SEXP, SEXP tau_SEXP, SEXP scale_factor_SEXP, SEXP penalty_factor_SEXP, SEXP opts_SEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type X_(X_SEXP);
-    Rcpp::traits::input_parameter< SEXP >::type Y_(Y_SEXP);
-    Rcpp::traits::input_parameter< SEXP >::type power_(power_SEXP);
-    Rcpp::traits::input_parameter< SEXP >::type penalty_(penalty_SEXP);
-    Rcpp::traits::input_parameter< SEXP >::type groups_(groups_SEXP);
-    Rcpp::traits::input_parameter< SEXP >::type unique_groups_(unique_groups_SEXP);
-    Rcpp::traits::input_parameter< SEXP >::type group_weights_(group_weights_SEXP);
-    Rcpp::traits::input_parameter< SEXP >::type lambda_(lambda_SEXP);
-    Rcpp::traits::input_parameter< SEXP >::type nlambda_(nlambda_SEXP);
-    Rcpp::traits::input_parameter< SEXP >::type lmin_ratio_(lmin_ratio_SEXP);
-    Rcpp::traits::input_parameter< SEXP >::type alpha_(alpha_SEXP);
-    Rcpp::traits::input_parameter< SEXP >::type gamma_(gamma_SEXP);
-    Rcpp::traits::input_parameter< SEXP >::type tau_(tau_SEXP);
-    Rcpp::traits::input_parameter< SEXP >::type scale_factor_(scale_factor_SEXP);
-    Rcpp::traits::input_parameter< SEXP >::type penalty_factor_(penalty_factor_SEXP);
-    Rcpp::traits::input_parameter< SEXP >::type opts_(opts_SEXP);
-    rcpp_result_gen = Rcpp::wrap(WPpenalized(X_, Y_, power_, penalty_, groups_, unique_groups_, group_weights_, lambda_, nlambda_, lmin_ratio_, alpha_, gamma_, tau_, scale_factor_, penalty_factor_, opts_));
-    return rcpp_result_gen;
-END_RCPP
-}
 // cost_calculation_
 Rcpp::NumericMatrix cost_calculation_(const Rcpp::NumericMatrix& A_, const Rcpp::NumericMatrix& B_, const double p);
 RcppExport SEXP _limbs_cost_calculation_(SEXP A_SEXP, SEXP B_SEXP, SEXP pSEXP) {
@@ -228,7 +202,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_limbs_sufficientStatistics", (DL_FUNC) &_limbs_sufficientStatistics, 4},
     {"_limbs_xtyUpdate", (DL_FUNC) &_limbs_xtyUpdate, 5},
     {"_limbs_W2penalized", (DL_FUNC) &_limbs_W2penalized, 17},
-    {"_limbs_WPpenalized", (DL_FUNC) &_limbs_WPpenalized, 16},
     {"_limbs_cost_calculation_", (DL_FUNC) &_limbs_cost_calculation_, 3},
     {"_limbs_pbClean", (DL_FUNC) &_limbs_pbClean, 0},
     {"_limbs_test", (DL_FUNC) &_limbs_test, 0},
