@@ -17,6 +17,7 @@ Imports:
   ROI.plugin.ecos,
   ECOSolveR,
   ROI.plugin.lpsolve,
+  Matrix
   quantreg,
   rqPen,
   parallel,
@@ -32,4 +33,5 @@ Suggests:
   microbenchmark,
   transport,
   ROI.plugin.cplex,
-  ROI.plugin.gurobi
+  gurobi,
+  Rmosek
