@@ -13,12 +13,16 @@ extractCoef <- function(fit, drop=FALSE) {
       extractCoefVar <- tapply(lambda, nvar, min)
       idx <- which(lambda %in% extractCoefVar)
       coefs <- fit$beta[[1]][,idx,drop=FALSE]
-  } else if(any(class(fit)=="sparse-posterior")){
+  } else if(any(inherits(fit, "sparse-posterior") | inherits(fit, "limbs"))) {
       nvar <- colSums(fit$beta != 0)
       extractCoefVar <- tapply(lambda, nvar, min)
       iters <- fit$niter
-      maxit <- eval(fit$call$maxit)
-      lastHitMax <- (iters[nrow(iters),nlambda]>=maxit)
+      maxit <- fit$maxit
+      if(length(dim(iters)) == 2) {
+        lastHitMax <- (iters[nrow(iters),nlambda]>=maxit)
+      } else {
+        lastHitMax <- FALSE
+      }
       if(lastHitMax == TRUE & sum(nvar==max(nvar))>1) {
         last.idx <- which(nvar==max(nvar))
         hitMax <- ifelse(iters[nrow(iters),last.idx]>=maxit,1,0)
@@ -56,7 +60,7 @@ L0Coef <- function(fit) {
 }
 
 annealCoef <- function(fit, theta) {
-  if(inherits(fit[[1]], "sparse-posterior")){
+  if(inherits(fit[[1]], "sparse-posterior") | inherits(fit[[1]], "limbs")){
     idx <- lapply(fit, function(f) f$optimal$index)
     numActive <- sapply(idx, length)
     beta <- lapply(fit, function(f) f$optimal$beta)
@@ -72,7 +76,7 @@ annealCoef <- function(fit, theta) {
       coefs[, jj] <- c(beta[[j]])
     }
     numActive <- c(numActive)
-  } else if (inherits(fit, "sparse-posterior") && is.list(fit$history)) {
+  } else if (inherits(fit, "limbs") && is.list(fit$history)) {
     idx <- lapply(fit$optimal, function(f) f$index)
     numActive <- sapply(idx, length)
     beta <- lapply(fit$optimal, function(f) f$beta)
@@ -102,7 +106,7 @@ annealCoef <- function(fit, theta) {
       }
       numActive <- c(numActive)
     }
-  } else if(inherits(fit, "sparse-posterior")) {
+  } else if(inherits(fit, "limbs")) {
   if(is.matrix(fit$optimal$beta)){
     nr <- nrow(fit$optimal$beta)
     nc <- ncol(fit$optimal$beta)
@@ -113,7 +117,7 @@ annealCoef <- function(fit, theta) {
   coefs <- matrix(c(fit$optimal$beta), nrow = nr, ncol = nc)
   numActive <- length(fit$optimal$index)
   } else {
-    stop("Not of class 'sparse-posterior'")
+    stop("Not of class 'limbs'")
   }
   
 

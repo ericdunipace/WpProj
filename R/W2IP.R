@@ -46,7 +46,8 @@ W2IP <- function(X, Y=NULL, theta,
            cone = ROI::ROI_reformulate(QP,to = "socp"),
            lp = ROI::ROI_reformulate(QP,"lp",method = "bqp_to_lp" ),
            cplex = QP,
-           gurobi = QP
+           gurobi = QP,
+           mosek = QP
     )
   }
   
@@ -55,7 +56,8 @@ W2IP <- function(X, Y=NULL, theta,
            cone = ROI.plugin.ecos:::solve_OP(obj, control),
            lp =  ROI.plugin.lpsolve:::solve_OP(obj, control),
            cplex = ROI.plugin.cplex:::solve_OP(obj, control),
-           gurobi = ROI.plugin.cplex:::solve_OP(obj, control)
+           gurobi = gurobi_solver(obj, control),
+           mosek = mosek_solver(obj, control)
     )
   }
   
@@ -225,7 +227,7 @@ W2IP <- function(X, Y=NULL, theta,
   output$remove.idx <- rmv.idx
   output$nonzero_beta <- colSums(output$beta != 0)
   # output$nzero <- nz
-  class(output) <- c("sparse-posterior","IP")
+  class(output) <- c("limbs","IP")
   extract <- extractTheta(output, theta_)
   output$nzero <- extract$nzero
   output$eta <- lapply(extract$theta, function(tt) crossprod(X_, tt))
@@ -254,3 +256,5 @@ qp_w2 <- function(xtx, xty, K) {
   ROI::types(op) <- rep.int("B", d)
   return(op)
 }
+
+

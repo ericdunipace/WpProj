@@ -349,7 +349,7 @@ WPSA <- function(X, Y=NULL, theta,
     rm(out)
   }
   
-  class(output) <- c("sparse-posterior","annealing")
+  class(output) <- c("limbs","annealing")
   
   if(get.theta == TRUE){
     extract       <- extractTheta(output, theta_)

@@ -94,7 +94,7 @@ W2L1 <- function(X, Y=NULL, theta = NULL, family="gaussian",
     } else {
       group.weights <- numeric(0)
     }
-  } else if( method != "location.scale" ){
+  } else if ( method != "location.scale" ) {
     unique.groups <- numeric(0)
     group.weights <- numeric(0)
   }
@@ -361,8 +361,10 @@ W2L1 <- function(X, Y=NULL, theta = NULL, family="gaussian",
   }
   
   output$nvars <- p
+  output$maxit <- maxit
+  output$power <- 2.0
   output$penalty <- penalty
-  output$family <- family
+  # output$family <- family
   output$varnames <- varnames
   output$call <- formals(W2L1)
   output$call[names(this.call)] <- this.call
@@ -370,7 +372,7 @@ W2L1 <- function(X, Y=NULL, theta = NULL, family="gaussian",
   output$remove.idx <- rmv.idx
   output$nonzero_beta <- colSums(output$beta != 0)
   # output$nzero <- nz
-  class(output) <- c("sparse-posterior", "optimization")
+  class(output) <- c("limbs", "optimization")
   extract <- extractTheta(output, theta_)
   output$nzero <- extract$nzero
   output$eta <- lapply(extract$theta, function(tt) crossprod(X_, tt))
