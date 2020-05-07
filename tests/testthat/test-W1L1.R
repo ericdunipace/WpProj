@@ -1,4 +1,21 @@
-testthat::test_that("lp_w1 works") {
+check_mosek <- function() {
+  skip.fun <- "Rmosek" %in% installed.packages()[,1]
+  if(!skip.fun) {
+    testthat::skip("Rmosek not found for tests with W1")
+  }
+}
+
+check_gurobi <- function() {
+  skip.fun <- "gurobi" %in% installed.packages()[,1]
+  if(!skip.fun) {
+    testthat::skip("gurobi not found for tests with W1")
+  }
+}
+
+testthat::test_that("lp_w1 works", {
+  check_gurobi()
+  check_mosek()
+  
   set.seed(87897)
   
   n <- 256
@@ -52,10 +69,11 @@ testthat::test_that("lp_w1 works") {
                                   gamma = 1.5, init = NULL, iter = 100, tol = 1e-7, opts= list(verbose = 0))
   
   testthat::expect_true(sum((output.gurobi-output.mosek)^2) < 1e-3)
-}
+})
 
 
 testthat::test_that("W1L1 works", {
+  testthat::skip("takes too much time")
   set.seed(87897)
   
   n <- 256

@@ -5,4 +5,5 @@
 src/*.o
 src/*.so
 src/*.o.*
+src/testing_src/
 .DS_store

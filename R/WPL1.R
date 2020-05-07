@@ -15,10 +15,10 @@ WPL1 <- function(X, Y=NULL, theta = NULL, power = 2.0,
                  gamma = 1, maxit = 500L,
                  tol = 1e-07, ...)
 {
+  pot.args <- c(as.list(environment()), list(...))
   this.call <- as.list(match.call()[-1])
   stopifnot(power >= 1)
   if(power == 2.0) {
-    pot.args <- c(as.list(environment()), list(...))
     w2l1.arg.sel <- which(names(pot.args) %in% formalArgs("W2L1"))
     w2l1.args <- pot.args[w2l1.arg.sel]
     argn <- lapply(names(w2l1.args), as.name)
@@ -28,7 +28,7 @@ WPL1 <- function(X, Y=NULL, theta = NULL, power = 2.0,
     # output <- W2L1(X = X, Y = Y, theta = theta, penalty = penalty,
     #                )
   } else if (power == 1) {
-    w1l1.args <- c(as.list(environment()), list(...))
+    w1l1.args <- pot.args
     w1l1.args$alpha <- w1l1.args$tau <-  w1l1.args$power <- NULL
     # w2l1.arg.sel <- which(names(pot.args) %in% formalArgs("W2L1"))
     # w2l1.args <- pot.args[w2l1.arg.sel]
@@ -37,7 +37,7 @@ WPL1 <- function(X, Y=NULL, theta = NULL, power = 2.0,
     f.call <- as.call(c(list(as.name("W1L1")), argn))
     output <- eval(f.call, envir = w1l1.args)
   } else if (power == Inf) {
-    winfl1.args <- c(as.list(environment()), list(...))
+    winfl1.args <- pot.args
     winfl1.args$alpha <- winfl1.args$tau <- winfl1.args$power <- NULL
     # w2l1.arg.sel <- which(names(pot.args) %in% formalArgs("W2L1"))
     # w2l1.args <- pot.args[w2l1.arg.sel]
@@ -46,13 +46,25 @@ WPL1 <- function(X, Y=NULL, theta = NULL, power = 2.0,
     f.call <- as.call(c(list(as.name("WInfL1")), argn))
     output <- eval(f.call, envir = winfl1.args)
   } else {
+    # lp.arg.sel <- which(names(pot.args) %in% formalArgs("lp_reg"))
+    # lp.args <- pot.args[lp.arg.sel]
+    # lp.args$x <- X
+    # lp.args$y <- Y
+    # argn <- lapply(names(lp.args), as.name)
+    # names(argn) <- names(lp.args)
+    # f.call <- as.call(c(list(as.name("lp_reg")), argn))
+    # output <- eval(f.call, envir = lp.args)
     dots <- list(...)
+    if(is.null(dots$alpha)) dots$alpha <- 1
+    if(is.null(dots$tau)) dots$tau <- 0.5
     output <- lp_reg(x = X, y = Y, theta = theta, power = power, gamma = gamma,
-                     alpha = alpha,
-                     penalty = penalty,  
+                     alpha = dots$alpha,
+                     tau = dots$tau,
+                     penalty = penalty,
                      penalty.factor = dots$penalty.factor,
                      lambda = lambda,
                      nlambda = nlambda,
+                     lambda.min.ratio = lambda.min.ratio,
                      model.size = model.size,
                      iter = maxit,
                      tol = tol)
@@ -63,9 +75,13 @@ WPL1 <- function(X, Y=NULL, theta = NULL, power = 2.0,
 }
 
 
-lp_reg <- function(x, y, theta = NULL, power, gamma, alpha, tau, penalty, penalty.factor = numeric(0),
-                    lambda = numeric(0),
+lp_reg <- function(x, y, theta = NULL, power, 
+                   gamma = 3, 
+                   alpha = 1, tau = .5, 
+                   penalty, penalty.factor = numeric(0),
+                   lambda = numeric(0),
                    nlambda = 100,
+                   lambda.min.ratio = 1e-4,
                    model.size = NULL,
                    iter = 100,
                    tol = 1e-7) {
@@ -146,8 +162,10 @@ lp_reg <- function(x, y, theta = NULL, power, gamma, alpha, tau, penalty, penalt
       # XtY[[1]] <- Matrix::crossprod(Xw[[1]], Y)
       oem_holder[[1]] <- oem::oem(x = Xw[[1]], y = Yw[[1]], family = "gaussian",
                                       penalty = penalty, lambda = lam,
+                                      nlambda = 1,
                                       intercept = FALSE,
                                       gamma = gamma, alpha = alpha,
+                                      tau = tau,
                                       standardize = FALSE,
                                       tol = tol, maxit = iter*5, groups = groups,
                                       group.weights = penalty.factor)

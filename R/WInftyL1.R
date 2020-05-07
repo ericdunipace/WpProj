@@ -31,7 +31,7 @@ WInfL1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "mcp","scad")
   s <- ncol(Y)
   cols <- lapply(1:s, function(ss) Matrix::sparseMatrix(i = n*(ss-1) + rep(1:n,d), 
                                                         j = rep(1:d,each = n), 
-                                                        x = c(x),
+                                                        x = c(X),
                                                         dims = c(n*s, d)))
   Xmat <- do.call(cbind, cols)
   
@@ -39,9 +39,9 @@ WInfL1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "mcp","scad")
   if(penalty != "none" & length(lambda) == 0) {
     if(!is.null(theta)) {
       lambda.max <- max(sqrt(rowSums(theta^2)))
-      if(lambda.max == 0) lambda.max <- max(crossprod(x,Y))/(n)
+      if(lambda.max == 0) lambda.max <- max(crossprod(X,Y))/(n)
     } else {
-      lambda.max <- max(crossprod(x,Y))/(n)
+      lambda.max <- max(crossprod(X,Y))/(n)
     }
     lambda <-  exp(log(lambda.max) + seq(0, log(lambda.min.ratio), length.out = nlambda))
   } else if (penalty == "none"){
@@ -73,7 +73,7 @@ WInfL1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "mcp","scad")
   output$beta <- as.matrix(beta)
   output$penalty <- penalty
   output$lambda <- lambda
-  output$nvars <- p
+  output$nvars <- d
   output$maxit <- NULL
   output$call <- formals(WInfL1)
   output$call[names(this.call)] <- this.call

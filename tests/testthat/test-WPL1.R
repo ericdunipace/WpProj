@@ -1,3 +1,17 @@
+check_mosek <- function() {
+  skip.fun <- "Rmosek" %in% installed.packages()[,1]
+  if(!skip.fun) {
+    testthat::skip("Rmosek not found for tests with WInf")
+  }
+}
+
+check_gurobi <- function() {
+  skip.fun <- "gurobi" %in% installed.packages()[,1]
+  if(!skip.fun) {
+    testthat::skip("gurobi not found for tests with WInf")
+  }
+}
+
 testthat::test_that("WPL1 refers to W2L1 appropriately", {
   set.seed(283947)
 
@@ -92,7 +106,68 @@ testthat::test_that("WPL1 refers to W2L1 appropriately", {
                                 penalty.factor = penalty.factor, method="projection"))
 })
 
+testthat::test_that("WPL1 works for Wp", {
+  set.seed(87897)
+  
+  n <- 256
+  p <- 10
+  s <- 99
+  
+  x <- matrix(rnorm(p*n), nrow=n, ncol=p)
+  beta <- (1:10)/10
+  y <- x %*% beta + rnorm(n)
+  
+  #posterior
+  prec <- crossprod(x) + diag(1,p,p)*1
+  mu_post <- solve(prec, crossprod(x,y))
+  alpha <- 1 + n/2
+  beta <- 1 + 0.5 * (crossprod(y) + t(mu_post) %*% prec %*% mu_post )
+  sigma_post <- 1/rgamma(s, alpha, 1/beta)
+  theta <- sapply(sigma_post, function(ss) mu_post + t(chol(ss * solve(prec))) %*% matrix(rnorm(p, 0, 1),p,1))
+  
+  lambda <- 0
+  nlambda <- 3
+  lmr <- 1e-10
+  gamma <- 1.5
+  penalty.factor <- 1/rowMeans(theta^2)
+  penalty.factor.null <- rep(1,p)
+  post_mu <- x %*% theta
+  # debugonce(W1L1)
+  # projectionmcp <- W1L1(X=x, Y=post_mu, penalty="mcp",
+  #                       nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+  #                       maxit = 1e2, gamma = gamma,
+  #                       lambda=NULL)
+  testthat::expect_silent(projectionmcp <- WPL1(X=x, Y=post_mu, penalty="mcp", p = 3,
+                                                nlambda = nlambda, lambda.min.ratio = lmr,
+                                                maxit = 1e2, gamma = gamma,
+                                                lambda=NULL))
+  testthat::expect_lte(mean(c(projectionmcp$beta[,3]) - c(theta)), 1e-7)
+  
+  testthat::expect_silent(projectionols <- 
+                            WPL1(X=x, Y=post_mu, power = 3.0,
+                                 theta=NULL, penalty="ols", lambda.min.ratio = lmr,
+                                 lambda=lambda))
+  
+  testthat::expect_lte(mean(c(projectionols$beta)-c(theta)), 1e-7) #should be pretty close
+  
+  testthat::expect_silent(projectionscad <- 
+                            WPL1(X=x, Y=NULL, power = 3,
+                                 theta=theta, penalty="scad",
+                                 nlambda = nlambda, lambda.min.ratio = lmr,
+                                 lambda=NULL))
+  testthat::expect_lte(mean(c(projectionscad$beta[,3])-c(theta)), 1e-7) #should be pretty close
+  
+  testthat::expect_silent(projectionlasso <- WPL1(X=x, Y=NULL, power = 3,
+                                                  theta=theta, penalty="lasso",
+                                                  nlambda = nlambda, lambda = NULL))
+  testthat::expect_lte(mean(c(projectionlasso$beta[,3])-c(theta)), 1e-5) #should be pretty close
+  
+  
+  
+})
+
 testthat::test_that("WPL1 works for W1", {
+  testthat::skip("Skipping W1L1 for time")
   set.seed(87897)
 
   n <- 256
@@ -170,6 +245,9 @@ testthat::test_that("WPL1 works for W1", {
 })
 
 testthat::test_that("WPL1 works for WInf", {
+  check_gurobi()
+  check_mosek()
+  
   set.seed(87897)
   
   n <- 256
@@ -246,62 +324,3 @@ testthat::test_that("WPL1 works for WInf", {
   
 })
 
-testthat::test_that("WPL1 works for Wp", {
-  set.seed(87897)
-  
-  n <- 256
-  p <- 10
-  s <- 99
-  
-  x <- matrix(rnorm(p*n), nrow=n, ncol=p)
-  beta <- (1:10)/10
-  y <- x %*% beta + rnorm(n)
-  
-  #posterior
-  prec <- crossprod(x) + diag(1,p,p)*1
-  mu_post <- solve(prec, crossprod(x,y))
-  alpha <- 1 + n/2
-  beta <- 1 + 0.5 * (crossprod(y) + t(mu_post) %*% prec %*% mu_post )
-  sigma_post <- 1/rgamma(s, alpha, 1/beta)
-  theta <- sapply(sigma_post, function(ss) mu_post + t(chol(ss * solve(prec))) %*% matrix(rnorm(p, 0, 1),p,1))
-  
-  lambda <- 0
-  nlambda <- 3
-  lambda.min.ratio <- 1e-10
-  gamma <- 1.5
-  penalty.factor <- 1/rowMeans(theta^2)
-  penalty.factor.null <- rep(1,p)
-  post_mu <- x %*% theta
-  # debugonce(W1L1)
-  # projectionmcp <- W1L1(X=x, Y=post_mu, penalty="mcp",
-  #                       nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
-  #                       maxit = 1e2, gamma = gamma,
-  #                       lambda=NULL)
-  testthat::expect_silent(projectionmcp <- WPL1(X=x, Y=post_mu, penalty="mcp", p = 3,
-                         nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
-                         maxit = 1e2, gamma = gamma,
-                         lambda=NULL))
-  testthat::expect_lte(mean(c(projectionmcp$beta[,3]) - c(theta)), 1e-7)
-  
-  testthat::expect_silent(projectionols <- 
-                            WPL1(X=x, Y=post_mu, power = 3.0,
-                         theta=NULL, penalty="ols",
-                         lambda=lambda))
-  
-  testthat::expect_lte(mean(c(projectionols$beta)-c(theta)), 1e-7) #should be pretty close
-  
-  testthat::expect_silent(projectionscad <- 
-                            WPL1(X=x, Y=NULL, power = 3,
-                          theta=theta, penalty="scad",
-                          nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
-                          lambda=NULL))
-  testthat::expect_lte(mean(c(projectionscad$beta[,3])-c(theta)), 1e-7) #should be pretty close
-  
-  testthat::expect_silent(projectionlasso <- WPL1(X=x, Y=NULL, power = 3,
-                           theta=theta, penalty="lasso",
-                           nlambda = nlambda, lambda = NULL))
-  testthat::expect_lte(mean(c(projectionlasso$beta[,3])-c(theta)), 1e-5) #should be pretty close
-  
-  
-  
-})

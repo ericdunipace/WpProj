@@ -1,4 +1,21 @@
+check_mosek <- function() {
+  skip.fun <- "Rmosek" %in% installed.packages()[,1]
+  if(!skip.fun) {
+    testthat::skip("Rmosek not found for tests with WInf")
+  }
+}
+
+check_gurobi <- function() {
+  skip.fun <- "gurobi" %in% installed.packages()[,1]
+  if(!skip.fun) {
+    testthat::skip("gurobi not found for tests with WInf")
+  }
+}
+
 testthat::test_that("WInfL1 lp generates", {
+  check_gurobi()
+  check_mosek()
+  
   set.seed(87897)
   
   n <- 256
@@ -55,6 +72,9 @@ testthat::test_that("WInfL1 lp generates", {
 })
 
 testthat::test_that("WInfL1 works", {
+  check_gurobi()
+  check_mosek()
+  
   set.seed(87897)
   
   n <- 256
@@ -117,8 +137,8 @@ testthat::test_that("WInfL1 works", {
   projection_mcp <- WInfL1(X=x, Y=post_mu, penalty="mcp",
                          nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
                          gamma = gamma, lambda=lambda)
-  testthat::expect_equal(c(projection_mcp$beta[,2]), c(theta)) #should be pretty close
-  testthat::expect_equal(c(projection_mcp$beta[,2]), c(projection_none$beta)) #should be pretty close
+  testthat::expect_equal(c(projection_mcp$beta), c(theta)) #should be pretty close
+  testthat::expect_equal(c(projection_mcp$beta), c(projection_none$beta)) #should be pretty close
   
   
   projection_scad <-WInfL1(X=x, Y=post_mu, penalty="scad",
