@@ -17,7 +17,7 @@ Imports:
   ROI.plugin.ecos,
   ECOSolveR,
   ROI.plugin.lpsolve,
-  Matrix
+  Matrix,
   quantreg,
   rqPen,
   parallel,
