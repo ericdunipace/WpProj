@@ -11,7 +11,7 @@ HC <- function(X, Y=NULL, theta, family="gaussian",
                method = c("selection.variable", "projection"),
                lambda = numeric(0), 
                nlambda = 100L, 
-               lambda.min.ratio = NULL, alpha = 1, 
+               lambda.min.ratio = NULL, alpha = 1,  
                gamma = 1, tau = 0.5, 
                groups = numeric(0), 
                scale.factor = numeric(0), 
@@ -126,7 +126,7 @@ HC <- function(X, Y=NULL, theta, family="gaussian",
   })
   output$theta[[length(output$theta)+1]] <- theta
   output$eta <- lapply(output$theta, function(tt) X %*% tt)
-  class(output) <- c("sparse-posterior", "HC")
+  class(output) <- c("limbs", "HC")
   
   return(output)
 }

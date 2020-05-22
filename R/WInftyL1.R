@@ -15,8 +15,8 @@ WInfL1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "mcp","scad")
   
   solver <- match.arg(solver)
   
-  if(penalty == "ols") penalty <- "none"
   penalty <- match.arg(penalty)
+  if(penalty == "ols") penalty <- "none"
   
   n <- nrow(X)
   d <- ncol(X)

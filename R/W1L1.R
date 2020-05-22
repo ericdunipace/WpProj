@@ -8,8 +8,8 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none", "lasso","scad","mcp"),
   this.call <- as.list(match.call()[-1])
   
   # if(penalty == "lasso") stop("Lasso group penalty is currently incorrect in rqPen package!")
-  if(penalty == "ols") penalty <- "none"
   penalty <- match.arg(penalty, choices = c("none","lasso","scad","mcp"))
+  if(penalty == "ols") penalty <- "none"
   
   n <- nrow(X)
   d <- ncol(X)

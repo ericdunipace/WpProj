@@ -51,13 +51,13 @@ W2IP <- function(X, Y=NULL, theta,
     )
   }
   
-  solver <- function(obj, control, solution.method) {
+  solver <- function(obj, control, solution.method, start) {
     switch(solution.method, 
            cone = ROI.plugin.ecos:::solve_OP(obj, control),
            lp =  ROI.plugin.lpsolve:::solve_OP(obj, control),
            cplex = ROI.plugin.cplex:::solve_OP(obj, control),
-           gurobi = gurobi_solver(obj, control),
-           mosek = mosek_solver(obj, control)
+           gurobi = gurobi_solver(obj, control, start),
+           mosek = mosek_solver(obj, control,start)
     )
   }
   
@@ -184,16 +184,19 @@ W2IP <- function(X, Y=NULL, theta,
          # browser()
          # sol <- ROI::ROI_solve(LP, "glpk")
          # can use ROI.plugin.glpk:::.onLoad("ROI.plugin.glpk","ROI.plugin.glpk") to use base solver ^
-         sol <- solver(TP, control, solution.method)
+         sol <- solver(TP, control, solution.method=solution.method, start=alpha)
          # print(ROI::solution(sol))
-         alpha <- ROI::solution(sol)[1:p]
+         alpha <- switch(solution.method,
+                         "gurobi" = sol,
+                         "mosek" = sol,
+                         ROI::solution(sol)[1:p])
          if(all(is.na(alpha))) {
            warning("Likely terminated early")
            break
          }
          if(limbs:::not.converged(alpha, alpha_save, tol)){
            alpha_save <- alpha
-           Ytemp <- limbs:::selVarMeanGen(X_, theta_, alpha)
+           Ytemp <- limbs:::selVarMeanGen(X_, theta_, as.double(alpha))
            xty <- limbs:::xtyUpdate(X, Ytemp, theta_, result_ = alpha, 
                                              OToptions)
            QP <- limbs:::qp_w2(xtx,xty,m)
@@ -257,4 +260,68 @@ qp_w2 <- function(xtx, xty, K) {
   return(op)
 }
 
+
+gurobi_solver <- function(problem,opts = NULL, start) {
+  
+  prob <-  list()
+  prob$Q <- Matrix::sparseMatrix(i=problem$objective$Q$i,
+                                 j = problem$objective$Q$j,
+                                 x = problem$objective$Q$v/2)
+  prob$modelsense <- 'min'
+  prob$obj <- as.numeric(problem$objective$L$v)
+  num_param <- length(problem$objective$L$v)
+  
+  prob$A <- Matrix::sparseMatrix(i=problem$constraints$L$i,
+                                 j = problem$constraints$L$j,
+                                 x = problem$constraints$L$v)
+  
+  prob$sense <- ifelse(problem$constraints$dir == "==", "=", NA)
+  # prob$sense <- rep(NA, length(qp$LC$dir))
+  # prob$sense[qp$LC$dir=="E"] <- '='
+  # prob$sense[qp$LC$dir=="L"] <- '<='
+  # prob$sense[qp$LC$dir=="G"] <- '>='
+  prob$rhs <- problem$constraints$rhs
+  prob$vtype <- rep("B", num_param)
+  prob$start <- start
+  
+  if(is.null(opts) | length(opts) == 0) {
+    opts <- list(OutputFlag = 0)
+  }
+  
+  res <- gurobi::gurobi(prob, opts)
+  
+  sol <- as.integer(res$x)
+  
+  return(sol)
+}
+
+mosek_solver <- function(problem, opts = NULL, start) {
+  
+  num_param <- length(problem$objective$L$v)
+  # qobj <- Matrix::sparseMatrix(i = problem$objective$Q$i,
+  #                              j = problem$objective$Q$j,
+  #                              x = problem$objective$Q$v/2)
+  lower.tri <- which(problem$objective$Q$j <= problem$objective$Q$i)
+  # trimat <- Matrix::tril(qobj)
+  prob <-  list(sense = "min",
+                c = problem$objective$L$v,
+                A = Matrix::sparseMatrix(i=problem$constraints$L$i,
+                                         j = problem$constraints$L$j,
+                                         x = problem$constraints$L$v),
+                bc = rbind(problem$constraints$rhs, problem$constraints$rhs),
+                bx = rbind(rep(0,num_param), rep(1, num_param)),
+                qobj = list(i =  problem$objective$Q$i[lower.tri], 
+                             j =  problem$objective$Q$j[lower.tri], 
+                             v =  problem$objective$Q$v[lower.tri]/2),
+                sol = list(int = list(xx = start)),
+                intsub = 1:num_param)
+  
+  if(is.null(opts) | length(opts) == 0) opts <- list(verbose = 0)
+  
+  res <- Rmosek::mosek(prob, opts)
+  
+  sol <- as.integer(res$sol$int$xx)
+  
+  return(sol)
+}
 
