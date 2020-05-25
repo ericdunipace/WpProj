@@ -3,13 +3,18 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none", "lasso","scad","mcp"),
                  lambda = numeric(0), 
                  lambda.min.ratio = 1e-4, 
                  nlambda = 10, 
-                 gamma = 1, ...) {
+                 gamma = 1, 
+                 display.progress = FALSE,
+                 solver = c("rqPen", "gurobi", "mosek"),
+                 ...) {
   
   this.call <- as.list(match.call()[-1])
   
   # if(penalty == "lasso") stop("Lasso group penalty is currently incorrect in rqPen package!")
+  if(any(penalty == "ols")) penalty <- "none"
   penalty <- match.arg(penalty, choices = c("none","lasso","scad","mcp"))
-  if(penalty == "ols") penalty <- "none"
+  
+  solver <- match.arg(solver)
   
   n <- nrow(X)
   d <- ncol(X)
@@ -30,13 +35,13 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none", "lasso","scad","mcp"),
   rm(cols)
   
   if(length(lambda) == 0) {
-    if(penalty != "lasso") {
+    if(penalty != "lasso" & solver == "rqPen") {
       lambda.max <- max(colSums(abs(X))/n)
     } else {
       lambda.max <- max(sqrt(colSums(X^2)))
     }
     lambda <-  exp(log(lambda.max) + seq(0, log(lambda.min.ratio), length.out = nlambda))
-  }
+  } 
   if(length(lambda) == 1) if(lambda == 0) penalty <- "none"
   
   
@@ -45,10 +50,8 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none", "lasso","scad","mcp"),
   } else {
     model.size <- model.size * s
   }
-  
-  
-  if(penalty != "none") {
-    rqpenargs <-  list(
+  if(solver == "rqPen") {
+    args <-  list(
       x = as.matrix(Xmat),
       y = c(Y),
       groups = rep(1:d, s),
@@ -60,13 +63,12 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none", "lasso","scad","mcp"),
                        "mcp" = "MCP",
                        "scad" = "SCAD"),
       lambda = lambda,
+      display.progress = display.progress,
       ...)
-    rqpenargs <- rqpenargs[!duplicated(names(rqpenargs))]
-    
-    if(is.null(rqpenargs$method)) {
-      rqpenargs$method <- if(nrow(Xmat) > 1000 & ncol(Xmat) > 100) { #sfn gives error
+    if(is.null(args$method)) {
+      args$method <- if(nrow(Xmat) > 1000 & ncol(Xmat) > 100) { #sfn gives error
         #   "sfn"
-        #   rqargs$x <- as(Xmat, "matrix.csr")
+        #   args$x <- as(Xmat, "matrix.csr")
         # } else if(nrow(Xmat) > 1000 & ncol(Xmat) > 100) {
         "pfn"
       } else if(nrow(Xmat) < 1000 & ncol(Xmat) > 100) {
@@ -75,88 +77,118 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none", "lasso","scad","mcp"),
         "br"
       }
     }
-    
-    
-    if(length(lambda) ==1 ) {
-      rqpenargs <- rqpenargs[names(rqpenargs) %in% names(c(formals(l1.group.fit), 
-                                                             formals(quantreg::rq.fit.pfn), 
-                                                             formals(quantreg::rq.fit.br), 
-                                                             formals(quantreg::rq.fit.fnb)))]
-      if(is.null(rqpenargs$alg)) rqpenargs$alg <- "QICD"
-      argn <- lapply(names(rqpenargs), as.name) 
-      names(argn) <- names(rqpenargs)
-      
-      f.call <- as.call(c(list(call("::", as.name("rqPen"), 
-                                    as.name("l1.group.fit"))), argn))
-      # res <- do.call(l1.group.fit, rqpenargs)
-      # res <- l1.group.fit(x = rqpenargs$x, y = rqpenargs$y, 
-      #                            groups = rqpenargs$groups, tau = 0.5, lambda = rqpenargs$lambda,
-      #                            intercept = FALSE, 
-      #                            penalty = rqpenargs$penalty, 
-      #                            alg = rqpenargs$alg, penGroups = NULL, ...)
-    } else {
-      rqpenargs <- rqpenargs[names(rqpenargs) %in% c(names(c(formals(l1.group.fit), 
-                                                             formals(quantreg::rq.fit.pfn), 
-                                                             formals(quantreg::rq.fit.br), 
-                                                             formals(quantreg::rq.fit.fnb))), 
-                                                     "model.size")]
-      # if(is.null(rqpenargs$alg)) rqpenargs$alg <- "QICD_warm"
-      argn <- lapply(names(rqpenargs), as.name) 
-      names(argn) <- names(rqpenargs) 
-      
-      f.call <- as.call(c(list(as.name("rqGroupLambda")), argn))
-      # res1 <- rqGroupLambda(x = rqpenargs$x, y = rqpenargs$y,
-      #                      groups = rqpenargs$groups, tau = 0.5, lambda = rqpenargs$lambda,
-      #                      intercept = FALSE,
-      #                      penalty = rqpenargs$penalty,
-      #                      a = rqpenargs$a,
-      #                      # alg = rqpenargs$alg,
-      #                      ...)
+    allowed.args <- if(length(lambda) == 1 & penalty != "none") {
+      names(c(formals(l1.group.fit), 
+              formals(quantreg::rq.fit.pfn), 
+              formals(quantreg::rq.fit.br), 
+              formals(quantreg::rq.fit.fnb)))
+    } else if (length(lambda) > 1 & penalty != "none") {
+      c(names(c(formals(l1.group.fit), 
+                formals(quantreg::rq.fit.pfn), 
+                formals(quantreg::rq.fit.br), 
+                formals(quantreg::rq.fit.fnb))), 
+        "model.size")
+    } else if (penalty == "none") {
+      # args <- list(
+      #   x = as.matrix(Xmat),
+      #   y = c(Y),
+      #   tau = 0.5,
+      #   ...
+      # )
+      # args <- list(formula = formula("Y ~ . + 0"),
+      #   data = data.frame(Y = c(Y), X = as.matrix(Xmat)),
+      #   tau = 0.5,
+      #   ...
+      # )
+      switch(args$method,
+                          "pfn" = names(c(formals(quantreg::rq.fit.pfn))), 
+                          "br" = names(formals(quantreg::rq.fit.br)), 
+                          "fn" = names(formals(quantreg::rq.fit.fnb)))
       
     }
-    res <- eval(f.call, envir = rqpenargs)
-    beta <- sapply(res, function(r) r$coefficients)
+    if(is.null(args$alg)) args$alg <- "QICD"
+    args <- args[names(args) %in% allowed.args]
+    
+  } else {
+    args <-  list(
+      X = as.matrix(Xmat),
+      Y = c(Y),
+      groups = rep(1:d, s),
+      lambda = lambda,
+      penalty = penalty,
+      power = 1,
+      gamma = gamma,
+      solver = solver,
+      model.size = model.size,
+      display.progress = display.progress,
+      ...)
+    args <- args[!duplicated(names(args))]
+    
+    args <- args[names(args) %in% names(c(formals(GroupLambda)))]
+    
+  }
+  
+  args <- args[!duplicated(names(args))]
+  
+  
+  argn <- lapply(names(args), as.name) 
+  names(argn) <- names(args)
+  
+  
+  if(penalty != "none") {
+    
+    if(solver == "rqPen") {
+      if(length(lambda) ==1 & penalty != "lasso" ) {
+        f.call <- as.call(c(list(call("::", as.name("rqPen"), 
+                                      as.name("l1.group.fit"))), argn))
+      } else {
+        # if(penalty == "lasso") {
+        #   argn <- c(argn, "solver" = solver)
+        #   args$solver <- solver
+        # }
+        f.call <- as.call(c(list(as.name("rqGroupLambda")), argn))
+      }
+    } else {
+      f.call <- as.call(c(list(as.name("GroupLambda")), argn))
+      
+    }
+    res <- eval(f.call, envir = args)
+    beta <- switch(solver,
+                   "rqPen" = sapply(res, function(r) r$coefficients),
+                   res)
   } else {
     lambda <- 0
     nlambda <- 0
-    rqargs <- list(
-      x = as.matrix(Xmat),
-      y = c(Y),
-      tau = 0.5,
-      ...
-    )
-    # rqargs <- list(formula = formula("Y ~ . + 0"),
-    #   data = data.frame(Y = c(Y), X = as.matrix(Xmat)),
-    #   tau = 0.5,
-    #   ...
-    # )
-    rqargs <- rqargs[!duplicated(names(rqargs))]
-    if(is.null(rqargs$method)) {
-      rqargs$method <- if(nrow(Xmat) > 1000 & ncol(Xmat) > 100) { #sfn gives error
-        #   "sfn"
-        #   rqargs$x <- as(Xmat, "matrix.csr")
-        # } else if(nrow(Xmat) > 1000 & ncol(Xmat) > 100) {
-        "pfn"
-      } else if(nrow(Xmat) < 1000 & ncol(Xmat) > 100) {
-        "fn"
-      } else if(nrow(Xmat)  < 1000 & ncol(Xmat) < 100) {
-        "br"
-      }
+    if(solver == "rqPen") {
+      # alg <- switch()
+      f.call <- as.call(c(list(call("::", as.name("quantreg"), 
+                                  as.name("rq.fit"))), argn))
+    } else {
+      args$lambda <- lambda
+      # args <- list(
+      #   X = as.matrix(Xmat),
+      #   Y = c(Y),
+      #   groups = 1:ncol(Xmat),
+      #   lambda = 0,
+      #   penalty = penalty,
+      #   power = 1,
+      #   gamma = gamma,
+      #   model.size = ncol(x),
+      #   solver = solver,
+      #   ...)
+      args <- args[names(args) %in% names(c(formals(GroupLambda)))]
+      args <- args[!duplicated(names(args))]
+      argn <- lapply(names(args), as.name) 
+      names(argn) <- names(args)
+      
+      f.call <- as.call(c(list(as.name("GroupLambda")), argn))
     }
-    arg.names <- switch(rqargs$method,
-                        "pfn" = names(c(formals(quantreg::rq.fit.pfn))), 
-                        "br" = names(formals(quantreg::rq.fit.br)), 
-                        "fn" = names(formals(quantreg::rq.fit.fnb)))
-    rqargs <- rqargs[names(rqargs) %in% arg.names ]
+    res <- eval(f.call, envir = args)
+    # res <- do.call(quantreg::rq, args)
     
-    argn <- lapply(names(rqargs), as.name)
-    names(argn) <- names(rqargs)
-    f.call <- as.call(c(list(call("::", as.name("quantreg"), 
-                                as.name("rq.fit"))), argn))
-    res <- eval(f.call, envir = rqargs)
-    # res <- do.call(quantreg::rq, rqargs)
-    
-    beta <- as.matrix(res$coefficients)
+    beta <- switch(solver,
+                   "rqPen" = as.matrix(res$coefficients),
+                   res)
   }
   output <- list()
   output$beta <- beta

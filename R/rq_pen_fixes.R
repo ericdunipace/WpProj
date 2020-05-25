@@ -94,6 +94,7 @@ l1.group.fit <- function (x, y, groups, lambda, intercept = TRUE,
 rqGroupLambda <- function(x, y, groups, lambda, intercept = FALSE, tau = 0.5,
                           penalty = "MCP", alg = "QICD_warm", penGroups = NULL, a = 3.7,
                           model.size = NULL,
+                          display.progress = FALSE,
                           ...) 
 {
   return_val <- vector("list", length(lambda))
@@ -119,9 +120,20 @@ rqGroupLambda <- function(x, y, groups, lambda, intercept = FALSE, tau = 0.5,
     #                  "MCP" = "mcp",
     #                  "SCAD" = "scad",
     #                  "LASSO" = "lasso")
+    solver <- list(...)$solver
+    if(is.null(solver)) solver <- "rqPen"
+    if(solver == "rqPen" ) {
+      if(find_mosek()) {
+        solver <- "mosek"
+      } else if (find_gurobi()) {
+        solver <- "gurobi"
+      } else {
+        solver <- "quadprog"
+      }
+    }
     temp_beta <- GroupLambda(X = x, Y = y, power = 1, groups = groups, lambda = lambda,
                              penalty = "lasso",
-                             gamma = a, solver = list(...)$solver,
+                             gamma = a, solver = solver,
                              model.size = model.size, 
                              options = list(...)$options, 
                              ...)
@@ -130,6 +142,8 @@ rqGroupLambda <- function(x, y, groups, lambda, intercept = FALSE, tau = 0.5,
   }
   if (alg != "QICD_warm") {
     pos <- 1
+    if(display.progress) pb <- txtProgressBar(min = 0, max = length(lambda), style = 3)
+    
     for (lam in lambda) {
       return_val[[pos]] <- l1.group.fit(x = x, y = y, groups = groups,
                                         tau = tau, lambda = lam, intercept = intercept, a = a,
@@ -139,10 +153,10 @@ rqGroupLambda <- function(x, y, groups, lambda, intercept = FALSE, tau = 0.5,
         if(pos != length(lambda)) return_val[(pos):length(return_val)] <- NULL
         break
       }
+      if(display.progress) setTxtProgressBar(pb, pos)
       pos <- pos + 1
     }
-  }
-  else {
+  } else {
     p <- dim(x)[2]
     pos <- 1
     alg = "QICD"
@@ -152,6 +166,8 @@ rqGroupLambda <- function(x, y, groups, lambda, intercept = FALSE, tau = 0.5,
     else {
       initial_beta <- list(rep(0, p))
     }
+    if(display.progress) pb <- txtProgressBar(min = 0, max = 2*length(lambda), style = 3)
+    
     for (lam in lambda) {
       return_val[[pos]] <- rqPen::QICD.group(y = y, x = x, groups = groups, tau = tau, 
                                              lambda = lam, intercept = intercept, initial_beta = initial_beta[[1]],
@@ -161,6 +177,8 @@ rqGroupLambda <- function(x, y, groups, lambda, intercept = FALSE, tau = 0.5,
       #                                   penalty = "LASSO", alg = alg, initial_beta = initial_beta[[1]],
       #                                   penGroups = penGroups, ...)
       initial_beta[[1]] <- return_val[[pos]]
+      if(display.progress) setTxtProgressBar(pb, pos)
+      
       pos <- pos + 1
     }
     # temp_beta <- GroupLambda(X = x, Y = y, power = 1, groups = groups, lambda = lambda,
@@ -181,6 +199,8 @@ rqGroupLambda <- function(x, y, groups, lambda, intercept = FALSE, tau = 0.5,
         if(pos != length(lambda)) return_val[(pos):length(return_val)] <- NULL
         break
       }
+      if(display.progress) setTxtProgressBar(pb, length(lambda) + pos)
+      
       pos <- pos + 1
       
     }

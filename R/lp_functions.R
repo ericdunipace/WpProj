@@ -4,7 +4,8 @@ GroupLambda <- function(X, Y, groups, lambda, penalty = "lasso", power = 1,
                              options = list(solver_opts = NULL,
                                             init = NULL,
                                             tol = 1e-7,
-                                            iter = 100), ...) 
+                                            iter = 100), 
+                             display.progress=FALSE, ...) 
 {
   
   nlambda <- length(lambda)
@@ -42,6 +43,8 @@ GroupLambda <- function(X, Y, groups, lambda, penalty = "lasso", power = 1,
       lp_solve(model, problem$beta_idx, rep(0, length(problem$lambda_idx)), gamma, opts, solver, thresh_fun, problem$group_idx)
     )
   } else {
+    if(display.progress) pb <- txtProgressBar(min = 0, max = length(lambda), style = 3)
+    
     for (pos in seq_along(lambda) ) {
       if(solver == "gurobi") {
         model$obj[problem$lambda_idx] <- lambda[[pos]]
@@ -62,6 +65,7 @@ GroupLambda <- function(X, Y, groups, lambda, penalty = "lasso", power = 1,
         break
       }
       options$init <- return_val[[pos]]
+      if(display.progress) setTxtProgressBar(pb, pos)
       
     }
   }
@@ -488,3 +492,13 @@ group_deriv <- function (deriv_func, groups, coefs, lambda, a = 3.7)
   }
   derivs
 }
+
+
+find_gurobi <- function() {
+   return("gurobi" %in% installed.packages()[,1])
+}
+
+find_mosek <- function() {
+  return("Rmosek" %in% installed.packages()[,1])
+}
+

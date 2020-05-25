@@ -9,14 +9,15 @@ WInfL1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "mcp","scad")
                                 tol = 1e-7,
                                 iter = 100),
                  model.size = NULL,
+                 display.progress = FALSE,
                  ...) {
   
   this.call <- as.list(match.call()[-1])
   
   solver <- match.arg(solver)
   
+  if(any(penalty == "ols")) penalty <- "none"
   penalty <- match.arg(penalty)
-  if(penalty == "ols") penalty <- "none"
   
   n <- nrow(X)
   d <- ncol(X)
@@ -62,7 +63,9 @@ WInfL1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "mcp","scad")
                            penalty = penalty,
                      gamma = gamma, solver = solver,
                      model.size = model.size,
-                     options = options, ...)
+                     options = options, 
+                     display.progress = display.progress, 
+                     ...)
     # beta <- linf_norm(X = Xmat, Y = Y, deriv_func = deriv_func, thresholder = thresh_fun,
     #                  lambda = lambda, groups=rep(1:d, s), solver = solver, 
     #                  gamma = gamma, opts = options$solver_opts, init = options$init, iter = options$iter, tol = options$tol)
