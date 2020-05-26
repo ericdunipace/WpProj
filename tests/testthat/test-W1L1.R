@@ -72,7 +72,7 @@ testthat::test_that("lp_w1 works", {
 })
 
 testthat::test_that("W1L1 works", {
-  # testthat::skip("takes too much time")
+  testthat::skip("takes too much time")
   set.seed(87897)
   
   n <- 256

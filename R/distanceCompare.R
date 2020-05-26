@@ -1,3 +1,8 @@
+setClass("distcompare",
+         list(posterior = "data.frame", 
+              mean = "data.frame", 
+              p = "numeric"))
+
 distCompare <- function(models, target = list(posterior = NULL, mean = NULL), p = 2, ground_p = 2, 
                          method = "exact", 
                          quantity = c("posterior","mean"),
@@ -101,7 +106,7 @@ dist_fun <- function(mulist, mu, p, ground_p, method, observation.orientation, p
           denom <- max(ncol(mu), ncol(m))
           sqrt(sum((c(m) - c(mu))^2)/denom)
         } else {
-          SparsePosterior::wasserstein(X = m, Y = mu, p = p, 
+          limbs::wasserstein(X = m, Y = mu, p = p, 
                                        ground_p = ground_p, 
                                        observation.orientation = observation.orientation, 
                                        method = method, ...)
@@ -196,7 +201,7 @@ set_dist_data <- function(target, models, quantity, method, transform) {
   if (inherits(models, "limbs")) {
     models <- list(models)
   } else {
-    if(!is.list(models)) stop("models must be a SparsePosterior fit or a list of fits")
+    if(!is.list(models)) stop("models must be a SLIM fit or a list of fits")
   }
   
   ### set group names ###
