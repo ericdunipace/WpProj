@@ -17,7 +17,11 @@ WInfL1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "mcp","scad")
   solver <- match.arg(solver)
   
   if(any(penalty == "ols")) penalty <- "none"
-  penalty <- match.arg(penalty)
+  if(any(grepl("lasso", penalty))) penalty <- "lasso"
+  if(any(penalty == "elastic.net")) penalty <- "lasso"
+  if(any(grepl("mcp", penalty))) penalty <- "mcp"
+  if(any(grepl("scad", penalty))) penalty <- "scad"
+  penalty <- match.arg(penalty, choices = c("none","lasso", "mcp","scad"))
   
   n <- nrow(X)
   d <- ncol(X)

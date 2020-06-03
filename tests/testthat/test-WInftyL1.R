@@ -162,3 +162,114 @@ testthat::test_that("WInfL1 works", {
   
   
 })
+
+testthat::test_that("WInfL1 changes penalty appropriately for net penalties", {
+  check_mosek()
+  check_gurobi()
+  set.seed(87897)
+  
+  n <- 256
+  p <- 10
+  s <- 99
+  
+  x <- matrix(rnorm(p*n), nrow=n, ncol=p)
+  beta <- (1:10)/10
+  y <- x %*% beta + rnorm(n)
+  
+  #posterior
+  prec <- crossprod(x) + diag(1,p,p)*1
+  mu_post <- solve(prec, crossprod(x,y))
+  alpha <- 1 + n/2
+  beta <- 1 + 0.5 * (crossprod(y) + t(mu_post) %*% prec %*% mu_post )
+  sigma_post <- 1/rgamma(s, alpha, 1/beta)
+  theta <- sapply(sigma_post, function(ss) mu_post + t(chol(ss * solve(prec))) %*% matrix(rnorm(p, 0, 1),p,1))
+  
+  lambda <- 0
+  nlambda <- 2
+  lambda.min.ratio <- 1e-10
+  gamma <- 2.1
+  penalty.factor <- 1/rowMeans(theta^2)
+  penalty.factor.null <- rep(1,p)
+  post_mu <- x %*% theta
+  
+  
+  projection_mcp <- WInfL1(X=x, Y=post_mu, penalty="mcp.net", solver = "gurobi",
+                         nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                         gamma = gamma)
+  testthat::expect_equal(projection_mcp$penalty, "mcp") #should be pretty close
+  
+  projection_mcp <- WInfL1(X=x, Y=post_mu, penalty="mcp.net", solver = "mosek",
+                         nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                         gamma = gamma)
+  testthat::expect_equal(projection_mcp$penalty, "mcp") #should be pretty close
+  
+  
+  # debugonce(WInfL1)
+  projection_mcp <- WInfL1(X=x, Y=post_mu, penalty="group.mcp", solver = "gurobi",
+                         nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                         gamma = gamma)
+  testthat::expect_equal(projection_mcp$penalty, "mcp") #should be pretty close
+  
+  projection_mcp <- WInfL1(X=x, Y=post_mu, penalty="group.mcp",solver = "mosek",
+                         nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                         gamma = gamma)
+  testthat::expect_equal(projection_mcp$penalty, "mcp") #should be pretty close
+  
+  
+  projection_scad <-WInfL1(X=x, Y=post_mu, penalty="scad.net", solver = "gurobi",
+                         nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                         gamma = gamma)
+  testthat::expect_equal(projection_scad$penalty, "scad") #should be pretty close
+  
+  projection_scad <-WInfL1(X=x, Y=post_mu, penalty="scad.net", solver = "mosek",
+                         nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                         gamma = gamma)
+  testthat::expect_equal(projection_scad$penalty, "scad") #should be pretty close
+  
+  
+  projection_scad <- WInfL1(X=x, Y=post_mu, penalty="group.scad", solver = "gurobi",
+                          nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                          gamma = gamma)
+  testthat::expect_equal(projection_scad$penalty, "scad") #should be pretty close
+  
+  
+  projection_scad <- WInfL1(X=x, Y=post_mu, penalty="group.scad", solver = "mosek",
+                          nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                          gamma = gamma)
+  testthat::expect_equal(projection_scad$penalty, "scad") #should be pretty close
+  
+  
+  # debugonce(WInfL1)
+  projection_lasso <- WInfL1(X=x, Y=post_mu, penalty="elastic.net", solver = "gurobi",
+                           nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                           gamma = gamma,)
+  testthat::expect_equal(projection_lasso$penalty, "lasso") #should be pretty close
+  
+  # debugonce(WInfL1)
+  projection_lasso <- WInfL1(X=x, Y=post_mu, penalty="elastic.net", solver = "mosek",
+                           nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                           gamma = gamma)
+  testthat::expect_equal(projection_lasso$penalty, "lasso") #should be pretty close
+  
+  
+  projection_lasso <- WInfL1(X=x, Y=post_mu, penalty="group.lasso", solver = "gurobi",
+                           nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                           gamma = gamma)
+  testthat::expect_equal(projection_lasso$penalty, "lasso") #should be pretty close
+  
+  # projection_lasso <- WInfL1(X=x, Y=post_mu, penalty="lasso",
+  #                          nlambda = 1, lambda.min.ratio = lambda.min.ratio,
+  #                          gamma = gamma, alg = "ip")
+  
+  projection_lasso <- WInfL1(X=x, Y=post_mu, penalty="group.lasso",  solver = "mosek",
+                           nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                           gamma = gamma)
+  testthat::expect_equal(projection_lasso$penalty, "lasso") #should be pretty close
+  
+  # projection_lasso <- W1L1(X=x, Y=post_mu, penalty="lasso",
+  #                          nlambda = 1, lambda.min.ratio = lambda.min.ratio,
+  #                          gamma = gamma, alg = "ip")
+  
+  
+})
+

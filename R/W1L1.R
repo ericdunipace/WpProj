@@ -12,6 +12,10 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none", "lasso","scad","mcp"),
   
   # if(penalty == "lasso") stop("Lasso group penalty is currently incorrect in rqPen package!")
   if(any(penalty == "ols")) penalty <- "none"
+  if(any(grepl("lasso", penalty))) penalty <- "lasso"
+  if(any(penalty == "elastic.net")) penalty <- "lasso"
+  if(any(grepl("mcp", penalty))) penalty <- "mcp"
+  if(any(grepl("scad", penalty))) penalty <- "scad"
   penalty <- match.arg(penalty, choices = c("none","lasso","scad","mcp"))
   
   solver <- match.arg(solver)
