@@ -57,6 +57,7 @@ WPL1 <- function(X, Y=NULL, theta = NULL, power = 2.0,
     dots <- list(...)
     if(is.null(dots$alpha)) dots$alpha <- 1
     if(is.null(dots$tau)) dots$tau <- 0.5
+    if(is.null(dots$display.progress)) dots$display.progress <- FALSE
     output <- lp_reg(x = X, y = Y, theta = theta, power = power, gamma = gamma,
                      alpha = dots$alpha,
                      tau = dots$tau,
@@ -67,7 +68,8 @@ WPL1 <- function(X, Y=NULL, theta = NULL, power = 2.0,
                      lambda.min.ratio = lambda.min.ratio,
                      model.size = model.size,
                      iter = maxit,
-                     tol = tol)
+                     tol = tol,
+                     display.progress = dots$display.progress)
   }
   
   return(output)
@@ -84,7 +86,8 @@ lp_reg <- function(x, y, theta = NULL, power,
                    lambda.min.ratio = 1e-4,
                    model.size = NULL,
                    iter = 100,
-                   tol = 1e-7) {
+                   tol = 1e-7,
+                   display.progress = FALSE) {
   this.call <- as.list(match.call()[-1])
   
   log_sum_exp <- function(x) {
@@ -149,6 +152,7 @@ lp_reg <- function(x, y, theta = NULL, power,
   }
   
   beta <- beta_old <- lapply(1:length(lambda), function(l) rep(Inf, d * s))
+  if(display.progress) pb <- txtProgressBar(min = 0, max = length(lambda), style = 3)
   
   for(l in seq_along(lambda)) {
     lam <- lambda[l]
@@ -181,6 +185,7 @@ lp_reg <- function(x, y, theta = NULL, power,
       if(sum(beta[[l]] != 0) > model.size) break
       
     }
+    if(display.progress) setTxtProgressBar(pb, l)
   }
   
   output <- list()
