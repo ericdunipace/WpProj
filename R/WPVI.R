@@ -53,7 +53,7 @@ WPVI <- function(X, Y, theta, pred.fun = NULL, p = 2, ground_p = 2,
     x_temp[,i] <- 0
     eta <- pred.fun(x_temp, theta)
     return(
-      SparsePosterior::wasserstein(eta, Y_, 
+      limbs::wasserstein(eta, Y_, 
                   p = p, ground_p = ground_p, 
                   observation.orientation = "colwise",
                 transport.method = transport.method, 
