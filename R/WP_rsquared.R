@@ -42,14 +42,16 @@ WPR2.distcompare <- function(Y=NULL, nu, ...) {
   
   if(!is.null(Y)) {
     stopifnot(inherits(Y, "matrix"))
+    meth.table <- table(method)
+    method.use <- names(meth.table)[which.max(meth.table)]
     wass.args <- list(X = Y, Y = as.matrix(rowMeans(Y)),
-                      p = p, method = method,
+                      p = as.numeric(p), method = method.use,
                       ...)
     wass.args <- wass.args[!duplicated(names(wass.args))]
     argn <- lapply(names(wass.args), as.name)
     names(argn) <- names(wass.args)
     
-    wass.call <- as.call(c(list("wasserstein"), argn))
+    wass.call <- as.call(c(list(as.name("wasserstein")), argn))
     
     max_vals <- eval(wass.call, envir = wass.args)
     base <- "dist.from.expectation"
