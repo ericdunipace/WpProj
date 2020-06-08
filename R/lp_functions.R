@@ -131,7 +131,7 @@ lp_solve <- function(problem, beta.idx, lambda, gamma, opts, solver, thresholder
     param <- res$x
   }
   
-  sol <- group_threhold(param[beta.idx], thresholder, lambda, gamma, groups)
+  sol <- group_threshold(param[beta.idx], thresholder, lambda, gamma, groups)
   
   return(sol)
   
@@ -445,7 +445,7 @@ lp_prob_w1 <- function(X, Y, lambda, groups = NULL) {
   return(problem)
 }
 
-group_threhold <- function(x, threshold, lambda, gamma, groups) {
+group_threshold <- function(x, threshold, lambda, gamma, groups) {
   n.groups <- length(groups)
   
   beta <- rep(NA, length(x))
@@ -468,6 +468,7 @@ mcp_threshold <- function(x, lambda, gamma) {
     res <- gamma/(gamma-1) * soft_threshold(x, lambda, gamma)
     if(is.infinite(res)) res <- 0
     if(is.nan(res)) res <- 0
+    if(is.na(res)) res <- 0
     return(res)
   }
   ifelse(abs(x) <= gamma * lambda, firm_soft(x,lambda,gamma), x)
