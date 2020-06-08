@@ -46,7 +46,7 @@ WPR2.distcompare <- function(Y=NULL, nu, ...) {
                       p = p, method = method,
                       ...)
     wass.args <- wass.args[!duplicated(names(wass.args))]
-    argn <- lapply(names(wass.args), as.names)
+    argn <- lapply(names(wass.args), as.name)
     names(argn) <- names(wass.args)
     
     wass.call <- as.call(c(list("wasserstein"), argn))
