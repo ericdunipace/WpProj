@@ -54,12 +54,14 @@ WPR2.distcompare <- function(Y=NULL, nu, ...) {
     wass.call <- as.call(c(list(as.name("wasserstein")), argn))
     
     max_vals <- eval(wass.call, envir = wass.args)
+    max_vec <- rep(max_vals, length(df$dist))
     base <- "dist.from.expectation"
   } else {
     max_vals <- tapply(df$dist, df$groups, max)
     max_vec <- max_vals[as.numeric(df$groups)]
     base <- "dist.from.null"
   }
+  
   
   
   r2 <- pmax(1- df$dist^p/max_vec^p, 0)

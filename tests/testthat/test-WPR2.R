@@ -26,8 +26,8 @@ testthat::test_that("WPR2 works", {
   # debugonce(distCompare)
   dist <- distCompare(out, list(posterior = post_beta, mean = post_mu), p = 2, ground_p = 2, quantity = c("posterior", "mean"))
   
-  r2 <- WPR2(nu = dist, p = 2, method = "exact")
   r2 <- WPR2(Y = post_mu, nu = dist, p = 2, method = "exact")
+  r2 <- WPR2(nu = dist, p = 2, method = "exact")
   
   maxes <- tapply(dist$mean$dist, dist$mean$groups, max)
   r2_check <- 1 - dist$mean$dist^2/maxes[as.numeric(dist$mean$groups)]^2
