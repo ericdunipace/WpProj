@@ -51,7 +51,7 @@ WPR2.distcompare <- function(Y=NULL, nu, ...) {
     
     wass.call <- as.call(c(list("wasserstein"), argn))
     
-    max_vals <- eval(wass.cal, envir = wass.args)
+    max_vals <- eval(wass.call, envir = wass.args)
     base <- "dist.from.expectation"
   } else {
     max_vals <- tapply(df$dist, df$groups, max)
@@ -72,7 +72,7 @@ WPR2.distcompare <- function(Y=NULL, nu, ...) {
   
 }
 
-setGeneric("WPR2", function(Y, nu, p = 2, method = "exact",...) UseMethod("WPR2"))
+setGeneric("WPR2", function(Y = NULL, nu, p = 2, method = "exact",...) UseMethod("WPR2"))
 setMethod("WPR2", c("Y" = "matrix", "nu" = "matrix"), WPR2.matrix)
 setMethod("WPR2", c("nu" = "distcompare"), WPR2.distcompare)
 
