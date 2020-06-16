@@ -44,9 +44,9 @@ WInfL1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "mcp","scad")
   if(penalty != "none" & length(lambda) == 0) {
     if(!is.null(theta)) {
       lambda.max <- max(sqrt(rowSums(theta^2)))
-      if(lambda.max == 0) lambda.max <- max(crossprod(X,Y))/(n)
+      if(lambda.max == 0) lambda.max <- max(abs(crossprod(X,Y)))/(n)
     } else {
-      lambda.max <- max(crossprod(X,Y))/(n)
+      lambda.max <- max(abs(crossprod(X,Y)))/(n)
     }
     lambda <-  exp(log(lambda.max) + seq(0, log(lambda.min.ratio), length.out = nlambda))
   } else if (penalty == "none"){
