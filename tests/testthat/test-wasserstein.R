@@ -6,34 +6,34 @@ testthat::test_that("wasserstein gives 0 for same distribution", {
   y <- rnorm(n)
   niter <- 1e2
   # y <- matrix(rnorm(n*d), nrow=d, ncol=n)
-  exact <- SparsePosterior::wasserstein(X = x, Y = x, p = 2,
+  exact <- limbs::wasserstein(X = x, Y = x, p = 2,
                                ground_p = 2, observation.orientation = "colwise",
                                method = "exact")
-  hilbert <- SparsePosterior::wasserstein(X = x, Y = x, p = 2,
+  hilbert <- limbs::wasserstein(X = x, Y = x, p = 2,
                                           ground_p = 2, observation.orientation = "colwise",
                                           method = "hilbert")
-  rank <- SparsePosterior::wasserstein(X = x, Y = x, p = 2,
+  rank <- limbs::wasserstein(X = x, Y = x, p = 2,
                                           ground_p = 2, observation.orientation = "colwise",
                                           method = "rank")
-  sinkhorn <- SparsePosterior::wasserstein(X = x, Y = x, p = 2,
+  sinkhorn <- limbs::wasserstein(X = x, Y = x, p = 2,
                                           ground_p = 2, observation.orientation = "colwise",
                                           method = "sinkhorn", niter = niter)
-  sinkhorn2 <- SparsePosterior::wasserstein(X = x, Y = x, p = 2,
+  sinkhorn2 <- limbs::wasserstein(X = x, Y = x, p = 2,
                                            ground_p = 2, observation.orientation = "colwise",
                                            method = "sinkhorn2", niter = niter)
-  greenkhorn <- SparsePosterior::wasserstein(X = x, Y = x, p = 2,
+  greenkhorn <- limbs::wasserstein(X = x, Y = x, p = 2,
                                            ground_p = 2, observation.orientation = "colwise",
                                            method = "greenkhorn", niter = niter)
-  randkhorn <- SparsePosterior::wasserstein(X = x, Y = x, p = 2,
+  randkhorn <- limbs::wasserstein(X = x, Y = x, p = 2,
                                            ground_p = 2, observation.orientation = "colwise",
                                            method = "randkhorn", niter = niter)
-  gandkhorn <- SparsePosterior::wasserstein(X = x, Y = x, p = 2,
+  gandkhorn <- limbs::wasserstein(X = x, Y = x, p = 2,
                                             ground_p = 2, observation.orientation = "colwise",
                                             method = "gandkhorn", niter = niter)
-  uni.pwr <- SparsePosterior::wasserstein(X = x, Y = x, p = 2,
+  uni.pwr <- limbs::wasserstein(X = x, Y = x, p = 2,
                                            ground_p = 2, observation.orientation = "colwise",
                                            method = "univariate.approximation.pwr")
-  uni.app <- SparsePosterior::wasserstein(X = x, Y = x, p = 2,
+  uni.app <- limbs::wasserstein(X = x, Y = x, p = 2,
                                                       ground_p = 2, observation.orientation = "colwise",
                                                       method = "univariate.approximation")
   testthat::expect_equal(exact, 0)
@@ -46,35 +46,35 @@ testthat::test_that("wasserstein gives 0 for same distribution", {
   testthat::expect_equal(uni.pwr, 0)
   testthat::expect_equal(uni.app, 0)
   
-  exact.uni <- SparsePosterior::wasserstein(X = y, Y = y, p = 2,
+  exact.uni <- limbs::wasserstein(X = y, Y = y, p = 2,
                                         ground_p = 2, observation.orientation = "colwise",
                                         method = "exact")
-  hilbert.uni <- SparsePosterior::wasserstein(X = y, Y = y, p = 2,
+  hilbert.uni <- limbs::wasserstein(X = y, Y = y, p = 2,
                                           ground_p = 2, observation.orientation = "colwise",
                                           method = "hilbert")
-  rank.uni <- SparsePosterior::wasserstein(X = y, Y = y, p = 2,
+  rank.uni <- limbs::wasserstein(X = y, Y = y, p = 2,
                                               ground_p = 2, observation.orientation = "colwise",
                                               method = "hilbert")
-  sinkhorn.uni <- SparsePosterior::wasserstein(X = y, Y = y, p = 2,
+  sinkhorn.uni <- limbs::wasserstein(X = y, Y = y, p = 2,
                                            ground_p = 2, observation.orientation = "colwise",
                                            method = "sinkhorn", niter = niter, epsilon = 2.4)
-  sinkhorn2.uni <- SparsePosterior::wasserstein(X = y, Y = y, p = 2,
+  sinkhorn2.uni <- limbs::wasserstein(X = y, Y = y, p = 2,
                                                ground_p = 2, observation.orientation = "colwise",
                                                method = "sinkhorn2", niter = niter)
-  greenkhorn.uni <- SparsePosterior::wasserstein(X = y, Y = y, p = 2,
+  greenkhorn.uni <- limbs::wasserstein(X = y, Y = y, p = 2,
                                                ground_p = 2, observation.orientation = "colwise",
                                                method = "greenkhorn", niter = niter)
-  randkhorn.uni <- SparsePosterior::wasserstein(X = y, Y = y, p = 2,
+  randkhorn.uni <- limbs::wasserstein(X = y, Y = y, p = 2,
                                                ground_p = 2, observation.orientation = "colwise",
                                                method = "randkhorn", niter = niter)
-  gandkhorn.uni <- SparsePosterior::wasserstein(X = y, Y = y, p = 2,
+  gandkhorn.uni <- limbs::wasserstein(X = y, Y = y, p = 2,
                                                ground_p = 2, observation.orientation = "colwise",
                                                method = "gandkhorn", niter = niter)
   
-  uni.pwr.uni <- SparsePosterior::wasserstein(X = y, Y = y, p = 2,
+  uni.pwr.uni <- limbs::wasserstein(X = y, Y = y, p = 2,
                                           ground_p = 2, observation.orientation = "colwise",
                                           method = "univariate.approximation.pwr")
-  uni.app.uni <- SparsePosterior::wasserstein(X = y, Y = y, p = 2,
+  uni.app.uni <- limbs::wasserstein(X = y, Y = y, p = 2,
                                           ground_p = 2, observation.orientation = "colwise",
                                           method = "univariate.approximation")
   testthat::expect_equal(exact.uni, 0)
@@ -98,7 +98,7 @@ testthat::test_that("wasserstein matches transport package for shortsimplex", {
   z <- rnorm(n)
   w <- rnorm(n)
   # y <- matrix(rnorm(n*d), nrow=d, ncol=n)
-  exact <- SparsePosterior::wasserstein(X = x, Y = y, p = 2,
+  exact <- limbs::wasserstein(X = x, Y = y, p = 2,
                                         ground_p = 2, observation.orientation = "colwise",
                                         method = "exact")
   exact.trans <- transport::wasserstein(a = rep(1,n), b = rep(1,n), p = 2, 
@@ -106,17 +106,17 @@ testthat::test_that("wasserstein matches transport package for shortsimplex", {
                                         costm = cost_calc(x,y, 2),
                                         method = "shortsimplex"
                                         )
-  uni <- SparsePosterior::wasserstein(X = z, Y = w, 2, 2, "colwise", "univariate")
+  uni <- limbs::wasserstein(X = z, Y = w, 2, 2, "colwise", "univariate")
   uni.trans <- transport::wasserstein1d(a = z, b = w, 2)
   
   testthat::expect_equal(exact, exact.trans)
   testthat::expect_equal(uni, uni.trans)
   
   # check for rowwise orientation
-  exact.row <- SparsePosterior::wasserstein(X = t(x), Y = t(y), p = 2,
+  exact.row <- limbs::wasserstein(X = t(x), Y = t(y), p = 2,
                                         ground_p = 2, observation.orientation = "rowwise",
                                         method = "exact")
-  uni.row <- SparsePosterior::wasserstein(X = t(t(z)), Y = t(t(w)), 2, 2, "rowwise", "univariate")
+  uni.row <- limbs::wasserstein(X = t(t(z)), Y = t(t(w)), 2, 2, "rowwise", "univariate")
 
   testthat::expect_equal(exact.row, exact.trans)
   testthat::expect_equal(uni.row, uni.trans)
