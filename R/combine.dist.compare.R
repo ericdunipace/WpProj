@@ -30,7 +30,7 @@ combine.dist.compare <- function(distances) {
     if(!is.null(cmb$mean)) cmb$mean <- cbind(cmb$mean, ranks = ranks.mean, iter = iter)
   }
   
-  class(cmb) <- c("sparse-posterior","combine.dist.compare")
+  class(cmb) <- c("limbs","combine.dist.compare")
   
   return(cmb)
 }
@@ -137,7 +137,7 @@ plot.combine.dist.compare <- function (distances, ylim = NULL, ylabs = c(NULL,NU
   }
   
   plots <- list(posterior = ppost, mean = pmean)
-  class(plots) <- c("plotcombine","sparse-posterior")
+  class(plots) <- c("plotcombine","limbs")
   return(plots)
 }
 
@@ -220,7 +220,7 @@ plot_ranks <- function(distances, ylim = NULL, ylabs = c(NULL,NULL), ...) {
   }
   
   plots <- list(posterior = ppost, mean = pmean)
-  class(plots) <- c("plotrank","sparse-posterior")
+  class(plots) <- c("plotrank","limbs")
   return(plots)
 }
 
