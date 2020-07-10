@@ -108,7 +108,7 @@ set_x_limits <- function(distance_data, xlim, quantity){
   if (is.null(df$nzero)) return(NULL)
   min_x <- min(df$nzero)
   max_x <- max(df$nzero)
-  xlim <- c(min_y, max_y)
+  xlim <- c(min_x, max_x)
   return(xlim)
 }
 

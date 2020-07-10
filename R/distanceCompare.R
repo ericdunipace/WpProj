@@ -169,11 +169,15 @@ set_dist_data <- function(target, models, quantity, method, transform) {
   }
   
   if(any(sapply(target, is.null)) ){
-    avail.models <- sapply(models, function(x) x$method)
+    avail.models <- unlist(sapply(models, function(x) x$method))
     if (!("selection.variable" %in% avail.models)) {
       stop("No way of setting target(s). Must either provide a named list or one of the methods should be the 'selection.variable' method since it preserves the original posterior.")
     } else {
       get_idx <- which(avail.models == "selection.variable")
+      if(length(get_idx) > 1) {
+        warning("Multiple models with same method 'selection.variable'")
+        get_idx <- get_idx[1]
+      }
     }
     selMod <- models[[get_idx]]
     last <- length(selMod$nzero)
