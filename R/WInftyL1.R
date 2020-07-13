@@ -34,11 +34,15 @@ WInfL1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "mcp","scad")
   }
   
   s <- ncol(Y)
-  cols <- lapply(1:s, function(ss) Matrix::sparseMatrix(i = n*(ss-1) + rep(1:n,d), 
-                                                        j = rep(1:d,each = n), 
-                                                        x = c(X),
-                                                        dims = c(n*s, d)))
-  Xmat <- do.call(cbind, cols)
+  # cols <- lapply(1:s, function(ss) Matrix::sparseMatrix(i = n*(ss-1) + rep(1:n,d), 
+  #                                                       j = rep(1:d,each = n), 
+  #                                                       x = c(X),
+  #                                                       dims = c(n*s, d)))
+  # Xmat <- do.call(cbind, cols)
+  Xmat <- Matrix::sparseMatrix(i = c(sapply(1:s, function(ss) n*(ss-1) + rep(1:n,d))), 
+                               j = c(sapply(1:s, function(ss) rep(1:d + d * (ss-1),each = n))), 
+                               x = c(X),
+                               dims = c(n*s, d*s))
   
   
   if(penalty != "none" & length(lambda) == 0) {
