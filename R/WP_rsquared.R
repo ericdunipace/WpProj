@@ -153,7 +153,7 @@ plot.WPR2 <- function(object, xlim = NULL, ylim = NULL, linesize =1, pointsize =
   
   ylim <- set_y_limits_gen(obj$r2, ylim)
   if(is.null(ylab)) {
-    ylab <- bquote(W[p]~R^2)
+    ylab <- bquote(W[.(p)]~R^2)
   }
   
   if(all(!is.na(nactive))) {
@@ -221,12 +221,13 @@ set_y_limits_gen <- function(vals, ylim){
       stop("ylim must be a numeric vector")
     }
   }
-  if(is.null(vals)) return(NULL)
-  range.size <- diff(range(vals))
-  add.factor <- range.size * 1.2 - range.size
-  min_y <- max(0, min(vals) - add.factor)
-  max_y <- max(vals) + add.factor
-  ylim <- c(min_y, max_y)
+  if(is.null(vals)) return(c(0,1))
+  # range.size <- diff(range(vals))
+  # add.factor <- range.size * 1.2 - range.size
+  # min_y <- max(0, min(vals) - add.factor)
+  # max_y <- max(vals) + add.factor
+  # ylim <- c(min_y, max_y)
+  ylim <- c(0,1)
   return(ylim)
 }
 

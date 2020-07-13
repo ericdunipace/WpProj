@@ -15,6 +15,7 @@ extractCoef <- function(fit, drop=FALSE) {
       coefs <- fit$beta[[1]][,idx,drop=FALSE]
   } else if(any(inherits(fit, "sparse-posterior") | inherits(fit, "limbs"))) {
       nvar <- colSums(fit$beta != 0)
+      if(length(nvar) < length(lambda)) lambda <- lambda[1:length(nvar)]
       extractCoefVar <- tapply(lambda, nvar, min)
       iters <- fit$niter
       maxit <- fit$maxit

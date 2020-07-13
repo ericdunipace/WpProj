@@ -31,12 +31,16 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none", "lasso","scad","mcp"),
   }
   
   s <- ncol(Y)
-  cols <- lapply(1:s, function(ss) Matrix::sparseMatrix(i = n*(ss-1) + rep(1:n,d), 
-                                                        j = rep(1:d,each = n), 
-                                                        x = c(X),
-                                                        dims = c(n*s, d)))
-  Xmat <- do.call(cbind, cols)
-  rm(cols)
+  # cols <- lapply(1:s, function(ss) Matrix::sparseMatrix(i = n*(ss-1) + rep(1:n,d), 
+  #                                                       j = rep(1:d,each = n), 
+  #                                                       x = c(X),
+  #                                                       dims = c(n*s, d)))
+  # Xmat <- do.call(cbind, cols)
+  Xmat <- Matrix::sparseMatrix(i = c(sapply(1:s, function(ss) n*(ss-1) + rep(1:n,d))), 
+                               j = c(sapply(1:s, function(ss) rep(1:d + d * (ss-1),each = n))), 
+                               x = c(X),
+                               dims = c(n*s, d*s))
+  # rm(cols)
   
   if(length(lambda) == 0) {
     if(penalty != "lasso" & solver == "rqPen") {
@@ -115,7 +119,7 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none", "lasso","scad","mcp"),
     
   } else {
     args <-  list(
-      X = as.matrix(Xmat),
+      X = Xmat,
       Y = c(Y),
       groups = rep(1:d, s),
       lambda = lambda,
