@@ -1,4 +1,5 @@
 useDynLib(limbs)
 import(RcppEigen)
 importFrom(Rcpp, evalCpp)
+importFrom(dplyr, `%>%`)
 exportPattern("^[[:alpha:]]+")

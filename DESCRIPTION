@@ -21,7 +21,8 @@ Imports:
   quantreg,
   rqPen,
   parallel,
-  doRNG
+  doRNG,
+  dplyr
 LinkingTo: 
   BH,
   Rcpp (>= 1.0.0), 

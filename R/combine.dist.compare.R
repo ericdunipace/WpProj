@@ -36,7 +36,7 @@ combine.dist.compare <- function(distances) {
 }
 
 
-plot.combine.dist.compare <- function (distances, ylim = NULL, ylabs = c(NULL,NULL), ...) {
+plot.combine.dist.compare <- function (distances, ylim = NULL, ylabs = c(NULL,NULL), facet.group = NULL, ...) {
   stopifnot(inherits(distances, "combine.dist.compare"))
   dots <- list(...)
   alpha <- dots$alpha
@@ -62,21 +62,30 @@ plot.combine.dist.compare <- function (distances, ylim = NULL, ylabs = c(NULL,NU
     dd <- distances$posterior
     
     dd$groups <- factor(dd$groups)
-    E <- tapply(dd$dist, INDEX = list(dd$nactive, dd$groups), mean)
-    sigma <- tapply(dd$dist, INDEX = list(dd$nactive, dd$groups), sd)
+    if(!is.null(facet.group)) {
+      grouping <- c("groups", facet.group, "nactive")
+    } else {
+      grouping <- c("groups", "nactive")
+    }
+    df <- dd %>% dplyr::group_by(.dots = grouping) %>% dplyr::summarise(
+                                                    low = quantile(dist, 0.025),
+                                                    hi = quantile(dist, 0.975),
+                                                    dist = mean(dist)
+                                                    )
+    # E <- tapply(dd$dist, INDEX = grouping, mean)
+    # sigma <- tapply(dd$dist, INDEX = grouping, sd)
+    # 
+    # M <- tapply(dd$dist, INDEX = grouping, median)
+    # hi <- tapply(dd$dist, INDEX = grouping, quantile, 0.975)
+    # low <- tapply(dd$dist, INDEX = grouping, quantile, 0.025)
     
-    M <- tapply(dd$dist, INDEX = list(dd$nactive, dd$groups), median)
-    hi <- tapply(dd$dist, INDEX = list(dd$nactive, dd$groups), quantile, 0.975)
-    low <- tapply(dd$dist, INDEX = list(dd$nactive, dd$groups), quantile, 0.025)
-    
-    df <- data.frame(dist = c(M), low = c(low), hi = c(hi), 
-                     groups = rep(colnames(M), each = nrow(M)),
-                     nactive = as.numeric(rep(rownames(M), ncol(M))),
-                     row.names = NULL)
-    
+    # df <- data.frame(dist = c(M), low = c(low), hi = c(hi), 
+    #                  groups = rep(colnames(M), each = nrow(M)),
+    #                  nactive = as.numeric(rep(rownames(M), ncol(M))),
+    #                  row.names = NULL)
     # df <- df[complete.cases(df),]
     
-    ylim_post <- set_y_limits(distances, ylim, "posterior")
+    ylim_post <- set_y_limits(df, ylim, "posterior")
     ppost <- ggplot2::ggplot( df, 
                               ggplot2::aes(x=nactive, y=dist, 
                                            color = groups, fill = groups,
@@ -96,24 +105,37 @@ plot.combine.dist.compare <- function (distances, ylim = NULL, ylabs = c(NULL,NU
       ggplot2::scale_x_continuous(expand = c(0, 0)) +
       ggplot2::scale_y_continuous(expand = c(0, 0), limits = ylim_post ) + 
       ggplot2::theme(legend.position = leg.pos)
+    if(!is.null(facet.group)) {
+      ppost <- ppost + ggplot2::facet_grid(stats::reformulate(facet.group))
+    }
   }
   
   if (!is.null(distances$mean)){
     dd <- distances$mean
     dd$groups <- factor(dd$groups)
-    E <- tapply(dd$dist, INDEX = list(dd$nactive, dd$groups), mean)
-    sigma <- tapply(dd$dist, INDEX = list(dd$nactive, dd$groups), sd)
+    if(!is.null(facet.group)) {
+      grouping <- c("groups", facet.group, "nactive")
+    } else {
+      grouping <- c("groups", "nactive")
+    }
+    df <- dd %>% dplyr::group_by(.dots = grouping) %>% dplyr::summarise(
+      low = quantile(dist, 0.025),
+      hi = quantile(dist, 0.975),
+      dist = mean(dist)
+    )
+    # E <- tapply(dd$dist, INDEX = list(dd$nactive, dd$groups), mean)
+    # sigma <- tapply(dd$dist, INDEX = list(dd$nactive, dd$groups), sd)
+    # 
+    # M <- tapply(dd$dist, INDEX = list(dd$nactive, dd$groups), median)
+    # hi <- tapply(dd$dist, INDEX = list(dd$nactive, dd$groups), quantile, 0.975)
+    # low <- tapply(dd$dist, INDEX = list(dd$nactive, dd$groups), quantile, 0.025)
+    # 
+    # df <- data.frame(dist = c(M), low = c(low), hi = c(hi), 
+    #                  groups = rep(colnames(M), each = nrow(M)),
+    #                  nactive = as.numeric(rep(rownames(M), ncol(M))),
+    #                  row.names = NULL)
     
-    M <- tapply(dd$dist, INDEX = list(dd$nactive, dd$groups), median)
-    hi <- tapply(dd$dist, INDEX = list(dd$nactive, dd$groups), quantile, 0.975)
-    low <- tapply(dd$dist, INDEX = list(dd$nactive, dd$groups), quantile, 0.025)
-    
-    df <- data.frame(dist = c(M), low = c(low), hi = c(hi), 
-                     groups = rep(colnames(M), each = nrow(M)),
-                     nactive = as.numeric(rep(rownames(M), ncol(M))),
-                     row.names = NULL)
-    
-    ylim_mean <- set_y_limits(distances, ylim, "mean")
+    ylim_mean <- set_y_limits(df, ylim, "mean")
     
     pmean <- ggplot2::ggplot( df, 
                               ggplot2::aes(x=nactive, y=dist, 
@@ -134,6 +156,9 @@ plot.combine.dist.compare <- function (distances, ylim = NULL, ylabs = c(NULL,NU
       ggplot2::scale_x_continuous(expand = c(0, 0)) +
       ggplot2::scale_y_continuous(expand = c(0, 0), limits = ylim_mean ) + 
       ggplot2::theme(legend.position = leg.pos)
+    if(!is.null(facet.group)) {
+      pmean <- pmean + ggplot2::facet_grid(stats::reformulate(facet.group))
+    }
   }
   
   plots <- list(posterior = ppost, mean = pmean)

@@ -1,6 +1,6 @@
 plot.distcompare <- function(distance = NULL, models = NULL, ylim = NULL, ylabs = c(NULL,NULL),
                              xlab = NULL, xlim = NULL,
-                             linesize = 1, pointsize = 1, ...) {
+                             linesize = 1, pointsize = 1, facet.group = NULL, ...) {
   
   mc <- match.call(expand.dots = TRUE)
   if(is.null(distance)) {
@@ -26,6 +26,9 @@ plot.distcompare <- function(distance = NULL, models = NULL, ylim = NULL, ylabs 
       ggplot2::ylab(ylabs[1]) + ggplot2::theme_bw() +
       ggplot2::scale_x_continuous(expand = c(0, 0), limits = xlim_post) +
       ggplot2::scale_y_continuous(expand = c(0, 0), limits = ylim_post )
+    if(!is.null(facet.group)) {
+      ppost <- ppost + facet_grid(facet.group)
+    }
   }
   
   if (!is.null(distance$mean)){
@@ -41,6 +44,9 @@ plot.distcompare <- function(distance = NULL, models = NULL, ylim = NULL, ylabs 
       ggplot2::ylab(ylabs[length(ylabs)]) + ggplot2::theme_bw() +
       ggplot2::scale_x_continuous(expand = c(0, 0), limits = xlim_mean) +
       ggplot2::scale_y_continuous(expand = c(0, 0), limits = ylim_mean )
+    if(!is.null(facet.group)) {
+      pmean <- pmean + facet_grid(facet.group)
+    }
   }
   
   plots <- list(posterior = ppost, mean = pmean)
@@ -71,15 +77,18 @@ set_y_limits <- function(distance_data, ylim, quantity){
       }
     } 
     if (is.list(ylim) & !is.null(ylim[[idx]])) return(ylim[[idx]])
-  }
-  
-  df <- distance_data[[idx]]
+  } 
+  # else {
+  #   return(NULL)
+  # }
+  df <- distance_data
   if (is.null(df)) return(NULL)
   if (is.null(df$dist)) return(NULL)
-  range.size <- diff(range(df$dist))
+  range.size <- max(df$hi - df$low)
   add.factor <- range.size * 1.2 - range.size
-  min_y <- max(0, min(df$dist) - add.factor)
-  max_y <- max(df$dist) + add.factor
+  min_y <- max(0, min(df$low) - add.factor)
+  max_y <- max(df$hi) + add.factor
+  max_y <- max(df$hi) * 1.1
   ylim <- c(min_y, max_y)
   return(ylim)
 }
@@ -101,13 +110,16 @@ set_x_limits <- function(distance_data, xlim, quantity){
       }
     } 
     if (is.list(xlim) & !is.null(xlim[[idx]])) return(xlim[[idx]])
-  }
+  } 
+  # else {
+  #   return(NULL)
+  # }
   
-  df <- distance_data[[idx]]
+  df <- distance_data
   if (is.null(df)) return(NULL)
   if (is.null(df$nzero)) return(NULL)
-  min_x <- min(df$nzero)
-  max_x <- max(df$nzero)
+  min_x <- min(df$nactive)
+  max_x <- max(df$nactive)
   xlim <- c(min_x, max_x)
   return(xlim)
 }

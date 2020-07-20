@@ -128,7 +128,7 @@ combine.WPR2 <- function(...) {
   return(cmb)
 }
 
-plot.WPR2 <- function(object, xlim = NULL, ylim = NULL, linesize =1, pointsize = 1, ...) {
+plot.WPR2 <- function(object, xlim = NULL, ylim = NULL, linesize = 1, pointsize = 1, facet.group = NULL, ...) {
   obj <- object
   stopifnot(inherits(obj, "WPR2"))
   dots <- list(...)
@@ -161,18 +161,31 @@ plot.WPR2 <- function(object, xlim = NULL, ylim = NULL, linesize =1, pointsize =
      xlab <- "Number of active coefficients" 
     }
     xlim <- set_x_limits_gen(obj$nactive, xlim)
-    
-    E <- tapply(obj$r2, INDEX = list(obj$nactive, obj$groups), mean)
-    # sigma <- tapply(obj$dist, INDEX = list(obj$nactive, obj$groups), sd)
-    
-    M <- tapply(obj$r2, INDEX = list(obj$nactive, obj$groups), median)
-    hi <- tapply(obj$r2, INDEX = list(obj$nactive, obj$groups), quantile, 0.975)
-    low <- tapply(obj$r2, INDEX = list(obj$nactive, obj$groups), quantile, 0.025)
-    
-    df <- data.frame(dist = c(M), low = c(low), hi = c(hi), 
-                     groups = rep(colnames(M), each = nrow(M)),
-                     nactive = as.numeric(rep(rownames(M), ncol(M))),
-                     row.names = NULL)
+    if(!is.null(facet.group)) {
+      grouping <- c("groups", facet.group, "nactive")
+    } else {
+      grouping <- c("groups", "nactive")
+    }
+    df <- obj %>% dplyr::group_by(.dots = grouping) %>% dplyr::summarise(
+      low = quantile(r2, 0.025),
+      hi = quantile(r2, 0.975),
+      dist = mean(r2)
+    )
+    # E <- tapply(obj$r2, INDEX = list(obj$nactive, obj$groups), mean)
+    # # sigma <- tapply(obj$dist, INDEX = list(obj$nactive, obj$groups), sd)
+    # 
+    # M <- tapply(obj$r2, INDEX = list(obj$nactive, obj$groups), median)
+    # hi <- tapply(obj$r2, INDEX = list(obj$nactive, obj$groups), quantile, 0.975)
+    # low <- tapply(obj$r2, INDEX = list(obj$nactive, obj$groups), quantile, 0.025)
+    # 
+    # df <- data.frame(dist = c(M), low = c(low), hi = c(hi), 
+    #                  groups = rep(colnames(M), each = nrow(M)),
+    #                  nactive = as.numeric(rep(rownames(M), ncol(M))),
+    #                  row.names = NULL)
+    # if(!is.null(facet.group)) {
+    #   fg <- tapply(obj[[facet.group]], INDEX = list(obj$nactive, obj$groups), FUN = function(x){x[1]})
+    #   df[[facet.group]] <- fg
+    # }
     plot <- ggplot2::ggplot( df, 
                      ggplot2::aes(x=nactive, y=dist, 
                                   color = groups, fill = groups,
@@ -205,7 +218,9 @@ plot.WPR2 <- function(object, xlim = NULL, ylim = NULL, linesize =1, pointsize =
       plot <- plot + ggplot2::theme(legend.position = "none")
     }
   }
-
+  if(!is.null(facet.group)) {
+    plot <- plot + ggplot2::facet_grid(stats::reformulate(facet.group))
+  }
   return(plot)
 }
 
