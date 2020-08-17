@@ -97,7 +97,7 @@ WPR2.distcompare <- function(Y=NULL, nu, ...) {
   
 }
 
-WPR2.limbs <- function(Y, nu, p = 2, method = "exact", base = NULL, ...) {
+WPR2.list <- function(Y, nu, p = 2, method = "exact", base = NULL, ...) {
   
   stopifnot(all(sapply(nu, inherits, "limbs")))
   
@@ -121,7 +121,7 @@ WPR2.limbs <- function(Y, nu, p = 2, method = "exact", base = NULL, ...) {
 setGeneric("WPR2", function(Y = NULL, nu, p = 2, method = "exact",...) UseMethod("WPR2"))
 setMethod("WPR2", c("Y" = "matrix", "nu" = "matrix"), WPR2.matrix)
 setMethod("WPR2", c("nu" = "distcompare"), WPR2.distcompare)
-
+setMethod("WPR2", c("nu" = "list"), WPR2.list)
 
 combine.WPR2 <- function(...) {
   if(...length()>1){
