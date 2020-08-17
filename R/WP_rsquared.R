@@ -31,7 +31,7 @@ WPR2.matrix <- function(Y, nu, p = 2, method = "exact", ...) {
                                 method = method, 
                                 ...)^p
   
-  r2 <- pmax(1 - wp_mod/wp_base,0)
+  r2 <- pmax(1 - wp_mod/wp_base, 0)
   output <- data.frame(r2 = r2, method = method)
   class(output) <- c("WPR2", class(output))
   return(output)
@@ -245,7 +245,6 @@ set_y_limits_gen <- function(vals, ylim){
   ylim <- c(0,1)
   return(ylim)
 }
-
 
 set_x_limits_gen <- function(vals, xlim){
   
