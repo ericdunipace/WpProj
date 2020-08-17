@@ -54,6 +54,8 @@ testthat::test_that("WPR2 works", {
   sel <- W2L1(x, post_mu, post_beta, penalty = "selection.lasso", method = "selection.variable")
   
   out <- list(test, proj, sel)
+  
+  
   dist <- distCompare(out, list(posterior = post_beta, mean = post_mu), p = 2, ground_p = 2, quantity = c("posterior", "mean"))
   
   r2 <- WPR2(Y = post_mu, nu = dist, p = 2, method = "exact")
@@ -74,8 +76,24 @@ testthat::test_that("WPR2 works", {
                        method = "exact", 
                        observation.orientation = "colwise")^2)
   
+  testthat::expect_silent(r2_limbs <- WPR2.limbs(post_mu, out, p = 2, method  ="exact"))
+  
+  names(out) <- c("BP", "L2", "relaxed bp")
+  r2_limbs <- WPR2.limbs(post_mu, out, p = 2, method  ="exact")
+  r2_limbs_check <- 1 - (limbs::wasserstein(post_mu, proj$eta[[1]],
+                                            p = 2, ground_p = 2,
+                                            method = "exact", 
+                                            observation.orientation = "colwise")^2/
+                           limbs::wasserstein(post_mu, 
+                                              matrix(colMeans(post_mu), nrow(post_mu),
+                                                     ncol(post_mu), byrow=TRUE),
+                                              p = 2, ground_p = 2,
+                                              method = "exact", 
+                                              observation.orientation = "colwise")^2)
+  
   testthat::expect_equivalent(r2$r2, r2_check)
   testthat::expect_equivalent(r2_mat[1,1], r2_mat_check)
+  testthat::expect_equivalent(r2_limbs$r2[r2_limbs$groups == "L2"][1], r2_limbs_check, )
 })
 
 testthat::test_that("WPR2 combining works", {

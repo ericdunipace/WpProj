@@ -102,11 +102,11 @@ WPR2.limbs <- function(Y, nu, p = 2, method = "exact", base = NULL, ...) {
   stopifnot(all(sapply(nu, inherits, "limbs")))
   
   df <- lapply(nu, function(nn) {
-              do.call("rbind", lapply(models[[j]]$eta, function(ee) WPR2.matrix(Y = Y, nu = ee, p = p, base = base)))
+              do.call("rbind", lapply(nn$eta, function(ee) WPR2.matrix(Y = Y, nu = ee, p = p, base = base)))
         })
   for(nn in seq_along(df)) {
-    df[[nn]]$groups <- names(nu)[[nn]]
     df[[nn]]$nactive <- nu[[nn]]$nzero
+    df[[nn]]$groups <- names(nu)[[nn]]
   }
   
   output <- do.call("rbind", df)
