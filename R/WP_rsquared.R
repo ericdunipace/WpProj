@@ -17,7 +17,15 @@ WPR2.matrix <- function(Y, nu, p = 2, method = "exact", ...) {
   
   wp_mod <- limbs::wasserstein(Y, nu, p = p, ground_p = p,
                            method = method, ...)^p
-  mu <- matrix(colMeans(Y), n, d, byrow=TRUE)
+  
+  stat <- if(p == 2) {
+    colMeans(Y)
+  } else if (p == 1) {
+    apply(Y, 2, median)
+  } else {
+    stop("Not yet implemented for p !=1 or p != 3")
+  }
+  mu <- matrix(stat, n, d, byrow=TRUE)
   # wp_base <- if(method == "exact") {
   #   mean(colSums((Y - mu)^p))
   # } else {
@@ -48,6 +56,59 @@ WPR2.distcompare <- function(Y=NULL, nu, ...) {
   
   stopifnot(p >= 1)
   
+  
+  if(!is.null(Y)) {
+    stopifnot(inherits(Y, "matrix"))
+    meth.table <- table(method)
+    method.use <- names(meth.table)[which.max(meth.table)]
+    wass.args <- list(X = Y, Y = as.matrix(rowMeans(Y)),
+                      p = as.numeric(p), method = method.use,
+                      ...)
+    wass.args <- wass.args[!duplicated(names(wass.args))]
+    argn <- lapply(names(wass.args), as.name)
+    names(argn) <- names(wass.args)
+    
+    wass.call <- as.call(c(list(as.name("wasserstein")), argn))
+    
+    max_vals <- eval(wass.call, envir = wass.args)
+    max_vec <- rep(max_vals, length(df$dist))
+    base <- "dist.from.expectation"
+  } else {
+    max_vals <- tapply(df$dist, df$groups, max)
+    max_vec <- max_vals[as.numeric(df$groups)]
+    base <- "dist.from.null"
+  }
+  
+  
+  
+  r2 <- pmax(1- df$dist^p/max_vec^p, 0)
+  
+  df$dist <- r2
+  df$p <- p
+  df$base <- base
+  colnames(df)[1] <- "r2"
+  
+  class(df) <- c("WPR2", class(df))
+  return(df)
+  
+}
+
+
+WPR2.limbs <- function(Y, nu, p = 2, method = "exact", ...) {
+  
+  stopifnot(all(sapply(nu, inherits, "limbs")))
+  
+  df <- lapply(nu, function(nn) {
+              do.call("rbind", lapply(models[[j]]$eta, function(ee) WPR2.matrix(Y = Y, nu = ee, p = p)))
+        })
+  for(nn in seq_along(df)) {
+    df[[nn]]$groups <- names(nu)[[nn]]
+    df[[nn]]$nactive <- nu[[nn]]$nzero
+  }
+  
+  output <- do.call("rbind", df)
+  
+  class(output) <- c("WPR2", "distcompare")
   
   if(!is.null(Y)) {
     stopifnot(inherits(Y, "matrix"))
