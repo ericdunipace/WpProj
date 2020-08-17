@@ -8,7 +8,7 @@ setClass("WPR2",
               base = "factor"),
          contains = "data.frame")
 
-WPR2.matrix <- function(Y, nu, p = 2, method = "exact", ...) {
+WPR2.matrix <- function(Y, nu, p = 2, method = "exact", base = NULL, ...) {
   
   stopifnot(p >= 1)
   
@@ -18,14 +18,18 @@ WPR2.matrix <- function(Y, nu, p = 2, method = "exact", ...) {
   wp_mod <- limbs::wasserstein(Y, nu, p = p, ground_p = p,
                            method = method, ...)^p
   
-  stat <- if(p == 2) {
-    colMeans(Y)
-  } else if (p == 1) {
-    apply(Y, 2, median)
+  if(is.null(base)) {
+    stat <- if(p == 2) {
+      colMeans(Y)
+    } else if (p == 1) {
+      apply(Y, 2, median)
+    } else {
+      stop("Not yet implemented for p !=1 or p != 3")
+    }
+    mu <- matrix(stat, n, d, byrow=TRUE)
   } else {
-    stop("Not yet implemented for p !=1 or p != 3")
+    mu <- matrix(base, n, d, byrow=TRUE)
   }
-  mu <- matrix(stat, n, d, byrow=TRUE)
   # wp_base <- if(method == "exact") {
   #   mean(colSums((Y - mu)^p))
   # } else {
@@ -39,7 +43,7 @@ WPR2.matrix <- function(Y, nu, p = 2, method = "exact", ...) {
                                 method = method, 
                                 ...)^p
   
-  r2 <- pmax(1 - wp_mod/wp_base, 0)
+  r2 <- 1 - wp_mod/wp_base # pmax(1 - wp_mod/wp_base, 0)
   output <- data.frame(r2 = r2, method = method)
   class(output) <- c("WPR2", class(output))
   return(output)
@@ -81,7 +85,7 @@ WPR2.distcompare <- function(Y=NULL, nu, ...) {
   
   
   
-  r2 <- pmax(1- df$dist^p/max_vec^p, 0)
+  r2 <- 1- df$dist^p/max_vec^p #pmax(1- df$dist^p/max_vec^p, 0)
   
   df$dist <- r2
   df$p <- p
@@ -93,13 +97,12 @@ WPR2.distcompare <- function(Y=NULL, nu, ...) {
   
 }
 
-
-WPR2.limbs <- function(Y, nu, p = 2, method = "exact", ...) {
+WPR2.limbs <- function(Y, nu, p = 2, method = "exact", base = NULL, ...) {
   
   stopifnot(all(sapply(nu, inherits, "limbs")))
   
   df <- lapply(nu, function(nn) {
-              do.call("rbind", lapply(models[[j]]$eta, function(ee) WPR2.matrix(Y = Y, nu = ee, p = p)))
+              do.call("rbind", lapply(models[[j]]$eta, function(ee) WPR2.matrix(Y = Y, nu = ee, p = p, base = base)))
         })
   for(nn in seq_along(df)) {
     df[[nn]]$groups <- names(nu)[[nn]]
@@ -110,39 +113,8 @@ WPR2.limbs <- function(Y, nu, p = 2, method = "exact", ...) {
   
   class(output) <- c("WPR2", "distcompare")
   
-  if(!is.null(Y)) {
-    stopifnot(inherits(Y, "matrix"))
-    meth.table <- table(method)
-    method.use <- names(meth.table)[which.max(meth.table)]
-    wass.args <- list(X = Y, Y = as.matrix(rowMeans(Y)),
-                      p = as.numeric(p), method = method.use,
-                      ...)
-    wass.args <- wass.args[!duplicated(names(wass.args))]
-    argn <- lapply(names(wass.args), as.name)
-    names(argn) <- names(wass.args)
-    
-    wass.call <- as.call(c(list(as.name("wasserstein")), argn))
-    
-    max_vals <- eval(wass.call, envir = wass.args)
-    max_vec <- rep(max_vals, length(df$dist))
-    base <- "dist.from.expectation"
-  } else {
-    max_vals <- tapply(df$dist, df$groups, max)
-    max_vec <- max_vals[as.numeric(df$groups)]
-    base <- "dist.from.null"
-  }
   
-  
-  
-  r2 <- pmax(1- df$dist^p/max_vec^p, 0)
-  
-  df$dist <- r2
-  df$p <- p
-  df$base <- base
-  colnames(df)[1] <- "r2"
-  
-  class(df) <- c("WPR2", class(df))
-  return(df)
+  return(output)
   
 }
 
