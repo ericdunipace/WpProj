@@ -76,10 +76,11 @@ testthat::test_that("WPR2 works", {
                        method = "exact", 
                        observation.orientation = "colwise")^2)
   
-  testthat::expect_silent(r2_limbs <- WPR2.limbs(post_mu, out, p = 2, method  ="exact"))
+  testthat::expect_silent(r2_limbs <- WPR2.list(post_mu, out, p = 2, method  ="exact"))
+  testthat::expect_silent(r2_limbs <- WPR2(post_mu, out, p = 2, method  ="exact"))
   
   names(out) <- c("BP", "L2", "relaxed bp")
-  r2_limbs <- WPR2.limbs(post_mu, out, p = 2, method  ="exact")
+  r2_limbs <- WPR2(post_mu, out, p = 2, method  ="exact")
   r2_limbs_check <- 1 - (limbs::wasserstein(post_mu, proj$eta[[1]],
                                             p = 2, ground_p = 2,
                                             method = "exact", 
