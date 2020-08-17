@@ -1,4 +1,4 @@
-test_that("distance compare gives correct values for wass", {
+testthat::test_that("distance compare gives correct values for wass", {
   
   set.seed(84370158)
   
@@ -26,14 +26,14 @@ test_that("distance compare gives correct values for wass", {
   out <- list(test, proj, sel)
   # debugonce(distCompare)
   dist <- distCompare(out, list(posterior = post_beta, mean = post_mu), p = 2, ground_p = 2, quantity = c("posterior", "mean"))
-  compost <- unlist(sapply(out, function(o) sapply(o$theta, function(tt)  SparsePosterior::wasserstein(tt, post_beta, 2, 2, "colwise","exact"))))
-  commean <- unlist(sapply(out, function(o) sapply(o$eta, function(tt)  SparsePosterior::wasserstein(tt, post_mu, 2, 2, "colwise","exact"))))
+  compost <- unlist(sapply(out, function(o) sapply(o$theta, function(tt)  limbs::wasserstein(tt, post_beta, 2, 2, "colwise","exact"))))
+  commean <- unlist(sapply(out, function(o) sapply(o$eta, function(tt)  limbs::wasserstein(tt, post_mu, 2, 2, "colwise","exact"))))
   
   testthat::expect_equal(dist$posterior$dist, compost)
   testthat::expect_equal(dist$mean$dist, commean)
 })
 
-test_that("distance compare gives correct values for mse", {
+testthat::test_that("distance compare gives correct values for mse", {
   
   set.seed(84370158)
   
@@ -62,14 +62,14 @@ test_that("distance compare gives correct values for mse", {
   out <- list(test, proj, sel)
   # debugonce(distCompare)
   mse <- distCompare(out, list(posterior = beta, mean =  mu), p = 2, ground_p = 2, quantity = c("posterior", "mean"), method = "mse")
-  compost <- unlist(sapply(out, function(o) sapply(o$theta, function(tt)  SparsePosterior::wasserstein(tt, as.matrix(beta), 2, 2, "colwise","exact"))))^2/p
-  commean <- unlist(sapply(out, function(o) sapply(o$eta, function(tt)  SparsePosterior::wasserstein(tt,  as.matrix(mu), 2, 2, "colwise","exact"))))^2/n
+  compost <- unlist(sapply(out, function(o) sapply(o$theta, function(tt)  limbs::wasserstein(tt, as.matrix(beta), 2, 2, "colwise","exact"))))^2/p
+  commean <- unlist(sapply(out, function(o) sapply(o$eta, function(tt)  limbs::wasserstein(tt,  as.matrix(mu), 2, 2, "colwise","exact"))))^2/n
   
   testthat::expect_equal(mse$posterior$dist, compost)
   testthat::expect_equal(mse$mean$dist, commean)
 })
 
-test_that("distance compare gives correct group names", {
+testthat::test_that("distance compare gives correct group names", {
 
   set.seed(84370158)
 
@@ -98,8 +98,8 @@ test_that("distance compare gives correct group names", {
   out <- list(Test=test, Projection = proj, Selection = sel)
   # debugonce(distCompare)
   mse <- distCompare(out, list(posterior = beta, mean =  mu), p = 2, ground_p = 2, quantity = c("posterior", "mean"), method = "mse")
-  compost <- unlist(sapply(out, function(o) sapply(o$theta, function(tt)  SparsePosterior::wasserstein(tt, as.matrix(beta), 2, 2, "colwise","exact"))))^2/p
-  commean <- unlist(sapply(out, function(o) sapply(o$eta, function(tt)  SparsePosterior::wasserstein(tt,  as.matrix(mu), 2, 2, "colwise","exact"))))^2/n
+  compost <- unlist(sapply(out, function(o) sapply(o$theta, function(tt)  limbs::wasserstein(tt, as.matrix(beta), 2, 2, "colwise","exact"))))^2/p
+  commean <- unlist(sapply(out, function(o) sapply(o$eta, function(tt)  limbs::wasserstein(tt,  as.matrix(mu), 2, 2, "colwise","exact"))))^2/n
 
   expectnames <- c('Test', 'Test', 'Test', 'Projection', 'Projection', 'Projection', 
                    'Projection', 'Projection', 'Projection', 'Projection', 'Projection', 
