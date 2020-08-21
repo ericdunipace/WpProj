@@ -111,7 +111,7 @@ WPR2.list <- function(Y, nu, p = 2, method = "exact", base = NULL, ...) {
   
   output <- do.call("rbind", df)
   
-  class(output) <- c("WPR2", "distcompare")
+  # class(output) <- c("WPR2", class(output))
   
   
   return(output)
