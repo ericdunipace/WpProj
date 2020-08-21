@@ -3,7 +3,7 @@ ranking <- function(fit, full, p = 2, minCoef = 1, maxCoef = 10, quantiles = c(0
   # rankMethod   <- match.arg(rankMethod)
   # rankFun      <- match.fun(rankMethod)
   
-  if (inherits(fit, "sparse-posterior")) {
+  if (inherits(fit, "limbs")) {
     coarse     <- fit$eta
     nzero      <- fit$nzero
     whichModel <- which(nzero >= minCoef & nzero <= maxCoef)
@@ -14,11 +14,11 @@ ranking <- function(fit, full, p = 2, minCoef = 1, maxCoef = 10, quantiles = c(0
     # rankLoss   <- apply(losses, 1, rankFun )
     rankLoss   <- sapply(coarse[whichModel],
                          function(x)
-                           sapply(1:nrow(x), function(y) SparsePosterior::wasserstein(transform(x[y,]), 
+                           sapply(1:nrow(x), function(y) limbs::wasserstein(transform(x[y,]), 
                                                                    full[y,], p, p, "colwise", 
                                                         "univariate.approximation.pwr")))
   } else{
-    if(is.list(fit)) stop("fit must be a sparse-posterior output")
+    if(is.list(fit)) stop("fit must be a limbs output")
     # if(!is.list(fit)) stop("fit must be a sparse-posterior output or a list of outputs from the SparsePosterior package")
     # if(!(all(sapply(fit, inherits, "sparse-posterior")))) {
     #   stop("Must be a fitted model from the SparsePosterior package")
