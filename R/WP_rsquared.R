@@ -44,7 +44,7 @@ WPR2.matrix <- function(Y, nu, p = 2, method = "exact", base = NULL, ...) {
                                 ...)^p
   
   r2 <- 1 - wp_mod/wp_base # pmax(1 - wp_mod/wp_base, 0)
-  output <- data.frame(r2 = r2, method = method)
+  output <- data.frame(r2 = r2, method = method, p = p)
   class(output) <- c("WPR2", class(output))
   return(output)
   
@@ -88,6 +88,7 @@ WPR2.distcompare <- function(Y=NULL, nu, ...) {
   r2 <- 1- df$dist^p/max_vec^p #pmax(1- df$dist^p/max_vec^p, 0)
   
   df$dist <- r2
+  df$method <- method
   df$p <- p
   df$base <- base
   colnames(df)[1] <- "r2"
