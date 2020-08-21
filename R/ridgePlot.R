@@ -11,7 +11,7 @@ ridgePlot <- function(fit, index = 1, minCoef = 1,maxCoef = 10, scale = 1, alpha
       ridgePlot(fit,i, minCoef, maxCoef, scale, alpha, full, transform, xlab)
     )
   } else {
-    if ( inherits(fit, "sparse-posterior") ) {
+    if ( inherits(fit, "limbs") ) {
       # n <- nrow(fit$eta[[1]])
       # s <- ncol(fit$eta[[1]])
       # whichModel <- which(fit$nzero <= maxCoef & fit$nzero>= minCoef)
@@ -26,10 +26,10 @@ ridgePlot <- function(fit, index = 1, minCoef = 1,maxCoef = 10, scale = 1, alpha
       s <- processed$s
       df_ridge <- processed$df
     }
-    else if (is.list(fit) & is.list(fit[[1]]) & inherits(fit[[1]][[1]],"sparse-posterior")) {
+    else if (is.list(fit) & is.list(fit[[1]]) & inherits(fit[[1]][[1]],"limbs")) {
       if (is.null(names(fit)) & length(fit) > 1) names(fit) <- paste0("Group ", 1:length(fit))
-      if (!(all(sapply(unlist(fit, recursive = FALSE), function(f) inherits(f, "sparse-posterior"))))) {
-        stop("Must be a fitted model from the 'SparsePosterior' package")
+      if (!(all(sapply(unlist(fit, recursive = FALSE), function(f) inherits(f, "limbs"))))) {
+        stop("Must be a fitted model from the 'limbs' package")
       }
       dfs <- vector("list", length(unlist(fit, recursive = FALSE)))
       count <- 1
@@ -45,8 +45,8 @@ ridgePlot <- function(fit, index = 1, minCoef = 1,maxCoef = 10, scale = 1, alpha
       df_ridge <- do.call("rbind", dfs)
     } else {
       if (is.null(names(fit)) & length(fit) > 1) names(fit) <- paste0("Model ", 1:length(fit))
-      if (!(all(sapply(fit, function(f) inherits(f, "sparse-posterior"))))) {
-        stop("Must be a fitted model from the 'SparsePosterior' package")
+      if (!(all(sapply(fit, function(f) inherits(f, "limbs"))))) {
+        stop("Must be a fitted model from the 'limbs' package")
       }
       # if ( length(idx) > 1) stop("Can only do ridgeline plots for one observation at a time")
       processed <- lapply(names(fit), function(f) ridgeData(fit[[f]],conditions, method = f))
@@ -127,7 +127,7 @@ ridgePlot <- function(fit, index = 1, minCoef = 1,maxCoef = 10, scale = 1, alpha
       ggplot2::xlab(xlab)
     
     # remove full from legend
-    if (!inherits(fit, "sparse-posterior")) {
+    if (!inherits(fit, "limbs")) {
       levs <- levels(df_ridge$Method)
       levs <- levs[levs != "Full"]
       cols <- c(ggsci::pal_jama("default")(length(levs)), "#e41a1c")
