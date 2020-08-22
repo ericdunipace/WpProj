@@ -1,6 +1,6 @@
 plot.distcompare <- function(distance = NULL, models = NULL, ylim = NULL, ylabs = c(NULL,NULL),
                              xlab = NULL, xlim = NULL,
-                             linesize = 1, pointsize = 1, facet.group = NULL, ...) {
+                             linesize = 0.5, pointsize = 1.5, facet.group = NULL, ...) {
   
   mc <- match.call(expand.dots = TRUE)
   if(is.null(distance)) {

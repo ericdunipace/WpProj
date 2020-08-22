@@ -162,7 +162,7 @@ combine.WPR2 <- function(...) {
   return(cmb)
 }
 
-plot.WPR2 <- function(object, xlim = NULL, ylim = NULL, linesize = 1, pointsize = 1, facet.group = NULL, ...) {
+plot.WPR2 <- function(object, xlim = NULL, ylim = NULL, linesize = 0.5, pointsize = 1.5, facet.group = NULL, ...) {
   obj <- object
   stopifnot(inherits(obj, "WPR2"))
   dots <- list(...)
