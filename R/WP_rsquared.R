@@ -28,7 +28,13 @@ WPR2.matrix <- function(Y, nu, p = 2, method = "exact", base = NULL, ...) {
     }
     mu <- matrix(stat, n, d, byrow=TRUE)
   } else {
-    mu <- matrix(base, n, d, byrow=TRUE)
+    if(!is.matrix(base)) base <- as.matrix(base)
+    if(ncol(base) == 1){
+      mu <- matrix(base, n, d, byrow=TRUE)
+    } else {
+      mu <- base
+      stopifnot(all(dim(base) %in% c(n,d)))
+    }
   }
   # wp_base <- if(method == "exact") {
   #   mean(colSums((Y - mu)^p))
@@ -103,7 +109,7 @@ WPR2.list <- function(Y, nu, p = 2, method = "exact", base = NULL, ...) {
   stopifnot(all(sapply(nu, inherits, "limbs")))
   
   df <- lapply(nu, function(nn) {
-              do.call("rbind", lapply(nn$eta, function(ee) WPR2.matrix(Y = Y, nu = ee, p = p, base = base)))
+              do.call("rbind", lapply(nn$eta, function(ee) WPR2.matrix(Y = Y, nu = ee, p = p, base = base, ...)))
         })
   for(nn in seq_along(df)) {
     df[[nn]]$nactive <- nu[[nn]]$nzero
@@ -168,15 +174,16 @@ plot.WPR2 <- function(object, xlim = NULL, ylim = NULL, linesize = 0.5, pointsiz
   dots <- list(...)
   alpha <- dots$alpha
   base_size <- dots$base_size
-  ribbon <- dots$ribbon
+  CI <- dots$CI
   xlab <- dots$xlab
   ylab <- dots$ylab
   leg.pos <- dots$legend.position
-  if(is.null(ribbon)) ribbon <- FALSE
+  if(is.null(CI)) CI <- "none"
   if(is.null(alpha)) alpha <- 0.3
   if(is.null(base_size)) base_size <- 11
   if(is.null(xlab)) xlab <- "Number of active coefficients"
   if(is.null(leg.pos)) leg.pos <- NULL
+  CI <- match.arg(CI, c("none", "ribbon","bar"))
   
   wp_calc_method <- obj$method
   opt_method <- obj$groups
@@ -224,9 +231,9 @@ plot.WPR2 <- function(object, xlim = NULL, ylim = NULL, linesize = 0.5, pointsiz
                      ggplot2::aes(x=nactive, y=dist, 
                                   color = groups, fill = groups,
                                   group=groups ))
-    if(ribbon) {
+    if(CI == "ribbon") {
       plot <- plot + ggplot2::geom_ribbon(ggplot2::aes(ymin = low, ymax = hi), alpha = alpha, linetype=0)
-    } else {
+    } else if(CI == "bar") {
       plot <- plot + ggplot2::geom_errorbar(ggplot2::aes(ymin = low, ymax = hi), alpha = alpha, position = ggplot2::position_dodge(width=0.25))
     }
     plot <- plot + ggplot2::geom_line(position = ggplot2::position_dodge(width=0.25), size = linesize) +

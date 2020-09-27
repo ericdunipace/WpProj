@@ -41,10 +41,12 @@ plot.combine.dist.compare <- function (distances, ylim = NULL, ylabs = c(NULL,NU
   dots <- list(...)
   alpha <- dots$alpha
   base_size <- dots$base_size
-  ribbon <- dots$ribbon
+  
+  CI <- dots$CI
+  if(is.null(CI)) CI <- "none"
+  CI <- match.arg(CI, c("none","ribbon","bar"))
   xlab <- dots$xlab
   leg.pos <- dots$legend.position
-  if(is.null(ribbon)) ribbon <- FALSE
   if(is.null(alpha)) alpha <- 0.3
   if(is.null(base_size)) base_size <- 11
   if(is.null(xlab)) xlab <- "Number of active coefficients"
@@ -90,9 +92,9 @@ plot.combine.dist.compare <- function (distances, ylim = NULL, ylabs = c(NULL,NU
                               ggplot2::aes(x=nactive, y=dist, 
                                            color = groups, fill = groups,
                                            group=groups ))
-    if(ribbon) {
+    if(CI == "ribbon") {
       ppost <- ppost + ggplot2::geom_ribbon(ggplot2::aes(ymin = low, ymax = hi), alpha = alpha, linetype=0)
-    } else {
+    } else if (CI == "bar") {
       ppost <- ppost + ggplot2::geom_errorbar(ggplot2::aes(ymin = low, ymax = hi), alpha = alpha, position = ggplot2::position_dodge(width=0.25))
     }
     ppost <- ppost + ggplot2::geom_line(position = ggplot2::position_dodge(width=0.25)) +
@@ -141,9 +143,9 @@ plot.combine.dist.compare <- function (distances, ylim = NULL, ylabs = c(NULL,NU
                               ggplot2::aes(x=nactive, y=dist, 
                                            color = groups, fill = groups,
                                            group=groups ))
-    if(ribbon) {
+    if(CI == "ribbon") {
       pmean <- pmean + ggplot2::geom_ribbon(ggplot2::aes(ymin = low, ymax = hi), alpha = alpha, linetype=0)
-    } else {
+    } else if (CI == "bar") {
       pmean <- pmean + ggplot2::geom_errorbar(ggplot2::aes(ymin = low, ymax = hi), alpha = alpha, position = ggplot2::position_dodge(width=0.25))
     }
     pmean <- pmean + ggplot2::geom_line(position = ggplot2::position_dodge(width=0.25)) +
