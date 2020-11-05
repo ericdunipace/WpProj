@@ -168,7 +168,8 @@ combine.WPR2 <- function(...) {
   return(cmb)
 }
 
-plot.WPR2 <- function(object, xlim = NULL, ylim = NULL, linesize = 0.5, pointsize = 1.5, facet.group = NULL, ...) {
+plot.WPR2 <- function(x, xlim = NULL, ylim = NULL, linesize = 0.5, pointsize = 1.5, facet.group = NULL, ...) {
+  object <- x
   obj <- object
   stopifnot(inherits(obj, "WPR2"))
   dots <- list(...)
@@ -244,7 +245,7 @@ plot.WPR2 <- function(object, xlim = NULL, ylim = NULL, linesize = 0.5, pointsiz
       ggplot2::xlab(xlab) + 
       ggplot2::ylab(ylab) + ggplot2::theme_bw(base_size) +
       ggplot2::scale_x_continuous(expand = c(0, 0), limits = xlim) +
-      ggplot2::scale_y_continuous(expand = c(0, 0), limits = ylim ) + 
+      ggplot2::scale_y_continuous(expand = c(0.01, 0.0), limits = ylim ) + 
       ggplot2::theme(legend.position = leg.pos)
   } else {
     plot <- ggplot2::ggplot(data = obj, mapping = ggplot2::aes(y = r2, fill = groups)) +
@@ -253,7 +254,7 @@ plot.WPR2 <- function(object, xlim = NULL, ylim = NULL, linesize = 0.5, pointsiz
       ggplot2::xlab(xlab) + 
       ggplot2::ylab(ylab) + ggplot2::theme_bw(base_size) +
       ggplot2::scale_x_continuous(expand = c(0, 0), limits = xlim) +
-      ggplot2::scale_y_continuous(expand = c(0, 0), limits = ylim ) + 
+      ggplot2::scale_y_continuous(expand = c(0.01, 0), limits = ylim ) + 
       ggplot2::theme(legend.position = leg.pos)
     if(nrow(obj) == 1) {
       plot <- plot + ggplot2::theme(legend.position = "none")
@@ -264,6 +265,7 @@ plot.WPR2 <- function(object, xlim = NULL, ylim = NULL, linesize = 0.5, pointsiz
   }
   return(plot)
 }
+setMethod("plot", c("x" = "WPR2"), plot.WPR2)
 
 set_y_limits_gen <- function(vals, ylim){
   if (!is.null(ylim)) {
@@ -277,13 +279,13 @@ set_y_limits_gen <- function(vals, ylim){
       stop("ylim must be a numeric vector")
     }
   }
-  if(is.null(vals)) return(c(0,1))
+  if(is.null(vals)) return(ylim)
   # range.size <- diff(range(vals))
   # add.factor <- range.size * 1.2 - range.size
   # min_y <- max(0, min(vals) - add.factor)
   # max_y <- max(vals) + add.factor
   # ylim <- c(min_y, max_y)
-  ylim <- c(0,1)
+  # ylim <- c(0,1)
   return(ylim)
 }
 

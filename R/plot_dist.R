@@ -1,7 +1,7 @@
-plot.distcompare <- function(distance = NULL, models = NULL, ylim = NULL, ylabs = c(NULL,NULL),
+plot.distcompare <- function(x = NULL, models = NULL, ylim = NULL, ylabs = c(NULL,NULL),
                              xlab = NULL, xlim = NULL,
                              linesize = 0.5, pointsize = 1.5, facet.group = NULL, ...) {
-  
+  distance <- x
   mc <- match.call(expand.dots = TRUE)
   if(is.null(distance)) {
     distance <- distCompare(models, ...)
@@ -138,3 +138,6 @@ set_equal_y_limits.plotcompare <- function(distance_data){
   }
   return(distance_data)
 }
+
+setMethod("plot", c("x" = "distcompare"), plot.distcompare)
+setMethod("print", c("x" = "plotcompare"), print.plotcompare)

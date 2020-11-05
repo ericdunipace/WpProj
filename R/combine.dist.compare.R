@@ -36,7 +36,8 @@ combine.dist.compare <- function(distances) {
 }
 
 
-plot.combine.dist.compare <- function (distances, ylim = NULL, ylabs = c(NULL,NULL), facet.group = NULL, ...) {
+plot.combine.dist.compare <- function (x, ylim = NULL, ylabs = c(NULL,NULL), facet.group = NULL, ...) {
+  distances <- x
   stopifnot(inherits(distances, "combine.dist.compare"))
   dots <- list(...)
   alpha <- dots$alpha
@@ -257,3 +258,7 @@ print.plotrank <- function(x) {
     print(x[[i]])
   }
 }
+
+setMethod("plot", c("x" ="combine.dist.compare"), plot.combine.dist.compare)
+setMethod("print", c("x" ="plotcombine"), print.plotcombine)
+setMethod("print", c("x" ="plotrank"), print.plotrank)
