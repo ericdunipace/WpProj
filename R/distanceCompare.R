@@ -3,6 +3,22 @@ setClass("distcompare",
               mean = "data.frame", 
               p = "numeric"))
 
+#' Title
+#'
+#' @param models Models from WpProj methods
+#' @param target The target to compare the methods to. Should be a list with slots "posterior" to compare the parameters and "mean" to compare predictions
+#' @param p The power parameter of the Wasserstein distance
+#' @param ground_p The power of the distance metric. Typically set the same as `p`
+#' @param method Which approximation to the Wasserstein distance to use. Should be one of "exact", "sinkhorn", "greenkhorn", "gandkhorn", "randkhorn", or "hilbert".
+#' @param quantity Should the function target the "posterior" or the "mean". Can choose both.
+#' @param parallel Parallel backend to use for the `foreach` package
+#' @param transform Transformation function for the predictions.
+#' @param ... other options passed to the wasserstein distance function
+#'
+#' @return an object of class `distancecompare` with slots `posterior`, `mean`, and `p`.
+#' @export
+#'
+#' @examples
 distCompare <- function(models, target = list(posterior = NULL, mean = NULL), p = 2, ground_p = 2, 
                          method = "exact", 
                          quantity = c("posterior","mean"),
@@ -288,6 +304,12 @@ set_equal_y_limits.distcompare <- function(distance_data){
   return(ylim)
 }
 
+#' ranks distcompare objects
+#'
+#' @param distances Distcompare object
+#'
+#' @return ranks of distcompare object
+#' @export
 rank.distCompare <- function(distances) {
   if(!is.distcompare(distances)) stop("Must be distcompare object")
   rank.fun <- function(distance, quant) {

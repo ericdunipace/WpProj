@@ -1,3 +1,21 @@
+#' p-Wasserstein linear projections with an \eqn{L_1} penalty
+#'
+#' @param X matrix of covariates
+#' @param Y matrix of predictions
+#' @param theta optional parameter matrix for selection methods.
+#' @param power power of the Wasserstein distance
+#' @param penalty Form of penalty. One of "lasso", "ols", "mcp", "elastic.net","selection.lasso", "scad", "mcp.net", "scad.net", "grp.lasso", "grp.lasso.net", "grp.mcp","grp.scad", "grp.mcp.net", "grp.scad.net", "sparse.grp.lasso"
+#' @param model.size How many coefficients should final model have
+#' @param lambda penalty parameter
+#' @param nlambda number of lambdas to explore
+#' @param lambda.min.ratio minimum ratio of max to min lambda
+#' @param gamma Tuning parameter for SCAD and MCP methods
+#' @param maxit maximum iterations for optimization
+#' @param tol tolerance for convergence
+#' @param ... arguments passed to other methods such as Wasserstein distance
+#'
+#' @return object of class `WpProj`
+#' @export
 WPL1 <- function(X, Y=NULL, theta = NULL, power = 2.0,
                  penalty =  c("lasso", "ols", "mcp", "elastic.net",
                               "selection.lasso",

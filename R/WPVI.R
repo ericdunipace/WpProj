@@ -1,7 +1,21 @@
+#' p-Wasserstein variable importance
+#'
+#' @param X covariates
+#' @param Y predictions
+#' @param theta parameters from prediction
+#' @param pred.fun prediction function. must take variables x, theta
+#' @param p Power of Wasserstein power
+#' @param ground_p Power of distance metric
+#' @param transport.method Transport methods. One of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert"
+#' @param epsilon Hyperparameter for sinkhorn iterations
+#' @param OTmaxit maximum number of iterations for the Wasserstein method
+#' @param display.progress Display intermediate progress
+#' @param parallel foreach backend
+#'
+#' @return
+#' @export
 WPVI <- function(X, Y, theta, pred.fun = NULL, p = 2, ground_p = 2,
-                 transport.method = c("exact", "sinkhorn", "hilbert","rank",
-                                      "univariate.approximation.pwr",
-                                      "univariate.approximation"),
+                 transport.method = transport_options(),
                  epsilon = 0.05,
                  OTmaxit = 100,
                  display.progress = FALSE,

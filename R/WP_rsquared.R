@@ -8,6 +8,20 @@ setClass("WPR2",
               base = "factor"),
          contains = "data.frame")
 
+#' \eqn{W_p R ^2} function to evaluate performance
+#'
+#' @param Y Predictions of interest
+#' @param nu A matrix of competing predictions, a list of matrices from competing predictions or the result from \code{\link{distCompare}}
+#' @param p Power of the wasserstein distance
+#' @param method Method for calculating Wasserstein distance
+#' @param ... Arguments passed to Wasserstein distance calculation. See \code{\link{wasserstein}}
+#'
+#' @return \eqn{W_p R ^2} values
+#' @export
+WPR2 <- function(Y = NULL, nu, p = 2, method = "exact", ...) UseMethod("WPR2")
+
+#' @rdname WPR2
+#' @export
 WPR2.matrix <- function(Y, nu, p = 2, method = "exact", base = NULL, ...) {
   
   stopifnot(p >= 1)
@@ -56,6 +70,8 @@ WPR2.matrix <- function(Y, nu, p = 2, method = "exact", base = NULL, ...) {
   
 }
 
+#' @rdname WPR2
+#' @export
 WPR2.distcompare <- function(Y=NULL, nu, ...) {
   
   stopifnot(inherits(nu, "distcompare"))
@@ -104,6 +120,8 @@ WPR2.distcompare <- function(Y=NULL, nu, ...) {
   
 }
 
+#' @rdname WPR2
+#' @export
 WPR2.list <- function(Y, nu, p = 2, method = "exact", base = NULL, ...) {
   
   stopifnot(all(sapply(nu, inherits, "WpProj")))
@@ -125,11 +143,18 @@ WPR2.list <- function(Y, nu, p = 2, method = "exact", base = NULL, ...) {
   
 }
 
-setGeneric("WPR2", function(Y = NULL, nu, p = 2, method = "exact",...) UseMethod("WPR2"))
-setMethod("WPR2", c("Y" = "matrix", "nu" = "matrix"), WPR2.matrix)
-setMethod("WPR2", c("nu" = "distcompare"), WPR2.distcompare)
-setMethod("WPR2", c("nu" = "list"), WPR2.list)
 
+# setMethod("WPR2", c("Y" = "matrix", "nu" = "matrix"), WPR2.matrix)
+# setMethod("WPR2", c("nu" = "distcompare"), WPR2.distcompare)
+# setMethod("WPR2", c("nu" = "list"), WPR2.list)
+
+
+#' Combine \eqn{W_p R^2} objects
+#'
+#' @param ... List of \eqn{W_p R^2} objects
+#'
+#' @return
+#' @export
 combine.WPR2 <- function(...) {
   if(...length()>1){
     objects <- list(...)
@@ -168,6 +193,18 @@ combine.WPR2 <- function(...) {
   return(cmb)
 }
 
+#' Plot \eqn{W_p R^2} objects
+#'
+#' @param x \eqn{W_p R^2} object
+#' @param xlim x-axis limits
+#' @param ylim y-axis limits
+#' @param linesize linesize for \link[ggplot2]{geom_line}
+#' @param pointsize point size for \link[ggplot2]{geom_point}
+#' @param facet.group Group to do facet_grid by
+#' @param ... currently no effect
+#'
+#' @return Plot
+#' @export
 plot.WPR2 <- function(x, xlim = NULL, ylim = NULL, linesize = 0.5, pointsize = 1.5, facet.group = NULL, ...) {
   object <- x
   obj <- object

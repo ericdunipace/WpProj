@@ -1,3 +1,18 @@
+#' Plot distcompare objects
+#'
+#' @param x object of class `distcompare`
+#' @param models Can give list of `WpProj` outputs and have them turned into `distcompare` object for immediate plotting
+#' @param ylim Limits on y-axis
+#' @param ylabs Y-axis labels
+#' @param xlab  X-axis labels
+#' @param xlim  Limite of x-axis
+#' @param linesize How big to make the lines?
+#' @param pointsize How big to make the points?
+#' @param facet.group Should the plots be turned into a \link[ggplot2]{facet_grid}?
+#' @param ... Additional options for the wasserstein distance if just inputing raw `WpProj` models
+#'
+#' @return A `ggplot2` object
+#' @export
 plot.distcompare <- function(x = NULL, models = NULL, ylim = NULL, ylabs = c(NULL,NULL),
                              xlab = NULL, xlim = NULL,
                              linesize = 0.5, pointsize = 1.5, facet.group = NULL, ...) {
@@ -50,10 +65,14 @@ plot.distcompare <- function(x = NULL, models = NULL, ylim = NULL, ylabs = c(NUL
   }
   
   plots <- list(posterior = ppost, mean = pmean)
-  class(plots) <- c("plotcompare","sparse-posterior")
+  class(plots) <- c("plotcompare","WpProj")
   return(plots)
 }
 
+setClass("plotcompare")
+
+#' @rdname print
+#' @export
 print.plotcompare <- function(x) {
   for(i in 1:length(x)) {
     if(is.null(x[[i]])) next

@@ -1,3 +1,18 @@
+#' p-Wasserstein projections with an L0 penalty
+#'
+#' @param X matrix of covariates
+#' @param Y matrix of predictions
+#' @param theta optional matrix of coefficients from original model, if relevant 
+#' @param p power of the Wasserstein distance
+#' @param ground_p power of the distance metric
+#' @param method One of "selection.variable" or "projection". Methods decide whether covariate matrix in `theta` is preserved ("selection.variable") or if new projections are generated ("projection")
+#' @param transport.method Method for wasserstein distance. One of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert"
+#' @param epsilon hyperparameter for sinkhorn iterations
+#' @param maxit max iteration for sinkhorn iterations
+#' @param parallel foreach backend
+#'
+#' @return `WpProj` object
+#' @export
 WPL0 <- function(X, Y = NULL, theta, p = 2, ground_p = 2,
                  method = c("selection.variable", "projection"),
                  transport.method = transport_options(),

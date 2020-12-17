@@ -1,3 +1,20 @@
+#' Ridge plots for range of coefficients
+#'
+#' @param fit A `WpProj` object of list of `WpProj` objects
+#' @param index The observation number to select. Can be a vector
+#' @param minCoef The minimum number of coefficients to use
+#' @param maxCoef The maximum number of coefficients to use
+#' @param scale How the densities should be scale
+#' @param alpha Alpha term from ggplot2 object
+#' @param full "True" prediction to compare to
+#' @param transform tranform for predictions
+#' @param xlab x-axis label
+#' @param bandwidth Bandwidth for kernel
+#'
+#' @return a `ggridges` plot
+#' @export
+#'
+#' @examples
 ridgePlot <- function(fit, index = 1, minCoef = 1,maxCoef = 10, scale = 1, alpha = 0.5, full = NULL, transform = function(x){x}, xlab = "Predictions",
                       bandwidth = NULL) {
   

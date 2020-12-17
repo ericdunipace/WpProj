@@ -1,3 +1,23 @@
+#' p-Wasserstein distance linear projections using a stepwise method
+#'
+#' @param X matrix of covariates
+#' @param Y matrix of predictions
+#' @param theta optional parameter matrix for selection methods.
+#' @param force Any covariates to force into the model?
+#' @param p Power of the wasserstein distance
+#' @param ground_p Distance metric power. Typically the same as `p`
+#' @param direction forward or backward selection
+#' @param method "selection.variable" or "projection
+#' @param transport.method Method for calculating the wasserstein distance. One of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert"
+#' @param epsilon hyperparameter if using sinkhorn iterations to approximate OT
+#' @param OTmaxit maximum number of iterations for the opt?imal transport methods
+#' @param calc.theta should we get the linear coefficients
+#' @param model.size Maximum model size
+#' @param parallel foreach backend
+#' @param display.progress Display intermediate progress
+#'
+#' @return
+#' @export
 WPSW <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
                         direction = c("backward","forward"), 
                         method=c("selection.variable","scale","projection"),

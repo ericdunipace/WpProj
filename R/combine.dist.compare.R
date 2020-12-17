@@ -1,3 +1,13 @@
+setClass("combine.dist.compare")
+
+#' Combine distance calculationg from the distCompare function
+#'
+#' @param distances distcompar object
+#'
+#' @return class "combine.dist.compare", the combined combine.distcompare objects as returned by \link{distCompare} function
+#' @export
+#'
+#' @examples 
 combine.dist.compare <- function(distances) {
   stopifnot(is.list(distances))
   if (!all(sapply(distances, is.distcompare))) {
@@ -36,6 +46,16 @@ combine.dist.compare <- function(distances) {
 }
 
 
+#' plot combine.dist.compare objects
+#'
+#' @param x combine.dist compare objects
+#' @param ylim y-axis limits
+#' @param ylabs y-axis labels
+#' @param facet.group groups to facet by
+#' @param ... additional plotting parameters like alpha
+#'
+#' @return
+#' @export
 plot.combine.dist.compare <- function (x, ylim = NULL, ylabs = c(NULL,NULL), facet.group = NULL, ...) {
   distances <- x
   stopifnot(inherits(distances, "combine.dist.compare"))
@@ -169,6 +189,7 @@ plot.combine.dist.compare <- function (x, ylim = NULL, ylabs = c(NULL,NULL), fac
   return(plots)
 }
 
+setClass("plotcombine")
 print.plotcombine <- function(x) {
   for(i in 1:length(x)) {
     if(is.null(x[[i]])) next
@@ -176,6 +197,18 @@ print.plotcombine <- function(x) {
   }
 }
 
+
+#' Plot the rankings on the combine.dist.compare objects
+#'
+#' @param distances combine.dist.compare objects
+#' @param ylim y-axis limits
+#' @param ylabs y-axis labels
+#' @param ... additional plot arguments like alpha parameter in ggplot2
+#'
+#' @return object of plotrank
+#' @export
+#'
+#' @examples
 plot_ranks <- function(distances, ylim = NULL, ylabs = c(NULL,NULL), ...) {
   stopifnot(inherits(distances, "combine.dist.compare"))
   dots <- list(...)
@@ -252,6 +285,15 @@ plot_ranks <- function(distances, ylim = NULL, ylabs = c(NULL,NULL), ...) {
   return(plots)
 }
 
+setClass("plotrank")
+
+#' Prints the plotrank object
+#'
+#' @param x 
+#'
+#' @return plots the plotrank objects
+#' @rdname print
+#' @export
 print.plotrank <- function(x) {
   for(i in 1:length(x)) {
     if(is.null(x[[i]])) next

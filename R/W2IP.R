@@ -1,3 +1,21 @@
+#' 2-Wasserstein distance selection by Integer Programming
+#'
+#' @param X Covariates
+#' @param Y Predictions from arbitrary model
+#' @param theta Parameters of original linear model. Required
+#' @param transport.method Method for Wasserstein distance calculation. Should be one of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert".
+#' @param model.size Maximum number of coefficients in interpretable model
+#' @param infimum.maxit Maximum iterations to alternate binary program and Wasserstein distance calculation
+#' @param tol Tolerance for convergence of coefficients
+#' @param solution.method solver to use. Must be one of "cone","lp", "cplex", "gurobi","mosek"
+#' @param display.progress Should progress be printed?
+#' @param parallel foreach back end
+#' @param ... Extra args to wasserstein distance methods
+#'
+#' @return
+#' @export
+#'
+#' @examples
 W2IP <- function(X, Y=NULL, theta,
                  transport.method = transport_options(),
                  model.size = NULL,

@@ -1,3 +1,28 @@
+#' p-Wasserstein distance projections using simulated annealing
+#'
+#' @param X Covariate vector
+#' @param Y Predictions
+#' @param theta optional matrix of parameters for generating predictions
+#' @param force any covariates to force into the model?
+#' @param p power of the wassersetin distance
+#' @param ground_p power of the distance metric. Typically same as `p`
+#' @param model.size Maximum number of coefficients
+#' @param iter Maximum number of iterations
+#' @param temps number of temperatures
+#' @param max.time maximum time in seconds to run
+#' @param const maximum value for simulated annealing distance
+#' @param proposal proposal function. There is a default method but can provide your own with parameters xty, cur, idx, force, d, method
+#' @param options options for simulated annealing
+#' @param display.progress 
+#' @param parallel foreach backend
+#' @param get.theta Should the model save the linear coefficients?
+#' @param xtx precomputed crossproduct \code{crossprod(X,X)}
+#' @param xty precomputed \code{crossprod(X, Y)}
+#'
+#' @return
+#' @export
+#'
+#' @examples
 WPSA <- function(X, Y=NULL, theta, 
                  force = NULL, p = 2, ground_p = 2, model.size = 3,
                  # groups = NULL,

@@ -1,4 +1,33 @@
-W2L1 <- function(X, Y=NULL, theta = NULL, family="gaussian", 
+#' 2-Wasserstein distance linear projections with an \eqn{L_1} penalty
+#'
+#' @param X matrix of covariates
+#' @param Y matrix of predictions
+#' @param theta optional parameter matrix for selection methods.
+#' @param penalty Form of penalty. One of "lasso", "ols", "mcp", "elastic.net","selection.lasso", "scad", "mcp.net", "scad.net", "grp.lasso", "grp.lasso.net", "grp.mcp","grp.scad", "grp.mcp.net", "grp.scad.net", "sparse.grp.lasso"
+#' @param method "selection.variable" or "projection
+#' @param transport.method Method for calculating the wasserstein distance. One of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert" 
+#' @param epsilon 
+#' @param OTmaxit 
+#' @param model.size 
+#' @param lambda lambda for lasso. See \link[oem]{oem}.
+#' @param nlambda Number of lambda values. See \link[oem]{oem}.
+#' @param lambda.min.ratio Minimum lambda ratio for self selected lambda. See \link[oem]{oem}.
+#' @param alpha elastic net mixing. See \link[oem]{oem}.
+#' @param gamma tuning parameters for SCAD and MCP. See \link[oem]{oem}.
+#' @param tau mixing parameter for sparse group lasso. See \link[oem]{oem}.
+#' @param groups A vector of grouping values. See \link[oem]{oem}.
+#' @param penalty.factor Penalty factor for OEM. See \link[oem]{oem}.
+#' @param group.weights Weights for group lasso. See \link[oem]{oem}.
+#' @param maxit Max iteration for OEM. See \link[oem]{oem}.
+#' @param tol Tolerance for OEM. See \link[oem]{oem}.
+#' @param irls.maxit IRLS max iterations for OEM. See \link[oem]{oem}.
+#' @param irls.tol IRLS tolerance for OEM. See \link[oem]{oem}.
+#' @param infimum.maxit Maximum number of iterations alternating optimization and Wasserstein distance calculation. Irrelevant for projection method.
+#' @param display.progress Display intermediate progress?
+#'
+#' @return Object of class `WpProj`
+#' @export
+W2L1 <- function(X, Y=NULL, theta = NULL, 
                  penalty =  c("lasso", "ols", "mcp", "elastic.net", 
                               "selection.lasso",
                               "scad", "mcp.net", 
@@ -29,7 +58,8 @@ W2L1 <- function(X, Y=NULL, theta = NULL, family="gaussian",
 {
   this.call <- as.list(match.call()[-1])
   
-  family <- match.arg(family)
+  family <- "gaussian"
+  # family <- match.arg(family)
   if ("penalty" %in% names(this.call)) {
     penalty <- match.arg(penalty, several.ok = TRUE)
   }

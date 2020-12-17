@@ -1,3 +1,20 @@
+#' 1-Wasserstein projection
+#'
+#' @param X Covariates
+#' @param Y Predictions from arbitrary model
+#' @param theta Parameters of original linear model. Optional.
+#' @param penalty penalty term to use. One of "none", "lasso","scad","mcp"
+#' @param model.size Maximum number of coefficients in interpretable model
+#' @param lambda Lambdas to use
+#' @param lambda.min.ratio Minimum lambda to select if choosing lambdas using default methods
+#' @param nlambda number of lambdas to look through
+#' @param gamma parameter for SCAD and MCP methods
+#' @param display.progress Print intermediate output?
+#' @param solver Solver to use. Must be one of "rqPen", "gurobi", "mosek", though "mosek" is preferred.
+#' @param ... options to pass to solvers
+#'
+#' @return `WpProj` object
+#' @export
 W1L1 <- function(X, Y, theta = NULL, penalty = c("none", "lasso","scad","mcp"), 
                  model.size = NULL,
                  lambda = numeric(0), 

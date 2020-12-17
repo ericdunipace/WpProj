@@ -1,3 +1,15 @@
+#' Calculate Wasserstein distances
+#'
+#' @param X Matrix for first group
+#' @param Y Matrix for second group
+#' @param p Powr of the wasserstein distance
+#' @param ground_p Powr of the distance metric. Usually same as `p`
+#' @param observation.orientation Are observations unique by rows or colummns? Set with "colwise" or "rowwise"
+#' @param method "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn", "hilbert"
+#' @param ... additional options for sinkhorn based methods. `epsilon` and `niter` determining the hyperparameters for the negative entropy penalty
+#'
+#' @return
+#' @export
 wasserstein <- function (X, Y, p = 2, ground_p = 2, observation.orientation = c("colwise","rowwise"), 
                          method = c("exact", "sinkhorn", "greenkhorn",
                                     "randkhorn", "gandkhorn",

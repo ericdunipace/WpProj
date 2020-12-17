@@ -1,3 +1,31 @@
+#' Run the Hahn-Carvalho method
+#'
+#' @param X Covariates
+#' @param Y Predictions
+#' @param theta Parameters
+#' @param family Family for method. See \link[oem]{oem}.
+#' @param penalty Penalty function. See \link[oem]{oem}.
+#' @param method Should we run a selection variable methodology or projection?
+#' @param lambda lambda for lasso. See \link[oem]{oem} for this and all options below
+#' @param nlambda Number of lambda values.
+#' @param lambda.min.ratio Minimum lambda ratio for self selected lambda
+#' @param alpha elastic net mixing.
+#' @param gamma tuning parameters for SCAD and MCP
+#' @param tau mixing parameter for sparse group lasso
+#' @param groups A vector of grouping values
+#' @param penalty.factor Penalty factor for OEM.
+#' @param group.weights Weights for groupped lasso
+#' @param maxit Max iteration for OEM
+#' @param tol Tolerance for OEM
+#' @param irls.maxit IRLS max iterations for OEM
+#' @param irls.tol IRLS tolerance for OEM
+#' @param intercept Should the method include an intercept
+#'
+#' @return a `WpProj` object with selected covariates and their values
+#' @export
+#' 
+#' @details Runs the method described in  Hahn, P. R., & Carvalho, C. M. (2015). Decoupling Shrinkage and Selection in Bayesian Linear Models: A Posterior Summary Perspective. Journal of the American Statistical Association, 110(509), 435–448. https://doi.org/10.1080/01621459.2014.993077 adapted for p-Wasserstein Projections.
+#' We work on the space of \eqn{E(\theta)}.
 HC <- function(X, Y=NULL, theta, family="gaussian", 
                penalty =  c("elastic.net", "selection.lasso",
                             "lasso", "ols", "mcp",
@@ -14,7 +42,7 @@ HC <- function(X, Y=NULL, theta, family="gaussian",
                lambda.min.ratio = NULL, alpha = 1,  
                gamma = 1, tau = 0.5, 
                groups = numeric(0), 
-               scale.factor = numeric(0), 
+               # scale.factor = numeric(0), 
                penalty.factor = NULL, 
                group.weights = NULL, maxit = 500L, 
                tol = 1e-07, irls.maxit = 100L, 

@@ -1,3 +1,21 @@
+#' Title
+#'
+#' @param X 
+#' @param Y 
+#' @param theta 
+#' @param penalty 
+#' @param lambda 
+#' @param lambda.min.ratio 
+#' @param gamma 
+#' @param nlambda 
+#' @param solver 
+#' @param options 
+#' @param model.size 
+#' @param display.progress 
+#' @param ... 
+#'
+#' @return `WpProj` object
+#' @export
 WInfL1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "mcp","scad"), 
                  lambda = numeric(0), 
                  lambda.min.ratio = 1e-4, 
