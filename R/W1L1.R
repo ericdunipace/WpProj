@@ -209,7 +209,7 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none", "lasso","scad","mcp"),
   output$nonzero_beta <- colSums(output$beta != 0)
   output$method <- "projection"
   output$power <- 1
-  class(output) <- c("limbs", "optimization")
+  class(output) <- c("WpProj", "optimization")
   
   extract <- extractTheta(output, matrix(0, d,s))
   output$nzero <- extract$nzero

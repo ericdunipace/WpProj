@@ -82,7 +82,7 @@ WPSW <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
                         OToptions, obs.direction, ...) {
       idx <- c(which(in.idx),j)
       temp_mu <- crossprod(X[idx,, drop=FALSE], theta[idx,, drop=FALSE])
-      wp <- limbs::wasserstein(X = sort_mu, Y = temp_mu, 
+      wp <- WpProj::wasserstein(X = sort_mu, Y = temp_mu, 
                                          p = p, ground_p = ground_p, 
                                          observation.orientation = obs.direction, 
                                          method = OToptions$transport.method, 
@@ -97,7 +97,7 @@ WPSW <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
       temp.in.idx[ j ] <- FALSE
       idx <- which( temp.in.idx )
       temp_mu <- crossprod(X[idx,, drop=FALSE], theta[idx,, drop=FALSE])
-      wp <- limbs::wasserstein(X = sort_mu, Y = temp_mu, 
+      wp <- WpProj::wasserstein(X = sort_mu, Y = temp_mu, 
                                          p = p, ground_p = ground_p, 
                                          observation.orientation = obs.direction, 
                                          method = OToptions$transport.method, 
@@ -122,13 +122,13 @@ WPSW <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
       # tsortmu <- t(sort_mu)
       # if(method == "projection") {
         # transp <- transport_plan(sortmu, temp_mu, p, p, "colwise", "exact")
-      wp <- limbs::wasserstein(X = sort_mu, Y = temp_mu, 
+      wp <- WpProj::wasserstein(X = sort_mu, Y = temp_mu, 
                                          p = p, ground_p = ground_p, 
                                          observation.orientation = obs.direction, 
                                          method = OToptions$transport.method, 
                                          epsilon = OToptions$epsilon, niter = OToptions$niter)
       # } else {
-      #   wp <- limbs::wasserstein(sort_mu, temp_mu, p = p, ground_p = p, "colwise", 
+      #   wp <- WpProj::wasserstein(sort_mu, temp_mu, p = p, ground_p = p, "colwise", 
       #                                      method=transport.method)
       # }
       return(list(wp = wp, beta = beta))
@@ -150,13 +150,13 @@ WPSW <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
       # tsortmu <- t(sort_mu)
       # if(method == "projection") {
         # transp <- transport_plan(tsortmu, temp_mu, p, p, "colwise", "exact")
-      wp <- limbs::wasserstein(X = sort_mu, Y = temp_mu, 
+      wp <- WpProj::wasserstein(X = sort_mu, Y = temp_mu, 
                                          p = p, ground_p = ground_p, 
                                          observation.orientation = obs.direction, 
                                          method = OToptions$transport.method, 
                                          epsilon = OToptions$epsilon, niter = OToptions$niter)
       # } else {
-      #   wp <- limbs::wasserstein(sort_mu, temp_mu, p = p, ground_p = p, "colwise", 
+      #   wp <- WpProj::wasserstein(sort_mu, temp_mu, p = p, ground_p = p, "colwise", 
       #                                      method=transport.method)
       # }
       return (list(wp = wp, beta = beta))
@@ -192,7 +192,7 @@ WPSW <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
     wP <- rep(Inf,d)
     temp_idx <- which(in.idx)
     temp_mu <- crossprod(X_[temp_idx, , drop=FALSE], theta[temp_idx, ,drop=FALSE])
-    wP_traj[1] <- limbs::wasserstein(temp_mu, Y_, p, ground_p, obs.direction, transport.method, epsilon = epsilon, niter = OTmaxit)
+    wP_traj[1] <- WpProj::wasserstein(temp_mu, Y_, p, ground_p, obs.direction, transport.method, epsilon = epsilon, niter = OTmaxit)
     # wP_traj[1] <- mean((Y_ - temp_mu)^2)
      
     for(i in 1:max_iter){
@@ -280,7 +280,7 @@ WPSW <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
                  beta= beta_store, call = formals(WPSW), 
                  method=method, direction = direction)
   output$call[names(this.call)] <- this.call
-  class(output) <- c("limbs","stepwise")
+  class(output) <- c("WpProj","stepwise")
   output$method <- method
   if(calc.theta) {
     extract <- extractTheta(output, theta)

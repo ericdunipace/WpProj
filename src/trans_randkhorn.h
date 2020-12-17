@@ -1,7 +1,7 @@
 #ifndef TRANS_RANDKHORN_H
 #define TRANS_RANDKHORN_H
 
-#include "limbs_types.h"
+#include "WpProj_types.h"
 #include "utils.h"
 
 void trans_randkhorn(const refVecConst & mass_r, const refVecConst & mass_l, 

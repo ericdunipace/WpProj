@@ -2,54 +2,54 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 sufficientStatistics <- function(X_, Y_, theta_, options_) {
-    .Call('_limbs_sufficientStatistics', PACKAGE = 'limbs', X_, Y_, theta_, options_)
+    .Call('_WpProj_sufficientStatistics', PACKAGE = 'WpProj', X_, Y_, theta_, options_)
 }
 
 xtyUpdate <- function(X_, Y_, theta_, result_, options_) {
-    .Call('_limbs_xtyUpdate', PACKAGE = 'limbs', X_, Y_, theta_, result_, options_)
+    .Call('_WpProj_xtyUpdate', PACKAGE = 'WpProj', X_, Y_, theta_, result_, options_)
 }
 
 W2penalized <- function(X_, Y_, theta_, family_, penalty_, groups_, unique_groups_, group_weights_, lambda_, nlambda_, lmin_ratio_, alpha_, gamma_, tau_, scale_factor_, penalty_factor_, opts_) {
-    .Call('_limbs_W2penalized', PACKAGE = 'limbs', X_, Y_, theta_, family_, penalty_, groups_, unique_groups_, group_weights_, lambda_, nlambda_, lmin_ratio_, alpha_, gamma_, tau_, scale_factor_, penalty_factor_, opts_)
+    .Call('_WpProj_W2penalized', PACKAGE = 'WpProj', X_, Y_, theta_, family_, penalty_, groups_, unique_groups_, group_weights_, lambda_, nlambda_, lmin_ratio_, alpha_, gamma_, tau_, scale_factor_, penalty_factor_, opts_)
 }
 
 cost_calculation_ <- function(A_, B_, p) {
-    .Call('_limbs_cost_calculation_', PACKAGE = 'limbs', A_, B_, p)
+    .Call('_WpProj_cost_calculation_', PACKAGE = 'WpProj', A_, B_, p)
 }
 
 pbClean <- function() {
-    invisible(.Call('_limbs_pbClean', PACKAGE = 'limbs'))
+    invisible(.Call('_WpProj_pbClean', PACKAGE = 'WpProj'))
 }
 
 test <- function() {
-    invisible(.Call('_limbs_test', PACKAGE = 'limbs'))
+    invisible(.Call('_WpProj_test', PACKAGE = 'WpProj'))
 }
 
 selVarMeanGen <- function(X_, theta_, beta_) {
-    .Call('_limbs_selVarMeanGen', PACKAGE = 'limbs', X_, theta_, beta_)
+    .Call('_WpProj_selVarMeanGen', PACKAGE = 'WpProj', X_, theta_, beta_)
 }
 
 sinkhorn_ <- function(p_, q_, cost_matrix_, epsilon, niterations) {
-    .Call('_limbs_sinkhorn_', PACKAGE = 'limbs', p_, q_, cost_matrix_, epsilon, niterations)
+    .Call('_WpProj_sinkhorn_', PACKAGE = 'WpProj', p_, q_, cost_matrix_, epsilon, niterations)
 }
 
 transport_C_ <- function(mass_a_, mass_b_, cost_matrix_, method_, epsilon_, niter_) {
-    .Call('_limbs_transport_C_', PACKAGE = 'limbs', mass_a_, mass_b_, cost_matrix_, method_, epsilon_, niter_)
+    .Call('_WpProj_transport_C_', PACKAGE = 'WpProj', mass_a_, mass_b_, cost_matrix_, method_, epsilon_, niter_)
 }
 
 transport_ <- function(A_, B_, p, ground_p, method_, a_sort, epsilon_ = 0.0, niter_ = 0L) {
-    .Call('_limbs_transport_', PACKAGE = 'limbs', A_, B_, p, ground_p, method_, a_sort, epsilon_, niter_)
+    .Call('_WpProj_transport_', PACKAGE = 'WpProj', A_, B_, p, ground_p, method_, a_sort, epsilon_, niter_)
 }
 
 wasserstein_ <- function(mass_, cost_, p, from_, to_) {
-    .Call('_limbs_wasserstein_', PACKAGE = 'limbs', mass_, cost_, p, from_, to_)
+    .Call('_WpProj_wasserstein_', PACKAGE = 'WpProj', mass_, cost_, p, from_, to_)
 }
 
 wasserstein_p_iid_ <- function(X_, Y_, p) {
-    .Call('_limbs_wasserstein_p_iid_', PACKAGE = 'limbs', X_, Y_, p)
+    .Call('_WpProj_wasserstein_p_iid_', PACKAGE = 'WpProj', X_, Y_, p)
 }
 
 wasserstein_p_iid_p_ <- function(X_, Y_, p) {
-    .Call('_limbs_wasserstein_p_iid_p_', PACKAGE = 'limbs', X_, Y_, p)
+    .Call('_WpProj_wasserstein_p_iid_p_', PACKAGE = 'WpProj', X_, Y_, p)
 }
 

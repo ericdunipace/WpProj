@@ -126,7 +126,7 @@ HC <- function(X, Y=NULL, theta, family="gaussian",
   })
   output$theta[[length(output$theta)+1]] <- theta
   output$eta <- lapply(output$theta, function(tt) X %*% tt)
-  class(output) <- c("limbs", "HC")
+  class(output) <- c("WpProj", "HC")
   
   return(output)
 }

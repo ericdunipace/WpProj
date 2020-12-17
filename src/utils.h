@@ -10,7 +10,7 @@
 #include <cmath>
 #include <numeric>
 #include <boost/noncopyable.hpp>
-#include "limbs_types.h"
+#include "WpProj_types.h"
 #include "sort.h"
 
 using namespace Rcpp;

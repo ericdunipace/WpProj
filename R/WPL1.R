@@ -198,7 +198,7 @@ lp_reg <- function(x, y, theta = NULL, power,
   output$nonzero_beta <- colSums(output$beta != 0)
   output$method <- "projection"
   output$power <- power
-  class(output) <- c("limbs", "optimization")
+  class(output) <- c("WpProj", "optimization")
   
   extract <- extractTheta(output, matrix(0, d,s))
   output$nzero <- extract$nzero

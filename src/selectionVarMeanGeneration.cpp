@@ -1,4 +1,4 @@
-#include "limbs_types.h"
+#include "WpProj_types.h"
 
 //[[Rcpp::export]]
 Rcpp::NumericMatrix selVarMeanGen(const SEXP & X_,

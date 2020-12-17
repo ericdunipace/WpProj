@@ -1,4 +1,4 @@
-#include "limbs_types.h"
+#include "WpProj_types.h"
 #include <vector>
 #include "SufficientStatistics.h"
 #include "utils.h"

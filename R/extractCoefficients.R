@@ -13,7 +13,7 @@ extractCoef <- function(fit, drop=FALSE) {
       extractCoefVar <- tapply(lambda, nvar, min)
       idx <- which(lambda %in% extractCoefVar)
       coefs <- fit$beta[[1]][,idx,drop=FALSE]
-  } else if(any(inherits(fit, "sparse-posterior") | inherits(fit, "limbs"))) {
+  } else if(any(inherits(fit, "sparse-posterior") | inherits(fit, "WpProj"))) {
       nvar <- colSums(fit$beta != 0)
       if(length(nvar) < length(lambda)) lambda <- lambda[1:length(nvar)]
       extractCoefVar <- tapply(lambda, nvar, min)
@@ -61,7 +61,7 @@ L0Coef <- function(fit) {
 }
 
 annealCoef <- function(fit, theta) {
-  if(inherits(fit[[1]], "sparse-posterior") | inherits(fit[[1]], "limbs")){
+  if(inherits(fit[[1]], "sparse-posterior") | inherits(fit[[1]], "WpProj")){
     idx <- lapply(fit, function(f) f$optimal$index)
     numActive <- sapply(idx, length)
     beta <- lapply(fit, function(f) f$optimal$beta)
@@ -77,7 +77,7 @@ annealCoef <- function(fit, theta) {
       coefs[, jj] <- c(beta[[j]])
     }
     numActive <- c(numActive)
-  } else if (inherits(fit, "limbs") && is.list(fit$history)) {
+  } else if (inherits(fit, "WpProj") && is.list(fit$history)) {
     idx <- lapply(fit$optimal, function(f) f$index)
     numActive <- sapply(idx, length)
     beta <- lapply(fit$optimal, function(f) f$beta)
@@ -107,7 +107,7 @@ annealCoef <- function(fit, theta) {
       }
       numActive <- c(numActive)
     }
-  } else if(inherits(fit, "limbs")) {
+  } else if(inherits(fit, "WpProj")) {
   if(is.matrix(fit$optimal$beta)){
     nr <- nrow(fit$optimal$beta)
     nc <- ncol(fit$optimal$beta)
@@ -118,7 +118,7 @@ annealCoef <- function(fit, theta) {
   coefs <- matrix(c(fit$optimal$beta), nrow = nr, ncol = nc)
   numActive <- length(fit$optimal$index)
   } else {
-    stop("Not of class 'limbs'")
+    stop("Not of class 'WpProj'")
   }
   
 

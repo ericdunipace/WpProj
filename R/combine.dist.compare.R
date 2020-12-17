@@ -30,7 +30,7 @@ combine.dist.compare <- function(distances) {
     if(!is.null(cmb$mean)) cmb$mean <- cbind(cmb$mean, ranks = ranks.mean, iter = iter)
   }
   
-  class(cmb) <- c("limbs","combine.dist.compare")
+  class(cmb) <- c("WpProj","combine.dist.compare")
   
   return(cmb)
 }
@@ -165,7 +165,7 @@ plot.combine.dist.compare <- function (x, ylim = NULL, ylabs = c(NULL,NULL), fac
   }
   
   plots <- list(posterior = ppost, mean = pmean)
-  class(plots) <- c("plotcombine","limbs")
+  class(plots) <- c("plotcombine","WpProj")
   return(plots)
 }
 
@@ -248,7 +248,7 @@ plot_ranks <- function(distances, ylim = NULL, ylabs = c(NULL,NULL), ...) {
   }
   
   plots <- list(posterior = ppost, mean = pmean)
-  class(plots) <- c("plotrank","limbs")
+  class(plots) <- c("plotrank","WpProj")
   return(plots)
 }
 

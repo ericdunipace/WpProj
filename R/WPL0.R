@@ -101,7 +101,7 @@ WPL0 <- function(X, Y = NULL, theta, p = 2, ground_p = 2,
     # temp[idx,] <- theta[idx,,drop=FALSE]
     return(c(temp))
   })
-  class(output) <-c("limbs","L0")
+  class(output) <-c("WpProj","L0")
   extraction <- extractTheta(output, theta)
   output$nzero <- extraction$nzero
   output$theta <- extraction$theta

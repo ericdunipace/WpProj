@@ -1,5 +1,5 @@
 testthat::test_that("stepwise works", {
-  require(limbs)
+  require(WpProj)
   set.seed(111)
   
   ##### Testing R Functions ####
@@ -75,7 +75,7 @@ testthat::test_that("stepwise works", {
 })
 
 testthat::test_that("model size works when force is null", {
-  require(limbs)
+  require(WpProj)
   set.seed(1234807)
   
   ##### Testing R Functions ####
@@ -118,7 +118,7 @@ testthat::test_that("model size works when force is null", {
 })
   
 testthat::test_that("nzero gives right number", {
-  require(limbs)
+  require(WpProj)
   set.seed(9786)
   
   ##### Testing R Functions ####

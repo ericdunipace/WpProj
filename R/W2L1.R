@@ -372,7 +372,7 @@ W2L1 <- function(X, Y=NULL, theta = NULL, family="gaussian",
   output$remove.idx <- rmv.idx
   output$nonzero_beta <- colSums(output$beta != 0)
   # output$nzero <- nz
-  class(output) <- c("limbs", "optimization")
+  class(output) <- c("WpProj", "optimization")
   extract <- extractTheta(output, theta_)
   output$nzero <- extract$nzero
   output$eta <- lapply(extract$theta, function(tt) crossprod(X_, tt))

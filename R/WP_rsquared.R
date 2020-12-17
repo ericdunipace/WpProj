@@ -15,7 +15,7 @@ WPR2.matrix <- function(Y, nu, p = 2, method = "exact", base = NULL, ...) {
   n <- nrow(Y)
   d <- ncol(Y)
   
-  wp_mod <- limbs::wasserstein(Y, nu, p = p, ground_p = p,
+  wp_mod <- WpProj::wasserstein(Y, nu, p = p, ground_p = p,
                            method = method, ...)^p
   
   if(is.null(base)) {
@@ -39,12 +39,12 @@ WPR2.matrix <- function(Y, nu, p = 2, method = "exact", base = NULL, ...) {
   # wp_base <- if(method == "exact") {
   #   mean(colSums((Y - mu)^p))
   # } else {
-  #   limbs::wasserstein(Y, mu, p = p, 
+  #   WpProj::wasserstein(Y, mu, p = p, 
   #                      ground_p = p,
   #                      method = method, 
   #                      ...)^p
   # }
-  wp_base <- limbs::wasserstein(Y, mu, p = p, 
+  wp_base <- WpProj::wasserstein(Y, mu, p = p, 
                                 ground_p = p,
                                 method = method, 
                                 ...)^p
@@ -106,7 +106,7 @@ WPR2.distcompare <- function(Y=NULL, nu, ...) {
 
 WPR2.list <- function(Y, nu, p = 2, method = "exact", base = NULL, ...) {
   
-  stopifnot(all(sapply(nu, inherits, "limbs")))
+  stopifnot(all(sapply(nu, inherits, "WpProj")))
   
   df <- lapply(nu, function(nn) {
               do.call("rbind", lapply(nn$eta, function(ee) WPR2.matrix(Y = Y, nu = ee, p = p, base = base, ...)))

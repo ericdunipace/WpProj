@@ -1,4 +1,4 @@
-useDynLib(limbs)
+useDynLib(WpProj)
 import(RcppEigen)
 importFrom(Rcpp, evalCpp)
 importFrom(dplyr, `%>%`)

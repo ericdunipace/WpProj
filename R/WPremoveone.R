@@ -47,7 +47,7 @@ WPRM <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
   output <- list(index = indices, importance = importance, wP = wp, call = formals(WPRM))
   output$call[names(this.call)] <- this.call
   output$nzero <- sapply(indices, function(i) length(i))
-  class(output) <- c("limbs","removeone")
+  class(output) <- c("WpProj","removeone")
   if(calc.theta){
     output$theta  <- lapply(indices, function(i) {
       theta_temp <- matrix(0, d, S)

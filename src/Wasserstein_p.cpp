@@ -1,4 +1,4 @@
-#include "limbs_types.h"
+#include "WpProj_types.h"
 #include "wasserstein.h"
 
 using namespace Rcpp;

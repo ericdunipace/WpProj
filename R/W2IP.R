@@ -148,7 +148,7 @@ W2IP <- function(X, Y=NULL, theta,
                     epsilon = epsilon,
                     niter = OTmaxit)
   
-  ss <- limbs:::sufficientStatistics(X, Y_, theta_, OToptions)
+  ss <- WpProj:::sufficientStatistics(X, Y_, theta_, OToptions)
   xtx <- ss$XtX
   xty <- xty_init <- ss$XtY
   Ytemp <- Y_
@@ -158,7 +158,7 @@ W2IP <- function(X, Y=NULL, theta,
     setTxtProgressBar(pb, 0)
   }
   
-  QP <- QP_orig <- limbs:::qp_w2(ss$XtX,ss$XtY,1)
+  QP <- QP_orig <- WpProj:::qp_w2(ss$XtX,ss$XtY,1)
   # LP <- ROI::ROI_reformulate(QP,"lp",method = "bqp_to_lp" )
   alpha <- alpha_save <- rep(0,p)
   beta <- matrix(0, nrow = p, ncol = p_star)
@@ -194,12 +194,12 @@ W2IP <- function(X, Y=NULL, theta,
            warning("Likely terminated early")
            break
          }
-         if(limbs:::not.converged(alpha, alpha_save, tol)){
+         if(WpProj:::not.converged(alpha, alpha_save, tol)){
            alpha_save <- alpha
-           Ytemp <- limbs:::selVarMeanGen(X_, theta_, as.double(alpha))
-           xty <- limbs:::xtyUpdate(X, Ytemp, theta_, result_ = alpha, 
+           Ytemp <- WpProj:::selVarMeanGen(X_, theta_, as.double(alpha))
+           xty <- WpProj:::xtyUpdate(X, Ytemp, theta_, result_ = alpha, 
                                              OToptions)
-           QP <- limbs:::qp_w2(xtx,xty,m)
+           QP <- WpProj:::qp_w2(xtx,xty,m)
          } else {
            break
          }
@@ -230,7 +230,7 @@ W2IP <- function(X, Y=NULL, theta,
   output$remove.idx <- rmv.idx
   output$nonzero_beta <- colSums(output$beta != 0)
   # output$nzero <- nz
-  class(output) <- c("limbs","IP")
+  class(output) <- c("WpProj","IP")
   extract <- extractTheta(output, theta_)
   output$nzero <- extract$nzero
   output$eta <- lapply(extract$theta, function(tt) crossprod(X_, tt))

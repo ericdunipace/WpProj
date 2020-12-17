@@ -1,7 +1,7 @@
 #ifndef SYSTEMATIC_SAMPLE_H
 #define SYSTEMATIC_SAMPLE_H
 
-#include "limbs_types.h"
+#include "WpProj_types.h"
 
 void sample_systematic(vectorI & samps, const vector & weight, const int nsamp );
   

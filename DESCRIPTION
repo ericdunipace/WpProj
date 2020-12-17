@@ -1,11 +1,11 @@
-Package: limbs
+Package: WpProj
 Type: Package
-Title: Generates interpretable summaries of Bayesian posterior models
+Title: Linear p-Wasserstein Projections
 Version: 0.1
 Date: 2019-03-12
 Author: Eric Dunipace
 Maintainer: Eric Dunipace <eduniapce@g.harvard.edu>
-Description: Uses interpretable linear models to generate summaries of any predictive Bayesian model.
+Description: Performs Wasserstein projections of linear models into the predictive space of any other model.
 License: GPL 2.0
 Imports: 
   ggplot2,
@@ -36,3 +36,4 @@ Suggests:
   ROI.plugin.cplex,
   gurobi,
   Rmosek
+RoxygenNote: 7.1.1

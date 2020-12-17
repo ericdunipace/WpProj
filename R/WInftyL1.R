@@ -91,7 +91,7 @@ WInfL1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "mcp","scad")
   output$nonzero_beta <- colSums(output$beta != 0)
   output$method <- "projection"
   output$power <- Inf
-  class(output) <- c("limbs", "optimization")
+  class(output) <- c("WpProj", "optimization")
   
   extract <- extractTheta(output, matrix(0, d,s))
   output$nzero <- extract$nzero

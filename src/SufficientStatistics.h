@@ -1,7 +1,7 @@
 #ifndef SUFFICIENT_STATISTICS_H
 #define SUFFICIENT_STATISTICS_H
 
-#include "limbs_types.h"
+#include "WpProj_types.h"
 #include <vector>
 #include "sort.h"
 #include "utils.h"

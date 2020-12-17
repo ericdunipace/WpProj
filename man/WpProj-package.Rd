@@ -1,23 +1,23 @@
-\name{limbs-package}
-\alias{limbs-package}
-\alias{limbs}
+\name{WpProj-package}
+\alias{WpProj-package}
+\alias{WpProj}
 \docType{package}
 \title{
-\packageTitle{limbs}
+\packageTitle{WpProj}
 }
 \description{
-\packageDescription{limbs}
+\packageDescription{WpProj}
 }
 \details{
 
-\packageDESCRIPTION{limbs}
-\packageIndices{limbs}
+\packageDESCRIPTION{WpProj}
+\packageIndices{WpProj}
 ~~ An overview of how to use the package, including the most important functions ~~
 }
 \author{
-\packageAuthor{limbs}
+\packageAuthor{WpProj}
 
-Maintainer: \packageMaintainer{limbs}
+Maintainer: \packageMaintainer{WpProj}
 }
 \references{
 ~~ Literature or other references for background information ~~

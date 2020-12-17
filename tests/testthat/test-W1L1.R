@@ -55,16 +55,16 @@ testthat::test_that("lp_w1 works", {
   
   temp.deriv <- function(x, lambda, a){lambda}
   
-  # debugonce(limbs:::lp_prob_winf)
-  testthat::expect_silent(problem_statement <- limbs:::lp_prob_w1(Xmat, Y, lambda = rep(1, d), groups = rep(1:d, s)))
+  # debugonce(WpProj:::lp_prob_winf)
+  testthat::expect_silent(problem_statement <- WpProj:::lp_prob_w1(Xmat, Y, lambda = rep(1, d), groups = rep(1:d, s)))
   
-  # debugonce(limbs:::lp_norm)
-  output.gurobi <- limbs:::lp_norm(Xmat, Y, power = 1, deriv_func = temp.deriv, 
+  # debugonce(WpProj:::lp_norm)
+  output.gurobi <- WpProj:::lp_norm(Xmat, Y, power = 1, deriv_func = temp.deriv, 
                                    thresholder = soft_threshold, lambda = 10, groups = rep(1:d,s), solver = "gurobi",
                                    gamma = 1.5, opts = list(OutputFlag = 0), init = NULL, iter = 100, tol = 1e-7)
   # function(X, Y, deriv_func, thresholder, lambda, groups, solver, gamma = 1.5, opts = NULL, init = NULL, iter = 100, tol = 1e-7)
-  # debugonce(limbs:::lp_norm)
-  output.mosek <- limbs:::lp_norm(Xmat, Y, power = 1, deriv_func = temp.deriv, 
+  # debugonce(WpProj:::lp_norm)
+  output.mosek <- WpProj:::lp_norm(Xmat, Y, power = 1, deriv_func = temp.deriv, 
                                   thresholder = soft_threshold, lambda = 10, groups = rep(1:d,s), solver = "mosek",
                                   gamma = 1.5, init = NULL, iter = 100, tol = 1e-7, opts= list(verbose = 0))
   

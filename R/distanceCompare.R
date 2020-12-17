@@ -23,10 +23,10 @@ distCompare <- function(models, target = list(posterior = NULL, mean = NULL), p 
     foreach::registerDoSEQ()
   }
   
-  if (inherits(models, "limbs") ) {
+  if (inherits(models, "WpProj") ) {
     models <- list(models)
   } else {
-    stopifnot(all(sapply(models, inherits, "limbs")))
+    stopifnot(all(sapply(models, inherits, "WpProj")))
   }
   
   dist_df <- dist_mu_df <- nactive <- groups <- plot <- plot_mu <- NULL
@@ -92,7 +92,7 @@ distCompare <- function(models, target = list(posterior = NULL, mean = NULL), p 
   
   # if (parallel) parallel::stopCluster(cl)
   output <- list(posterior = dist_df, mean = dist_mu_df, p = p)
-  class(output) <- c("distcompare","limbs")
+  class(output) <- c("distcompare","WpProj")
   
   return(output)
 }
@@ -106,7 +106,7 @@ dist_fun <- function(mulist, mu, p, ground_p, method, observation.orientation, p
           denom <- max(ncol(mu), ncol(m))
           sqrt(sum((c(m) - c(mu))^2)/denom)
         } else {
-          limbs::wasserstein(X = m, Y = mu, p = p, 
+          WpProj::wasserstein(X = m, Y = mu, p = p, 
                                        ground_p = ground_p, 
                                        observation.orientation = observation.orientation, 
                                        method = method, ...)
@@ -202,7 +202,7 @@ set_dist_data <- function(target, models, quantity, method, transform) {
   
   
   ### model checks ###
-  if (inherits(models, "limbs")) {
+  if (inherits(models, "WpProj")) {
     models <- list(models)
   } else {
     if(!is.list(models)) stop("models must be a SLIM fit or a list of fits")

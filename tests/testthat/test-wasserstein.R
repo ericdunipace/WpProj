@@ -6,34 +6,34 @@ testthat::test_that("wasserstein gives 0 for same distribution", {
   y <- rnorm(n)
   niter <- 1e2
   # y <- matrix(rnorm(n*d), nrow=d, ncol=n)
-  exact <- limbs::wasserstein(X = x, Y = x, p = 2,
+  exact <- WpProj::wasserstein(X = x, Y = x, p = 2,
                                ground_p = 2, observation.orientation = "colwise",
                                method = "exact")
-  hilbert <- limbs::wasserstein(X = x, Y = x, p = 2,
+  hilbert <- WpProj::wasserstein(X = x, Y = x, p = 2,
                                           ground_p = 2, observation.orientation = "colwise",
                                           method = "hilbert")
-  rank <- limbs::wasserstein(X = x, Y = x, p = 2,
+  rank <- WpProj::wasserstein(X = x, Y = x, p = 2,
                                           ground_p = 2, observation.orientation = "colwise",
                                           method = "rank")
-  sinkhorn <- limbs::wasserstein(X = x, Y = x, p = 2,
+  sinkhorn <- WpProj::wasserstein(X = x, Y = x, p = 2,
                                           ground_p = 2, observation.orientation = "colwise",
                                           method = "sinkhorn", niter = niter)
-  sinkhorn2 <- limbs::wasserstein(X = x, Y = x, p = 2,
+  sinkhorn2 <- WpProj::wasserstein(X = x, Y = x, p = 2,
                                            ground_p = 2, observation.orientation = "colwise",
                                            method = "sinkhorn2", niter = niter)
-  greenkhorn <- limbs::wasserstein(X = x, Y = x, p = 2,
+  greenkhorn <- WpProj::wasserstein(X = x, Y = x, p = 2,
                                            ground_p = 2, observation.orientation = "colwise",
                                            method = "greenkhorn", niter = niter)
-  randkhorn <- limbs::wasserstein(X = x, Y = x, p = 2,
+  randkhorn <- WpProj::wasserstein(X = x, Y = x, p = 2,
                                            ground_p = 2, observation.orientation = "colwise",
                                            method = "randkhorn", niter = niter)
-  gandkhorn <- limbs::wasserstein(X = x, Y = x, p = 2,
+  gandkhorn <- WpProj::wasserstein(X = x, Y = x, p = 2,
                                             ground_p = 2, observation.orientation = "colwise",
                                             method = "gandkhorn", niter = niter)
-  uni.pwr <- limbs::wasserstein(X = x, Y = x, p = 2,
+  uni.pwr <- WpProj::wasserstein(X = x, Y = x, p = 2,
                                            ground_p = 2, observation.orientation = "colwise",
                                            method = "univariate.approximation.pwr")
-  uni.app <- limbs::wasserstein(X = x, Y = x, p = 2,
+  uni.app <- WpProj::wasserstein(X = x, Y = x, p = 2,
                                                       ground_p = 2, observation.orientation = "colwise",
                                                       method = "univariate.approximation")
   testthat::expect_equal(exact, 0)
@@ -46,35 +46,35 @@ testthat::test_that("wasserstein gives 0 for same distribution", {
   testthat::expect_equal(uni.pwr, 0)
   testthat::expect_equal(uni.app, 0)
   
-  exact.uni <- limbs::wasserstein(X = y, Y = y, p = 2,
+  exact.uni <- WpProj::wasserstein(X = y, Y = y, p = 2,
                                         ground_p = 2, observation.orientation = "colwise",
                                         method = "exact")
-  hilbert.uni <- limbs::wasserstein(X = y, Y = y, p = 2,
+  hilbert.uni <- WpProj::wasserstein(X = y, Y = y, p = 2,
                                           ground_p = 2, observation.orientation = "colwise",
                                           method = "hilbert")
-  rank.uni <- limbs::wasserstein(X = y, Y = y, p = 2,
+  rank.uni <- WpProj::wasserstein(X = y, Y = y, p = 2,
                                               ground_p = 2, observation.orientation = "colwise",
                                               method = "hilbert")
-  sinkhorn.uni <- limbs::wasserstein(X = y, Y = y, p = 2,
+  sinkhorn.uni <- WpProj::wasserstein(X = y, Y = y, p = 2,
                                            ground_p = 2, observation.orientation = "colwise",
                                            method = "sinkhorn", niter = niter, epsilon = 2.4)
-  sinkhorn2.uni <- limbs::wasserstein(X = y, Y = y, p = 2,
+  sinkhorn2.uni <- WpProj::wasserstein(X = y, Y = y, p = 2,
                                                ground_p = 2, observation.orientation = "colwise",
                                                method = "sinkhorn2", niter = niter)
-  greenkhorn.uni <- limbs::wasserstein(X = y, Y = y, p = 2,
+  greenkhorn.uni <- WpProj::wasserstein(X = y, Y = y, p = 2,
                                                ground_p = 2, observation.orientation = "colwise",
                                                method = "greenkhorn", niter = niter)
-  randkhorn.uni <- limbs::wasserstein(X = y, Y = y, p = 2,
+  randkhorn.uni <- WpProj::wasserstein(X = y, Y = y, p = 2,
                                                ground_p = 2, observation.orientation = "colwise",
                                                method = "randkhorn", niter = niter)
-  gandkhorn.uni <- limbs::wasserstein(X = y, Y = y, p = 2,
+  gandkhorn.uni <- WpProj::wasserstein(X = y, Y = y, p = 2,
                                                ground_p = 2, observation.orientation = "colwise",
                                                method = "gandkhorn", niter = niter)
   
-  uni.pwr.uni <- limbs::wasserstein(X = y, Y = y, p = 2,
+  uni.pwr.uni <- WpProj::wasserstein(X = y, Y = y, p = 2,
                                           ground_p = 2, observation.orientation = "colwise",
                                           method = "univariate.approximation.pwr")
-  uni.app.uni <- limbs::wasserstein(X = y, Y = y, p = 2,
+  uni.app.uni <- WpProj::wasserstein(X = y, Y = y, p = 2,
                                           ground_p = 2, observation.orientation = "colwise",
                                           method = "univariate.approximation")
   testthat::expect_equal(exact.uni, 0)
@@ -98,7 +98,7 @@ testthat::test_that("wasserstein matches transport package for shortsimplex", {
   z <- rnorm(n)
   w <- rnorm(n)
   # y <- matrix(rnorm(n*d), nrow=d, ncol=n)
-  exact <- limbs::wasserstein(X = x, Y = y, p = 2,
+  exact <- WpProj::wasserstein(X = x, Y = y, p = 2,
                                         ground_p = 2, observation.orientation = "colwise",
                                         method = "exact")
   exact.trans <- transport::wasserstein(a = rep(1,n), b = rep(1,n), p = 2, 
@@ -106,17 +106,17 @@ testthat::test_that("wasserstein matches transport package for shortsimplex", {
                                         costm = cost_calc(x,y, 2),
                                         method = "shortsimplex"
                                         )
-  uni <- limbs::wasserstein(X = z, Y = w, 2, 2, "colwise", "univariate")
+  uni <- WpProj::wasserstein(X = z, Y = w, 2, 2, "colwise", "univariate")
   uni.trans <- transport::wasserstein1d(a = z, b = w, 2)
   
   testthat::expect_equal(exact, exact.trans)
   testthat::expect_equal(uni, uni.trans)
   
   # check for rowwise orientation
-  exact.row <- limbs::wasserstein(X = t(x), Y = t(y), p = 2,
+  exact.row <- WpProj::wasserstein(X = t(x), Y = t(y), p = 2,
                                         ground_p = 2, observation.orientation = "rowwise",
                                         method = "exact")
-  uni.row <- limbs::wasserstein(X = t(t(z)), Y = t(t(w)), 2, 2, "rowwise", "univariate")
+  uni.row <- WpProj::wasserstein(X = t(t(z)), Y = t(t(w)), 2, 2, "rowwise", "univariate")
 
   testthat::expect_equal(exact.row, exact.trans)
   testthat::expect_equal(uni.row, uni.trans)
