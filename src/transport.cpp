@@ -219,7 +219,6 @@ Rcpp::List transport_C_(const Rcpp::NumericVector & mass_a_, const Rcpp::Numeric
                              Rcpp::Named("mass")  = Rcpp::wrap(mass));
 }
 
-
 //[[Rcpp::export]]
 Rcpp::List transport_(const Rcpp::NumericMatrix & A_, 
                       const Rcpp::NumericMatrix & B_, double p, double ground_p,

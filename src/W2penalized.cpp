@@ -18,7 +18,6 @@
 
 using namespace Rcpp;
 
-
 //[[Rcpp::export]]
 SEXP W2penalized(SEXP X_,
                  SEXP Y_,

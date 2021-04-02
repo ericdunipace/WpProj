@@ -2,7 +2,7 @@
 % Please edit documentation in R/wasserstein_distance.R
 \name{wasserstein}
 \alias{wasserstein}
-\title{Title}
+\title{Calculate Wasserstein distances}
 \usage{
 wasserstein(
   X,
@@ -17,23 +17,23 @@ wasserstein(
 )
 }
 \arguments{
-\item{X}{}
+\item{X}{Matrix for first group}
 
-\item{Y}{}
+\item{Y}{Matrix for second group}
 
-\item{p}{}
+\item{p}{Powr of the wasserstein distance}
 
-\item{ground_p}{}
+\item{ground_p}{Powr of the distance metric. Usually same as `p`}
 
-\item{observation.orientation}{}
+\item{observation.orientation}{Are observations unique by rows or colummns? Set with "colwise" or "rowwise"}
 
-\item{method}{}
+\item{method}{"exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn", "hilbert"}
 
-\item{...}{}
+\item{...}{additional options for sinkhorn based methods. `epsilon` and `niter` determining the hyperparameters for the negative entropy penalty}
 }
 \value{
 
 }
 \description{
-Title
+Calculate Wasserstein distances
 }
