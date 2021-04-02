@@ -25,7 +25,7 @@ W2IP(
 
 \item{theta}{Parameters of original linear model. Required}
 
-\item{transport.method}{Method for Wasserstein distance calculation. Should be one of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert"}
+\item{transport.method}{Method for Wasserstein distance calculation. Should be one of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert".}
 
 \item{model.size}{Maximum number of coefficients in interpretable model}
 
@@ -40,9 +40,6 @@ W2IP(
 \item{parallel}{foreach back end}
 
 \item{...}{Extra args to wasserstein distance methods}
-}
-\value{
-
 }
 \description{
 2-Wasserstein distance selection by Integer Programming

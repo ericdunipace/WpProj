@@ -2,7 +2,7 @@
 % Please edit documentation in R/WPVI.R
 \name{WPVI}
 \alias{WPVI}
-\title{Title}
+\title{p-Wasserstein variable importance}
 \usage{
 WPVI(
   X,
@@ -11,8 +11,7 @@ WPVI(
   pred.fun = NULL,
   p = 2,
   ground_p = 2,
-  transport.method = c("exact", "sinkhorn", "hilbert", "rank",
-    "univariate.approximation.pwr", "univariate.approximation"),
+  transport.method = transport_options(),
   epsilon = 0.05,
   OTmaxit = 100,
   display.progress = FALSE,
@@ -20,31 +19,31 @@ WPVI(
 )
 }
 \arguments{
-\item{X}{}
+\item{X}{covariates}
 
-\item{Y}{}
+\item{Y}{predictions}
 
-\item{theta}{}
+\item{theta}{parameters from prediction}
 
-\item{pred.fun}{}
+\item{pred.fun}{prediction function. must take variables x, theta}
 
-\item{p}{}
+\item{p}{Power of Wasserstein power}
 
-\item{ground_p}{}
+\item{ground_p}{Power of distance metric}
 
-\item{transport.method}{}
+\item{transport.method}{Transport methods. One of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert"}
 
-\item{epsilon}{}
+\item{epsilon}{Hyperparameter for sinkhorn iterations}
 
-\item{OTmaxit}{}
+\item{OTmaxit}{maximum number of iterations for the Wasserstein method}
 
-\item{display.progress}{}
+\item{display.progress}{Display intermediate progress}
 
-\item{parallel}{}
+\item{parallel}{foreach backend}
 }
 \value{
 
 }
 \description{
-Title
+p-Wasserstein variable importance
 }

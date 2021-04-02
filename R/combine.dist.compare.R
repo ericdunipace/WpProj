@@ -6,8 +6,6 @@ setClass("combine.dist.compare")
 #'
 #' @return class "combine.dist.compare", the combined combine.distcompare objects as returned by \link{distCompare} function
 #' @export
-#'
-#' @examples 
 combine.dist.compare <- function(distances) {
   stopifnot(is.list(distances))
   if (!all(sapply(distances, is.distcompare))) {
@@ -207,8 +205,6 @@ print.plotcombine <- function(x) {
 #'
 #' @return object of plotrank
 #' @export
-#'
-#' @examples
 plot_ranks <- function(distances, ylim = NULL, ylabs = c(NULL,NULL), ...) {
   stopifnot(inherits(distances, "combine.dist.compare"))
   dots <- list(...)

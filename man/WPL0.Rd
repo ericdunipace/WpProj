@@ -2,7 +2,7 @@
 % Please edit documentation in R/WPL0.R
 \name{WPL0}
 \alias{WPL0}
-\title{Title}
+\title{p-Wasserstein projections with an L0 penalty}
 \usage{
 WPL0(
   X,
@@ -18,29 +18,29 @@ WPL0(
 )
 }
 \arguments{
-\item{X}{}
+\item{X}{matrix of covariates}
 
-\item{Y}{}
+\item{Y}{matrix of predictions}
 
-\item{theta}{}
+\item{theta}{optional matrix of coefficients from original model, if relevant}
 
-\item{p}{}
+\item{p}{power of the Wasserstein distance}
 
-\item{ground_p}{}
+\item{ground_p}{power of the distance metric}
 
-\item{method}{}
+\item{method}{One of "selection.variable" or "projection". Methods decide whether covariate matrix in `theta` is preserved ("selection.variable") or if new projections are generated ("projection")}
 
-\item{transport.method}{}
+\item{transport.method}{Method for wasserstein distance. One of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert"}
 
-\item{epsilon}{}
+\item{epsilon}{hyperparameter for sinkhorn iterations}
 
-\item{maxit}{}
+\item{maxit}{max iteration for sinkhorn iterations}
 
-\item{parallel}{}
+\item{parallel}{foreach backend}
 }
 \value{
-
+`WpProj` object
 }
 \description{
-Title
+p-Wasserstein projections with an L0 penalty
 }

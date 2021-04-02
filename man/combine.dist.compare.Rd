@@ -7,10 +7,10 @@
 combine.dist.compare(distances)
 }
 \arguments{
-\item{distances}{}
+\item{distances}{distcompar object}
 }
 \value{
-combined distancecompare objects as returned by distCompare function
+class "combine.dist.compare", the combined combine.distcompare objects as returned by \link{distCompare} function
 }
 \description{
 Combine distance calculationg from the distCompare function

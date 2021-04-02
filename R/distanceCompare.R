@@ -17,8 +17,6 @@ setClass("distcompare",
 #'
 #' @return an object of class `distancecompare` with slots `posterior`, `mean`, and `p`.
 #' @export
-#'
-#' @examples
 distCompare <- function(models, target = list(posterior = NULL, mean = NULL), p = 2, ground_p = 2, 
                          method = "exact", 
                          quantity = c("posterior","mean"),

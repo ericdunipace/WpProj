@@ -1,5 +1,9 @@
-#' Run the Hahn-Carvalho method
-#'
+#' @name HC
+#' 
+#' @title Run the Hahn-Carvalho method
+#' 
+#' @description Runs the Hahn-Carvalho method but adapted to return full distributions.
+#' 
 #' @param X Covariates
 #' @param Y Predictions
 #' @param theta Parameters
@@ -20,12 +24,10 @@
 #' @param irls.maxit IRLS max iterations for OEM
 #' @param irls.tol IRLS tolerance for OEM
 #' @param intercept Should the method include an intercept
-#'
-#' @return a `WpProj` object with selected covariates and their values
-#' @export
 #' 
-#' @details Runs the method described in  Hahn, P. R., & Carvalho, C. M. (2015). Decoupling Shrinkage and Selection in Bayesian Linear Models: A Posterior Summary Perspective. Journal of the American Statistical Association, 110(509), 435–448. https://doi.org/10.1080/01621459.2014.993077 adapted for p-Wasserstein Projections.
-#' We work on the space of \eqn{E(\theta)}.
+#' @return a `WpProj` object with selected covariates and their values
+#' 
+#' @export
 HC <- function(X, Y=NULL, theta, family="gaussian", 
                penalty =  c("elastic.net", "selection.lasso",
                             "lasso", "ols", "mcp",

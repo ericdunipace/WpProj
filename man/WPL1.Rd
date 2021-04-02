@@ -2,7 +2,7 @@
 % Please edit documentation in R/WPL1.R
 \name{WPL1}
 \alias{WPL1}
-\title{Title}
+\title{p-Wasserstein linear projections with an \eqn{L_1} penalty}
 \usage{
 WPL1(
   X,
@@ -23,35 +23,35 @@ WPL1(
 )
 }
 \arguments{
-\item{X}{}
+\item{X}{matrix of covariates}
 
-\item{Y}{}
+\item{Y}{matrix of predictions}
 
-\item{theta}{}
+\item{theta}{optional parameter matrix for selection methods.}
 
-\item{power}{}
+\item{power}{power of the Wasserstein distance}
 
-\item{penalty}{}
+\item{penalty}{Form of penalty. One of "lasso", "ols", "mcp", "elastic.net","selection.lasso", "scad", "mcp.net", "scad.net", "grp.lasso", "grp.lasso.net", "grp.mcp","grp.scad", "grp.mcp.net", "grp.scad.net", "sparse.grp.lasso"}
 
-\item{model.size}{}
+\item{model.size}{How many coefficients should final model have}
 
-\item{lambda}{}
+\item{lambda}{penalty parameter}
 
-\item{nlambda}{}
+\item{nlambda}{number of lambdas to explore}
 
-\item{lambda.min.ratio}{}
+\item{lambda.min.ratio}{minimum ratio of max to min lambda}
 
-\item{gamma}{}
+\item{gamma}{Tuning parameter for SCAD and MCP methods}
 
-\item{maxit}{}
+\item{maxit}{maximum iterations for optimization}
 
-\item{tol}{}
+\item{tol}{tolerance for convergence}
 
-\item{...}{}
+\item{...}{arguments passed to other methods such as Wasserstein distance}
 }
 \value{
-
+object of class `WpProj`
 }
 \description{
-Title
+p-Wasserstein linear projections with an \eqn{L_1} penalty
 }

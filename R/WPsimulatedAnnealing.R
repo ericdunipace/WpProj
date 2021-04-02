@@ -21,8 +21,6 @@
 #'
 #' @return
 #' @export
-#'
-#' @examples
 WPSA <- function(X, Y=NULL, theta, 
                  force = NULL, p = 2, ground_p = 2, model.size = 3,
                  # groups = NULL,

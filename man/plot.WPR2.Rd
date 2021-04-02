@@ -30,7 +30,7 @@ plot.WPR2(
 \item{...}{currently no effect}
 }
 \value{
-
+Plot
 }
 \description{
 Plot \eqn{W_p R^2} objects

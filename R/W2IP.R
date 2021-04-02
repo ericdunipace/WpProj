@@ -11,11 +11,7 @@
 #' @param display.progress Should progress be printed?
 #' @param parallel foreach back end
 #' @param ... Extra args to wasserstein distance methods
-#'
-#' @return
 #' @export
-#'
-#' @examples
 W2IP <- function(X, Y=NULL, theta,
                  transport.method = transport_options(),
                  model.size = NULL,

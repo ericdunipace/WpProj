@@ -2,7 +2,7 @@
 % Please edit documentation in R/WPstepwise.R
 \name{WPSW}
 \alias{WPSW}
-\title{Title}
+\title{p-Wasserstein distance linear projections using a stepwise method}
 \usage{
 WPSW(
   X,
@@ -23,39 +23,39 @@ WPSW(
 )
 }
 \arguments{
-\item{X}{}
+\item{X}{matrix of covariates}
 
-\item{Y}{}
+\item{Y}{matrix of predictions}
 
-\item{theta}{}
+\item{theta}{optional parameter matrix for selection methods.}
 
-\item{force}{}
+\item{force}{Any covariates to force into the model?}
 
-\item{p}{}
+\item{p}{Power of the wasserstein distance}
 
-\item{ground_p}{}
+\item{ground_p}{Distance metric power. Typically the same as `p`}
 
-\item{direction}{}
+\item{direction}{forward or backward selection}
 
-\item{method}{}
+\item{method}{"selection.variable" or "projection}
 
-\item{transport.method}{}
+\item{transport.method}{Method for calculating the wasserstein distance. One of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert"}
 
-\item{epsilon}{}
+\item{epsilon}{hyperparameter if using sinkhorn iterations to approximate OT}
 
-\item{OTmaxit}{}
+\item{OTmaxit}{maximum number of iterations for the opt?imal transport methods}
 
-\item{calc.theta}{}
+\item{calc.theta}{should we get the linear coefficients}
 
-\item{model.size}{}
+\item{model.size}{Maximum model size}
 
-\item{parallel}{}
+\item{parallel}{foreach backend}
 
-\item{display.progress}{}
+\item{display.progress}{Display intermediate progress}
 }
 \value{
 
 }
 \description{
-Title
+p-Wasserstein distance linear projections using a stepwise method
 }

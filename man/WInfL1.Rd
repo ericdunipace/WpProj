@@ -48,7 +48,7 @@ WInfL1(
 \item{...}{}
 }
 \value{
-
+`WpProj` object
 }
 \description{
 Title

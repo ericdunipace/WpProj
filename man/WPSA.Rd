@@ -2,7 +2,7 @@
 % Please edit documentation in R/WPsimulatedAnnealing.R
 \name{WPSA}
 \alias{WPSA}
-\title{Title}
+\title{p-Wasserstein distance projections using simulated annealing}
 \usage{
 WPSA(
   X,
@@ -29,45 +29,45 @@ WPSA(
 )
 }
 \arguments{
-\item{X}{}
+\item{X}{Covariate vector}
 
-\item{Y}{}
+\item{Y}{Predictions}
 
-\item{theta}{}
+\item{theta}{optional matrix of parameters for generating predictions}
 
-\item{force}{}
+\item{force}{any covariates to force into the model?}
 
-\item{p}{}
+\item{p}{power of the wassersetin distance}
 
-\item{ground_p}{}
+\item{ground_p}{power of the distance metric. Typically same as `p`}
 
-\item{model.size}{}
+\item{model.size}{Maximum number of coefficients}
 
-\item{iter}{}
+\item{iter}{Maximum number of iterations}
 
-\item{temps}{}
+\item{temps}{number of temperatures}
 
-\item{max.time}{}
+\item{max.time}{maximum time in seconds to run}
 
-\item{const}{}
+\item{const}{maximum value for simulated annealing distance}
 
-\item{proposal}{}
+\item{proposal}{proposal function. There is a default method but can provide your own with parameters xty, cur, idx, force, d, method}
 
-\item{options}{}
+\item{options}{options for simulated annealing}
 
 \item{display.progress}{}
 
-\item{parallel}{}
+\item{parallel}{foreach backend}
 
-\item{get.theta}{}
+\item{get.theta}{Should the model save the linear coefficients?}
 
-\item{xtx}{}
+\item{xtx}{precomputed crossproduct \code{crossprod(X,X)}}
 
-\item{xty}{}
+\item{xty}{precomputed \code{crossprod(X, Y)}}
 }
 \value{
 
 }
 \description{
-Title
+p-Wasserstein distance projections using simulated annealing
 }

@@ -13,6 +13,7 @@ Imports:
   ggridges,
   glmnet,
   oem,
+  Rcpp,
   ROI,
   ROI.plugin.ecos,
   ECOSolveR,

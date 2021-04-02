@@ -13,8 +13,6 @@
 #'
 #' @return a `ggridges` plot
 #' @export
-#'
-#' @examples
 ridgePlot <- function(fit, index = 1, minCoef = 1,maxCoef = 10, scale = 1, alpha = 0.5, full = NULL, transform = function(x){x}, xlab = "Predictions",
                       bandwidth = NULL) {
   
