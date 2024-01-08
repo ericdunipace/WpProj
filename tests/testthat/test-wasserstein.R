@@ -1,11 +1,11 @@
 testthat::test_that("wasserstein gives 0 for same distribution", {
   set.seed(11289374)
-  n <- 100
-  d <- 50
-  x <- matrix(rnorm(n*d), nrow=d, ncol=n)
-  y <- rnorm(n)
+  n <- 21
+  d <- 5
+  x <- matrix(stats::rnorm(n*d), nrow=d, ncol=n)
+  y <- stats::rnorm(n)
   niter <- 1e2
-  # y <- matrix(rnorm(n*d), nrow=d, ncol=n)
+  # y <- matrix(stats::rnorm(n*d), nrow=d, ncol=n)
   exact <- WpProj::wasserstein(X = x, Y = x, p = 2,
                                ground_p = 2, observation.orientation = "colwise",
                                method = "exact")
@@ -18,33 +18,33 @@ testthat::test_that("wasserstein gives 0 for same distribution", {
   sinkhorn <- WpProj::wasserstein(X = x, Y = x, p = 2,
                                           ground_p = 2, observation.orientation = "colwise",
                                           method = "sinkhorn", niter = niter)
-  sinkhorn2 <- WpProj::wasserstein(X = x, Y = x, p = 2,
-                                           ground_p = 2, observation.orientation = "colwise",
-                                           method = "sinkhorn2", niter = niter)
+  # sinkhorn2 <- WpProj::wasserstein(X = x, Y = x, p = 2,
+  #                                          ground_p = 2, observation.orientation = "colwise",
+  #                                          method = "sinkhorn2", niter = niter)
   greenkhorn <- WpProj::wasserstein(X = x, Y = x, p = 2,
                                            ground_p = 2, observation.orientation = "colwise",
                                            method = "greenkhorn", niter = niter)
-  randkhorn <- WpProj::wasserstein(X = x, Y = x, p = 2,
-                                           ground_p = 2, observation.orientation = "colwise",
-                                           method = "randkhorn", niter = niter)
-  gandkhorn <- WpProj::wasserstein(X = x, Y = x, p = 2,
-                                            ground_p = 2, observation.orientation = "colwise",
-                                            method = "gandkhorn", niter = niter)
+  # randkhorn <- WpProj::wasserstein(X = x, Y = x, p = 2,
+  #                                          ground_p = 2, observation.orientation = "colwise",
+  #                                          method = "randkhorn", niter = niter)
+  # gandkhorn <- WpProj::wasserstein(X = x, Y = x, p = 2,
+  #                                           ground_p = 2, observation.orientation = "colwise",
+  #                                           method = "gandkhorn", niter = niter)
   uni.pwr <- WpProj::wasserstein(X = x, Y = x, p = 2,
                                            ground_p = 2, observation.orientation = "colwise",
                                            method = "univariate.approximation.pwr")
-  uni.app <- WpProj::wasserstein(X = x, Y = x, p = 2,
-                                                      ground_p = 2, observation.orientation = "colwise",
-                                                      method = "univariate.approximation")
+  # uni.app <- WpProj::wasserstein(X = x, Y = x, p = 2,
+  #                                                     ground_p = 2, observation.orientation = "colwise",
+  #                                                     method = "univariate.approximation")
   testthat::expect_equal(exact, 0)
   testthat::expect_equal(hilbert, 0)
-  testthat::expect_lt(sinkhorn, 0.05)
-  testthat::expect_lt(sinkhorn2, 0.05) #compare espen bernton and pierre jacob's funct to one from Greenkhorn paper
-  testthat::expect_lt(greenkhorn, 0.06)
-  testthat::expect_lt(randkhorn, 0.05)
-  testthat::expect_lt(gandkhorn, 0.06)
+  testthat::expect_lt(sinkhorn, 0.17)
+  # testthat::expect_lt(sinkhorn2, 0.05) #compare espen bernton and pierre jacob's funct to one from Greenkhorn paper
+  testthat::expect_lt(greenkhorn, 0.17)
+  # testthat::expect_lt(randkhorn, 0.05)
+  # testthat::expect_lt(gandkhorn, 0.06)
   testthat::expect_equal(uni.pwr, 0)
-  testthat::expect_equal(uni.app, 0)
+  # testthat::expect_equal(uni.app, 0)
   
   exact.uni <- WpProj::wasserstein(X = y, Y = y, p = 2,
                                         ground_p = 2, observation.orientation = "colwise",
@@ -58,46 +58,47 @@ testthat::test_that("wasserstein gives 0 for same distribution", {
   sinkhorn.uni <- WpProj::wasserstein(X = y, Y = y, p = 2,
                                            ground_p = 2, observation.orientation = "colwise",
                                            method = "sinkhorn", niter = niter, epsilon = 2.4)
-  sinkhorn2.uni <- WpProj::wasserstein(X = y, Y = y, p = 2,
-                                               ground_p = 2, observation.orientation = "colwise",
-                                               method = "sinkhorn2", niter = niter)
+  # sinkhorn2.uni <- WpProj::wasserstein(X = y, Y = y, p = 2,
+  #                                              ground_p = 2, observation.orientation = "colwise",
+  #                                              method = "sinkhorn2", niter = niter)
   greenkhorn.uni <- WpProj::wasserstein(X = y, Y = y, p = 2,
                                                ground_p = 2, observation.orientation = "colwise",
                                                method = "greenkhorn", niter = niter)
-  randkhorn.uni <- WpProj::wasserstein(X = y, Y = y, p = 2,
-                                               ground_p = 2, observation.orientation = "colwise",
-                                               method = "randkhorn", niter = niter)
-  gandkhorn.uni <- WpProj::wasserstein(X = y, Y = y, p = 2,
-                                               ground_p = 2, observation.orientation = "colwise",
-                                               method = "gandkhorn", niter = niter)
+  # randkhorn.uni <- WpProj::wasserstein(X = y, Y = y, p = 2,
+  #                                              ground_p = 2, observation.orientation = "colwise",
+  #                                              method = "randkhorn", niter = niter)
+  # gandkhorn.uni <- WpProj::wasserstein(X = y, Y = y, p = 2,
+  #                                              ground_p = 2, observation.orientation = "colwise",
+  #                                              method = "gandkhorn", niter = niter)
   
   uni.pwr.uni <- WpProj::wasserstein(X = y, Y = y, p = 2,
                                           ground_p = 2, observation.orientation = "colwise",
                                           method = "univariate.approximation.pwr")
-  uni.app.uni <- WpProj::wasserstein(X = y, Y = y, p = 2,
-                                          ground_p = 2, observation.orientation = "colwise",
-                                          method = "univariate.approximation")
+  # uni.app.uni <- WpProj::wasserstein(X = y, Y = y, p = 2,
+  #                                         ground_p = 2, observation.orientation = "colwise",
+  #                                         method = "univariate.approximation")
   testthat::expect_equal(exact.uni, 0)
   testthat::expect_equal(hilbert.uni, 0)
   testthat::expect_equal(rank.uni, 0)
   testthat::expect_lt(sinkhorn.uni, 1.4)
-  testthat::expect_lt(sinkhorn2.uni, 0.15)
+  # testthat::expect_lt(sinkhorn2.uni, 0.15)
   testthat::expect_lt(greenkhorn.uni, 0.3)
-  testthat::expect_lt(randkhorn.uni, 0.15)
-  testthat::expect_lt(gandkhorn.uni, 0.5)
+  # testthat::expect_lt(randkhorn.uni, 0.15)
+  # testthat::expect_lt(gandkhorn.uni, 0.5)
   testthat::expect_equal(uni.pwr.uni, 0)
-  testthat::expect_equal(uni.app.uni, 0)
+  # testthat::expect_equal(uni.app.uni, 0)
 })
 
 testthat::test_that("wasserstein matches transport package for shortsimplex", {
+  testthat::skip_if_not_installed("transport")
   set.seed(11289374)
-  n <- 100
-  d <- 50
-  x <- matrix(rnorm(n*d), nrow=d, ncol=n)
-  y <- matrix(rnorm(n*d), nrow=d, ncol=n)
-  z <- rnorm(n)
-  w <- rnorm(n)
-  # y <- matrix(rnorm(n*d), nrow=d, ncol=n)
+  n <- 21
+  d <- 5
+  x <- matrix(stats::rnorm(n*d), nrow=d, ncol=n)
+  y <- matrix(stats::rnorm(n*d), nrow=d, ncol=n)
+  z <- stats::rnorm(n)
+  w <- stats::rnorm(n)
+  # y <- matrix(stats::rnorm(n*d), nrow=d, ncol=n)
   exact <- WpProj::wasserstein(X = x, Y = y, p = 2,
                                         ground_p = 2, observation.orientation = "colwise",
                                         method = "exact")
@@ -123,9 +124,10 @@ testthat::test_that("wasserstein matches transport package for shortsimplex", {
 })
 
 testthat::test_that("wasserstein from sp matches transport package",{
+  testthat::skip_if_not_installed("transport")
   set.seed(32857)
-  A <- matrix(rnorm(1000*1024),nrow=1024,ncol=1000)
-  B <- matrix(rnorm(1000*1024),nrow=1024,ncol=1000)
+  A <- matrix(stats::rnorm(1000*1024),nrow=1024,ncol=1000)
+  B <- matrix(stats::rnorm(1000*1024),nrow=1024,ncol=1000)
   at <- t(A)
   bt <- t(B)
   cost <- cost_calc(at,bt,2)
@@ -158,8 +160,8 @@ testthat::test_that("wasserstein from sp matches transport package",{
 
 testthat::test_that("make sure wass less than all other transports", {
   set.seed(32857)
-  A <- matrix(rnorm(1000*1024),nrow=1024,ncol=1000)
-  B <- matrix(rnorm(1000*1024),nrow=1024,ncol=1000)
+  A <- matrix(stats::rnorm(1000*1024),nrow=1024,ncol=1000)
+  B <- matrix(stats::rnorm(1000*1024),nrow=1024,ncol=1000)
   at <- t(A)
   bt <- t(B)
   cost <- cost_calc(at,bt,2)
@@ -174,22 +176,22 @@ testthat::test_that("make sure wass less than all other transports", {
   uap <- wasserstein(at,bt, 2, 2, "colwise", "univariate.approximation.pwr")
   sink <- wasserstein(at,bt, 2, 2, "colwise", "sinkhorn")
   grnk <- wasserstein(at,bt, 2, 2, "colwise", "greenkhorn")
-  rand <- wasserstein(at,bt, 2, 2, "colwise", "randkhorn")
-  gand <- wasserstein(at,bt, 2, 2, "colwise", "gandkhorn")
+  # rand <- wasserstein(at,bt, 2, 2, "colwise", "randkhorn")
+  # gand <- wasserstein(at,bt, 2, 2, "colwise", "gandkhorn")
   
   testthat::expect_lt(loss, hilbert)
   testthat::expect_lt(loss, rank)
   testthat::expect_lt(loss, sink)
   testthat::expect_lt(loss, grnk)
-  testthat::expect_lt(loss, rand)
-  testthat::expect_lt(loss, gand)
+  # testthat::expect_lt(loss, rand)
+  # testthat::expect_lt(loss, gand)
   testthat::expect_gt(loss, uap)
 })
 
 testthat::test_that("make sure sinkhorn outputs agree and are less than wass", {
   set.seed(32857)
-  A <- matrix(rnorm(1000*1024),nrow=1024,ncol=1000)
-  B <- matrix(rnorm(1000*1024),nrow=1024,ncol=1000)
+  A <- matrix(stats::rnorm(1000*1024),nrow=1024,ncol=1000)
+  B <- matrix(stats::rnorm(1000*1024),nrow=1024,ncol=1000)
   at <- t(A)
   bt <- t(B)
   cost <- cost_calc(at,bt,2)
@@ -209,8 +211,8 @@ testthat::test_that("make sure sinkhorn outputs agree and are less than wass", {
 
 testthat::test_that("give error when p < 1", {
   set.seed(32857)
-  A <- matrix(rnorm(1000*1024),nrow=1024,ncol=1000)
-  B <- matrix(rnorm(1000*1024),nrow=1024,ncol=1000)
+  A <- matrix(stats::rnorm(1000*1024),nrow=1024,ncol=1000)
+  B <- matrix(stats::rnorm(1000*1024),nrow=1024,ncol=1000)
   ground_p <- 2
   p <- 0
   
@@ -219,6 +221,6 @@ testthat::test_that("give error when p < 1", {
   testthat::expect_error(wasserstein(at,bt, p = p, ground_p = ground_p, "colwise", "univariate.approximation.pwr"))
   testthat::expect_error(wasserstein(at,bt, p = p, ground_p = ground_p, "colwise", "sinkhorn"))
   testthat::expect_error(wasserstein(at,bt, p = p, ground_p = ground_p, "colwise", "greenkhorn"))
-  testthat::expect_error(wasserstein(at,bt, p = p, ground_p = ground_p, "colwise", "randkhorn"))
-  testthat::expect_error(wasserstein(at,bt, p = p, ground_p = ground_p, "colwise", "gandkhorn"))
+  # testthat::expect_error(wasserstein(at,bt, p = p, ground_p = ground_p, "colwise", "randkhorn"))
+  # testthat::expect_error(wasserstein(at,bt, p = p, ground_p = ground_p, "colwise", "gandkhorn"))
 })

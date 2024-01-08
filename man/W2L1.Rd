@@ -8,10 +8,10 @@ W2L1(
   X,
   Y = NULL,
   theta = NULL,
-  penalty = c("lasso", "ols", "mcp", "elastic.net", "selection.lasso", "scad",
-    "mcp.net", "scad.net", "grp.lasso", "grp.lasso.net", "grp.mcp", "grp.scad",
-    "grp.mcp.net", "grp.scad.net", "sparse.grp.lasso"),
-  method = c("selection.variable", "projection", "location.scale", "scale"),
+  penalty = c("lasso", "ols", "mcp", "elastic.net", "selection.lasso", "scad", "mcp.net",
+    "scad.net", "grp.lasso", "grp.lasso.net", "grp.mcp", "grp.scad", "grp.mcp.net",
+    "grp.scad.net", "sparse.grp.lasso"),
+  method = c("projection", "selection.variable", "location.scale", "scale"),
   transport.method = transport_options(),
   epsilon = 0.05,
   OTmaxit = 100,
@@ -35,25 +35,25 @@ W2L1(
 )
 }
 \arguments{
-\item{X}{matrix of covariates}
+\item{X}{An n x p matrix of covariates}
 
-\item{Y}{matrix of predictions}
+\item{Y}{An n x s matrix of predictions}
 
-\item{theta}{optional parameter matrix for selection methods.}
+\item{theta}{optional parameter matrix for selection methods. Should be p x s.}
 
 \item{penalty}{Form of penalty. One of "lasso", "ols", "mcp", "elastic.net","selection.lasso", "scad", "mcp.net", "scad.net", "grp.lasso", "grp.lasso.net", "grp.mcp","grp.scad", "grp.mcp.net", "grp.scad.net", "sparse.grp.lasso"}
 
 \item{method}{"selection.variable" or "projection}
 
-\item{transport.method}{Method for calculating the wasserstein distance. One of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert"}
+\item{transport.method}{Method for calculating the wasserstein distance. One of "exact", "sinkhorn", "greenkhorn","hilbert"}
 
-\item{epsilon}{}
+\item{epsilon}{Penalty parameter for Sinkhorn and Greenkhorn and  optimal transport}
 
-\item{OTmaxit}{}
+\item{OTmaxit}{Maximum iterations for the optimal transport iterations}
 
-\item{model.size}{}
+\item{model.size}{The maximum number of desired covariates. Defaults to the number of covariates.}
 
-\item{lambda}{lambda for lasso. See \link[oem]{oem}.}
+\item{lambda}{Penalty parameter for lasso regression. See \link[oem]{oem}.}
 
 \item{nlambda}{Number of lambda values. See \link[oem]{oem}.}
 
@@ -66,6 +66,8 @@ W2L1(
 \item{tau}{mixing parameter for sparse group lasso. See \link[oem]{oem}.}
 
 \item{groups}{A vector of grouping values. See \link[oem]{oem}.}
+
+\item{scale.factor}{Value to standardize the covariates by. Typically, is the standard deviation. Should have length 1 or length same as the number of covariates}
 
 \item{penalty.factor}{Penalty factor for OEM. See \link[oem]{oem}.}
 
@@ -84,8 +86,9 @@ W2L1(
 \item{display.progress}{Display intermediate progress?}
 }
 \value{
-Object of class `WpProj`
+Object of class \code{WpProj}
 }
 \description{
 2-Wasserstein distance linear projections with an \eqn{L_1} penalty
 }
+\keyword{internal}

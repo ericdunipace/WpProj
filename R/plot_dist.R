@@ -1,18 +1,4 @@
-#' Plot distcompare objects
-#'
-#' @param x object of class `distcompare`
-#' @param models Can give list of `WpProj` outputs and have them turned into `distcompare` object for immediate plotting
-#' @param ylim Limits on y-axis
-#' @param ylabs Y-axis labels
-#' @param xlab  X-axis labels
-#' @param xlim  Limite of x-axis
-#' @param linesize How big to make the lines?
-#' @param pointsize How big to make the points?
-#' @param facet.group Should the plots be turned into a \link[ggplot2]{facet_grid}?
-#' @param ... Additional options for the wasserstein distance if just inputing raw `WpProj` models
-#'
-#' @return A `ggplot2` object
-#' @export
+
 plot.distcompare <- function(x = NULL, models = NULL, ylim = NULL, ylabs = c(NULL,NULL),
                              xlab = NULL, xlim = NULL,
                              linesize = 0.5, pointsize = 1.5, facet.group = NULL, ...) {
@@ -27,11 +13,13 @@ plot.distcompare <- function(x = NULL, models = NULL, ylim = NULL, ylabs = c(NUL
   
   if(is.null(xlab)) xlab <- "Number of active coefficients"
   
-  if ( !is.null(distance$posterior) ) {
-    ylim_post <- set_y_limits(distance, ylim, "posterior")
-    xlim_post <- set_x_limits(distance, xlim, "posterior")
+  if ( !is.null(distance$parameters) ) {
+    ylim_post <- set_y_limits(distance, ylim, "parameters")
+    xlim_post <- set_x_limits(distance, xlim, "parameters")
     
-    ppost <- ggplot2::ggplot( distance$posterior, 
+    
+    nactive <- dist <- groups <- NULL
+    ppost <- ggplot2::ggplot( distance$parameters, 
                               ggplot2::aes(x=nactive, y=dist, color = groups, group=groups )) +
       ggplot2::geom_line(size = linesize, position = ggplot2::position_dodge(width = 0.25)) + 
       ggplot2::geom_point(size = pointsize, position = ggplot2::position_dodge(width = 0.25)) + 
@@ -42,14 +30,14 @@ plot.distcompare <- function(x = NULL, models = NULL, ylim = NULL, ylabs = c(NUL
       ggplot2::scale_x_continuous(expand = c(0, 0), limits = xlim_post) +
       ggplot2::scale_y_continuous(expand = c(0, 0), limits = ylim_post )
     if(!is.null(facet.group)) {
-      ppost <- ppost + facet_grid(facet.group)
+      ppost <- ppost + ggplot2::facet_grid(facet.group)
     }
   }
   
-  if (!is.null(distance$mean)){
-    ylim_mean <- set_y_limits(distance, ylim, "mean")
-    xlim_mean <- set_x_limits(distance, xlim, "mean")
-    pmean <- ggplot2::ggplot( distance$mean, 
+  if (!is.null(distance$predictions)){
+    ylim_mean <- set_y_limits(distance, ylim, "predictions")
+    xlim_mean <- set_x_limits(distance, xlim, "predictions")
+    pmean <- ggplot2::ggplot( distance$predictions, 
                               ggplot2::aes(x=nactive, y=dist, color = groups, group=groups )) +
       ggplot2::geom_line(size = linesize, position = ggplot2::position_dodge(width = 0.25)) + 
       ggplot2::geom_point(size = pointsize, position = ggplot2::position_dodge(width = 0.25)) +
@@ -60,19 +48,17 @@ plot.distcompare <- function(x = NULL, models = NULL, ylim = NULL, ylabs = c(NUL
       ggplot2::scale_x_continuous(expand = c(0, 0), limits = xlim_mean) +
       ggplot2::scale_y_continuous(expand = c(0, 0), limits = ylim_mean )
     if(!is.null(facet.group)) {
-      pmean <- pmean + facet_grid(facet.group)
+      pmean <- pmean + ggplot2::facet_grid(facet.group)
     }
   }
   
-  plots <- list(posterior = ppost, mean = pmean)
+  plots <- list(parameters = ppost, predictions = pmean)
   class(plots) <- c("plotcompare","WpProj")
   return(plots)
 }
 
-setClass("plotcompare")
+methods::setClass("plotcompare")
 
-#' @rdname print
-#' @export
 print.plotcompare <- function(x) {
   for(i in 1:length(x)) {
     if(is.null(x[[i]])) next
@@ -81,9 +67,9 @@ print.plotcompare <- function(x) {
 }
 
 set_y_limits <- function(distance_data, ylim, quantity){
-  idx <- if (quantity == "posterior"){
+  idx <- if (quantity == "parameters"){
     1L
-  } else if (quantity == "mean") {
+  } else if (quantity == "predictions") {
     2L
   }
   
@@ -114,9 +100,9 @@ set_y_limits <- function(distance_data, ylim, quantity){
 
 
 set_x_limits <- function(distance_data, xlim, quantity){
-  idx <- if (quantity == "posterior"){
+  idx <- if (quantity == "parameters"){
     1L
-  } else if (quantity == "mean") {
+  } else if (quantity == "predictions") {
     2L
   }
   
@@ -145,18 +131,34 @@ set_x_limits <- function(distance_data, xlim, quantity){
 
 set_equal_y_limits.plotcompare <- function(distance_data){
   # dist.list <- list(dist = unlist(sapply(distance_data, function(x) x[[quantity]]$data$dist )))
-  dist <- ylim <- list(posterior = NULL, mean = NULL)
-  for(i in c("posterior", "mean")){
+  dist <- ylim <- list(parameters = NULL, predictions = NULL)
+  for(i in c("parameters", "predictions")){
     dist[[i]] <- list(dist = unlist(sapply(distance_data, function(x) x[[i]]$data$dist )))
     ylim[[i]] <- set_y_limits(dist, ylim[[i]], i)
   }
   for(j in seq_along(distance_data)) {
-    for(i in c("posterior", "mean")) {
+    for(i in c("parameters", "predictions")) {
       distance_data[[j]][[i]] <- distance_data[[j]][[i]] + ggplot2::scale_y_continuous(expand = c(0, 0), limits = ylim[[i]] )
     }
   }
   return(distance_data)
 }
 
-setMethod("plot", c("x" = "distcompare"), plot.distcompare)
-setMethod("print", c("x" = "plotcompare"), print.plotcompare)
+#' Plot `distcompare` Objects
+#'
+#' @param x object of class `distcompare`
+#' @param models Can give list of `WpProj` outputs and have them turned into `distcompare` object for immediate plotting
+#' @param ylim Limits on y-axis
+#' @param ylabs Y-axis labels
+#' @param xlab  X-axis labels
+#' @param xlim  Limite of x-axis
+#' @param linesize How big to make the lines?
+#' @param pointsize How big to make the points?
+#' @param facet.group Should the plots be turned into a \link[ggplot2]{facet_grid}?
+#' @param ... Additional options for the wasserstein distance if just inputing raw `WpProj` models
+#'
+#' @return A `ggplot2` object
+#' @keywords internal
+methods::setMethod("plot", c("x" = "distcompare"), plot.distcompare)
+
+# methods::setMethod("print", c("x" = "plotcompare"), print.plotcompare)

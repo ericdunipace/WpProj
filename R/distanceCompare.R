@@ -1,25 +1,47 @@
-setClass("distcompare",
-         list(posterior = "data.frame", 
-              mean = "data.frame", 
+methods::setClass("distcompare",
+         list(parameters = "data.frame", 
+              predictions = "data.frame", 
               p = "numeric"))
 
-#' Title
+#' Compares Optimal Transport Distances Between WpProj and Original Models
 #'
 #' @param models Models from WpProj methods
-#' @param target The target to compare the methods to. Should be a list with slots "posterior" to compare the parameters and "mean" to compare predictions
-#' @param p The power parameter of the Wasserstein distance
-#' @param ground_p The power of the distance metric. Typically set the same as `p`
+#' @param target The target to compare the methods to. Should be a list with slots "parameters" to compare the parameters and "predictions" to compare predictions
+#' @param power The power parameter of the Wasserstein distance.
 #' @param method Which approximation to the Wasserstein distance to use. Should be one of "exact", "sinkhorn", "greenkhorn", "gandkhorn", "randkhorn", or "hilbert".
-#' @param quantity Should the function target the "posterior" or the "mean". Can choose both.
-#' @param parallel Parallel backend to use for the `foreach` package
+#' @param quantity Should the function target the "parameters" or the "predictions". Can choose both.
+#' @param parallel Parallel backend to use for the `foreach` package. See `foreach::registerDoParallel(` for more details.
 #' @param transform Transformation function for the predictions.
 #' @param ... other options passed to the wasserstein distance function
 #'
-#' @return an object of class `distancecompare` with slots `posterior`, `mean`, and `p`.
+#' @return an object of class `distcompare` with slots `parameters`, `predictions`, and `p`.
+#' 
 #' @export
-distCompare <- function(models, target = list(posterior = NULL, mean = NULL), p = 2, ground_p = 2, 
+#' @examples
+#' if(rlang::is_installed("stats")) {
+#' n <- 32
+#' p <- 10
+#' s <- 21
+#' x <- matrix( stats::rnorm( p * n ), nrow = n, ncol = p )
+#' beta <- (1:10)/10
+#' y <- x %*% beta + stats::rnorm(n)
+#' post_beta <- matrix(beta, nrow=p, ncol=s) + stats::rnorm(p*s, 0, 0.1)
+#' post_mu <- x %*% post_beta
+#' 
+#' fit1 <-  WpProj(X=x, eta=post_mu, power = 2.0,
+#'                options = list(penalty = "lasso")
+#' )
+#' fit2 <-  WpProj(X=x, eta=post_mu, theta = post_beta, power = 2.0,
+#'                method = "binary program", solver = "lasso",
+#'                options = list(solver.options = list(penalty = "mcp"))
+#' )
+#' dc <- distCompare(models = list(fit1, fit2),
+#'                  target = list(parameters = post_beta, predictions = post_mu))
+#' plot(dc)
+#' }
+distCompare <- function(models, target = list(parameters = NULL, predictions = NULL), power = 2, 
                          method = "exact", 
-                         quantity = c("posterior","mean"),
+                         quantity = c("parameters","predictions"),
                          parallel=NULL, transform = function(x){return(x)}, ...) 
 {
   method <- match.arg(method, c("mse", transport_options()), 
@@ -43,6 +65,8 @@ distCompare <- function(models, target = list(posterior = NULL, mean = NULL), p 
     stopifnot(all(sapply(models, inherits, "WpProj")))
   }
   
+  p <- ground_p <- power
+  
   dist_df <- dist_mu_df <- nactive <- groups <- plot <- plot_mu <- NULL
   
   nzero <- lapply(models, function(mm) mm$nzero)
@@ -53,36 +77,38 @@ distCompare <- function(models, target = list(posterior = NULL, mean = NULL), p 
   d <- data$d
   s <- data$s
   
-  if ("posterior" %in% quantity){
-    posterior <- data$posterior
+  if ("parameters" %in% quantity){
+    parameters <- data$parameters
     dist_list <- mapply(function(mc, proj){
-        dist_fun(mc, mu = posterior$target, p = p, ground_p = ground_p, 
-                 method = posterior$method, observation.orientation = posterior$obs.direction,
-                 projection = proj, ...) }, mc = posterior$source, proj = posterior$projection)
+        dist_fun(mc, mu = parameters$target, p = p, ground_p = ground_p, 
+                 method = parameters$method, observation.orientation = parameters$obs.direction,
+                 projection = proj, ...) }, mc = parameters$source, proj = parameters$projection,
+        SIMPLIFY = FALSE)
     
     dist <- unlist(dist_list)
     nactive <- unlist(nzero)
     groups <- mapply(function(x,z){return(rep(x, each=z))}, 
                      x = group_names, z = sapply(dist_list, length))
     
-    if(posterior$isMSE)
+    if(parameters$isMSE)
     {
       dist <- (dist^2)/d
-      posterior$method <- "mse"
+      parameters$method <- "mse"
     }    
     dist_df <- data.frame(dist = dist,
                           nactive = unlist(nactive),
                           groups=factor(unlist(groups)),
-                          method = posterior$method)
+                          method = parameters$method)
   }
   
-  if ("mean" %in% quantity){
+  if ("predictions" %in% quantity){
     
-    mu <- data$mean
+    mu <- data$predictions
     dist_list_mu <- mapply(function(mc, proj){
       dist_fun(mc, mu = mu$target, p = p, ground_p = ground_p,
                method = mu$method, observation.orientation = mu$obs.direction,
-               projection = proj, ...)}, mc = mu$source, proj = mu$projection)
+               projection = proj, ...)}, mc = mu$source, proj = mu$projection,
+      SIMPLIFY = FALSE)
     
     dist_mu <- unlist(dist_list_mu)
     if (is.null(nactive)) nactive <- unlist(nzero)
@@ -96,7 +122,7 @@ distCompare <- function(models, target = list(posterior = NULL, mean = NULL), p 
       dist_mu <- (dist_mu^2)/n
       mu$method <- "mse"
     }   
-    
+
     dist_mu_df <- data.frame(dist = dist_mu,
                              nactive = unlist(nactive),
                              groups=factor(unlist(groups)),
@@ -105,7 +131,7 @@ distCompare <- function(models, target = list(posterior = NULL, mean = NULL), p 
   }
   
   # if (parallel) parallel::stopCluster(cl)
-  output <- list(posterior = dist_df, mean = dist_mu_df, p = p)
+  output <- list(parameters = dist_df, predictions = dist_mu_df, p = p)
   class(output) <- c("distcompare","WpProj")
   
   return(output)
@@ -114,6 +140,7 @@ distCompare <- function(models, target = list(posterior = NULL, mean = NULL), p 
 is.distcompare <- function(x) inherits(x, "distcompare")
 
 dist_fun <- function(mulist, mu, p, ground_p, method, observation.orientation, projection, ...) {
+  m <- NULL
   dist <-
     foreach::foreach(m=mulist, .combine = c) %dopar% {
         wp <- if(projection & method == "exact" & p == 2) {
@@ -144,9 +171,9 @@ set_dist_data <- function(target, models, quantity, method, transform) {
     if ( !is.null(names(method)) ) {
       method <- method[order(names(method), decreasing=TRUE)]
     } 
-    if("posterior" %in% quantity) {
+    if("parameters" %in% quantity) {
       meth.rm <- 2L
-    } else if ("mean" %in% quantity) {
+    } else if ("predictions" %in% quantity) {
       meth.rm <- 1L
     }
     method[meth.rm] <- NA
@@ -163,7 +190,7 @@ set_dist_data <- function(target, models, quantity, method, transform) {
   ### Target checks ###
   if (!is.null(target) ) {
     if (length(quantity) > 1 & (!is.list(target) | (is.list(target) & length(target) ==1) ) ) {
-      stop("For more than one quantity, target should be a list of length 2. The list should either be named with slots 'posterior' and 'mean' OR the posterior target should be in the first slot and the mean target in the second.")
+      stop("For more than one quantity, target should be a list of length 2. The list should either be named with slots 'parameters' and 'predictions' OR the parameters target should be in the first slot and the predictions target in the second.")
     }
     if (!is.list(target)) {
       target <- list(target)
@@ -172,34 +199,34 @@ set_dist_data <- function(target, models, quantity, method, transform) {
     if ( any (names(target) != quantity) ) {
       target <- target[sort(quantity, decreasing = TRUE) ]
     }
-    if ("posterior" %in% quantity) {
-      post_targ <- target$posterior
+    if ("parameters" %in% quantity) {
+      post_targ <- target$parameters
     }
-    if ("mean" %in% quantity) {
-      mean_targ <- target$mean
+    if ("predictions" %in% quantity) {
+      mean_targ <- target$predictions
     }
   } else {
-    target <- list(posterior = NULL, mean = NULL)
+    target <- list(parameters = NULL, predictions = NULL)
   }
   
   if(any(sapply(target, is.null)) ){
     avail.models <- unlist(sapply(models, function(x) x$method))
-    if (!("selection.variable" %in% avail.models)) {
-      stop("No way of setting target(s). Must either provide a named list or one of the methods should be the 'selection.variable' method since it preserves the original posterior.")
+    if (!("binary program" %in% avail.models)) {
+      stop("No way of setting target(s). Must either provide a named list or one of the methods should be the 'selection.variable' method since it preserves the original parameters.")
     } else {
-      get_idx <- which(avail.models == "selection.variable")
+      get_idx <- which(avail.models == "binary program")
       if(length(get_idx) > 1) {
-        warning("Multiple models with same method 'selection.variable'")
+        warning("Multiple models with same method 'binary program'")
         get_idx <- get_idx[1]
       }
     }
     selMod <- models[[get_idx]]
     last <- length(selMod$nzero)
-    if (is.null(target$posterior)  & "posterior" %in% quantity) {
+    if (is.null(target$parameters)  & "parameters" %in% quantity) {
       post_targ <- selMod$theta[[last]]
     }
-    if (is.null(target$mean) & "mean" %in% quantity) {
-      mean_targ <- transform(selMod$eta[[last]])
+    if (is.null(target$predictions) & "predictions" %in% quantity) {
+      mean_targ <- transform(selMod$fitted.values[[last]])
     }
   }
   
@@ -219,7 +246,7 @@ set_dist_data <- function(target, models, quantity, method, transform) {
   if (inherits(models, "WpProj")) {
     models <- list(models)
   } else {
-    if(!is.list(models)) stop("models must be a SLIM fit or a list of fits")
+    if(!is.list(models)) stop("models must be a WpProj fit or a list of fits")
   }
   
   ### set group names ###
@@ -227,24 +254,24 @@ set_dist_data <- function(target, models, quantity, method, transform) {
   if (is.null(group_names)) group_names <- seq.int(length(models))
   
   ### get dimensions ###
-  n <- dim(models[[1]]$eta[[1]])[1]
+  n <- dim(models[[1]]$fitted.values[[1]])[1]
   d <- dim(models[[1]]$theta[[1]])[1]
   s <- dim(models[[1]]$theta[[1]])[2]
   
-  ### set posterior data if present ###
-  if ("posterior" %in% quantity) {
+  ### set parameters data if present ###
+  if ("parameters" %in% quantity) {
     theta <- lapply(models, function(mm) mm$theta)
     if(!is.matrix(post_targ)) post_targ <- as.matrix(post_targ)
     if(nrow(post_targ) != d) post_targ <- t(post_targ)
-    if(nrow(post_targ) != d) stop("Number of parameters in posterior target isn't equal to the number of parameters in theta")
+    if(nrow(post_targ) != d) stop("Number of parameters in parameters target isn't equal to the number of parameters in theta")
     
     if(ncol(post_targ) == 1 & method[1] != "exact") {
       method[1] <- "exact"
       obs.direction[1] <- "colwise"
-      warning("posterior target only has 1 observation. Changing to exact method which will be fast in this case.")
+      warning("parameters target only has 1 observation. Changing to exact method which will be fast in this case.")
     }
     
-    posterior <- list(source = theta,
+    parameters <- list(source = theta,
                       target = post_targ,
                       method = method[1],
                       obs.direction = obs.direction[1],
@@ -252,25 +279,25 @@ set_dist_data <- function(target, models, quantity, method, transform) {
                       projection = rep(FALSE, length(theta))
     )
   } else {
-    posterior <- NULL
+    parameters <- NULL
   }
   
-  ### set mean data if present ###
-  if ("mean" %in% quantity) {
-    eta <- lapply(models, function(mm) lapply(mm$eta, transform))
+  ### set predictions data if present ###
+  if ("predictions" %in% quantity) {
+    eta <- lapply(models, function(mm) lapply(mm$fitted.values, transform))
     
     if(!is.matrix(mean_targ)) mean_targ <- as.matrix(mean_targ)
     if(any(dim(mean_targ) %in% c(n,s))) {
       if(nrow(mean_targ) == s) mean_targ <- t(mean_targ)
     }
-    if( nrow (mean_targ) != n) stop("Number of obsersvations of mean target not equal to number of observations in sample")
+    if( nrow (mean_targ) != n) stop("Number of obsersvations of predictions target not equal to number of observations in sample")
     if(ncol(mean_targ) == 1 & method[2] != "exact") {
       method[2] <- "exact"
       obs.direction[2] <- "colwise"
-      warning("Mean target only has 1 observation. Changing to exact method which will be fast in this case")
+      warning("predictions target only has 1 observation. Changing to exact method which will be fast in this case")
     }
     
-    mean <- list( source = eta,
+    predictions <- list( source = eta,
                   target = mean_targ,
                   method = method[2],
                   obs.direction = obs.direction[2],
@@ -278,12 +305,12 @@ set_dist_data <- function(target, models, quantity, method, transform) {
                   projection = ifelse(sapply(models, function(mm) mm$method) == "projection",TRUE, FALSE)
     )
   } else {
-    mean <- NULL
+    predictions <- NULL
   }
   
   ### set output matrix ###
-  output <- list( posterior = posterior,
-                  mean = mean,
+  output <- list( parameters = parameters,
+                  predictions = predictions,
                   models = models,
                   quantity = quantity,
                   n = n, d = d, s = s,
@@ -294,21 +321,22 @@ set_dist_data <- function(target, models, quantity, method, transform) {
 }
 
 set_equal_y_limits.distcompare <- function(distance_data){
-  dist <- ylim <- list(posterior = NULL, mean = NULL)
-  for(i in c("posterior", "mean")){
+  dist <- ylim <- list(parameters = NULL, predictions = NULL)
+  for(i in c("parameters", "predictions")){
     dist[[i]] <- list(dist = unlist(sapply(distance_data, function(x) x[[i]]$dist)))
     ylim[[i]] <- set_y_limits(dist, ylim[[i]], i)
   }
   return(ylim)
 }
 
-#' ranks distcompare objects
+#' Ranks `distcompare` Objects
 #'
-#' @param distances Distcompare object
+#' @param distances A `distcompare` object
 #'
-#' @return ranks of distcompare object
-#' @export
-rank.distCompare <- function(distances) {
+#' @keywords internal
+#'
+#' @return The ranks of a `distcompare` object
+rank_distcompare <- function(distances) {
   if(!is.distcompare(distances)) stop("Must be distcompare object")
   rank.fun <- function(distance, quant) {
     dist <- distance[[quant]]$dist
@@ -323,13 +351,13 @@ rank.distCompare <- function(distances) {
   }
   rp.df <- rm.df <- NULL
   
-  if ( !is.null(distances$posterior) ) {
-    rp.df <- rank.fun(distances, "posterior")
+  if ( !is.null(distances$parameters) ) {
+    rp.df <- rank.fun(distances, "parameters")
   }
   
-  if ( !is.null(distances$mean) ) {
-    rm.df <- rank.fun(distances, "mean")
+  if ( !is.null(distances$predictions) ) {
+    rm.df <- rank.fun(distances, "predictions")
   }
   
-  return(list(posterior = rp.df, mean = rm.df))
+  return(list(parameters = rp.df, predictions = rm.df))
 }

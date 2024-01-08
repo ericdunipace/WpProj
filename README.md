@@ -1,0 +1,128 @@
+
+# `WpProj`: Linear p-Wasserstein Projections
+
+<!-- badges: start -->
+
+[![R-CMD-check](https://github.com/ericdunipace/WpProj/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ericdunipace/WpProj/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
+
+The goal of `WpProj` is to perform Wasserstein projections from the
+predictive distributions of any model into the space of predictive
+distributions of linear models. We utilize L1 penalties to also reduce
+the complexity of the model space. This package employs the methods as
+described in Eric Dunipace and Lorenzo Trippa (2020)
+\<arXiv:2012.09999\>.
+
+The Wasserstein distance is a measure of distance between two
+probability distributions. It is defined as:
+$$W_p(\mu,\nu) = \left(\inf_{\pi \in \Pi(\mu,\nu)} \int_{\mathbb{R}^d \times \mathbb{R}^d} \|x-y\|^p d\pi(x,y)\right)^{1/p}}$$
+where $\Pi(\mu,\nu)$ is the set of all joint distributions with
+marginals $\mu$ and $\nu$.
+
+In the our package, if $\mu$ is the original prediction from the
+original model, such as from a Bayesian linear regression or a neural
+network, then we seek to find a new prediction $\nu$ that minimizes the
+Wasserstein distance between the two:
+$$ \text{argmin}_\nu \left(\inf_{\pi \in \Pi(\mu,\nu)} \int_{\mathbb{R}^d \times \mathbb{R}^d} \|x-y\|^p d\pi(x,y)\right)^{1/p}$$
+
+## Installation
+
+You can install the development version of WpProj from
+[GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("ericdunipace/WpProj")
+```
+
+## Example
+
+This is a basic example running the `WpProj` function on a simulated
+dataset:
+
+``` r
+library(WpProj)
+# note we don't generate believable data with real posteriors
+# these examples are just to show how to use the function
+n <- 32
+p <- 10
+s <- 21
+
+# covariates and coefficients
+x <- matrix( stats::rnorm( p * n ), nrow = n, ncol = p )
+beta <- (1:10)/10
+
+#outcome
+y <- x %*% beta + stats::rnorm(n)
+
+# fake posterior
+post_beta <- matrix(beta, nrow=p, ncol=s) + stats::rnorm(p*s, 0, 0.1)
+post_mu <- x %*% post_beta #posterior predictive distributions
+
+# fit models
+## L1 model
+fit.p2     <-  WpProj(X=x, eta=post_mu, power = 2.0,
+                   method = "L1", #default
+                   solver = "lasso" #default
+)
+
+## approximate binary program
+fit.p2.bp <-  WpProj(X=x, eta=post_mu, theta = post_beta, power = 2.0,
+                   method = "binary program",
+                   solver = "lasso" #default because approximate algorithm is faster
+)
+```
+
+We can compare the performance of the models using the `distCompare`
+function (measuring distance between the reduced models and the original
+model) and then generate a plot
+
+``` r
+dc <- distCompare(models = list("L1" = fit.p2, "BP" = fit.p2.bp),
+                  target = list(parameters = post_beta,
+                                  predictions = post_mu))
+```
+
+``` r
+plot(dc)
+```
+
+    #> $parameters
+
+<img src="man/figures/README-example_continued_plot_noecho-1.png" width="100%" />
+
+    #> 
+    #> $predictions
+
+<img src="man/figures/README-example_continued_plot_noecho-2.png" width="100%" />
+
+    #> 
+    #> attr(,"class")
+    #> [1] "plotcompare" "WpProj"
+
+We can also compare performacne by measure the relative distance between
+a null model and the predictions of interest as a pseudo $R^2$
+
+``` r
+r2.null  <- WPR2(projected_model = dc) # should be between 0 and 1
+```
+
+``` r
+plot(r2.null)
+```
+
+    #> Warning: Removed 2 rows containing missing values (`geom_line()`).
+    #> Warning: Removed 2 rows containing missing values (`geom_point()`).
+
+<img src="man/figures/README-r2_plots_noecho-1.png" width="100%" />
+
+We can also examine how the predictions change in the models for
+individual observations
+
+``` r
+ridgePlot(fit.p2, index = 21, minCoef = 0, maxCoef = 10)
+```
+
+    #> Picking joint bandwidth of 0.102
+
+<img src="man/figures/README-ridgeplots_noecho-1.png" width="100%" />

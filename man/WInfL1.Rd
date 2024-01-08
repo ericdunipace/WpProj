@@ -2,7 +2,7 @@
 % Please edit documentation in R/WInftyL1.R
 \name{WInfL1}
 \alias{WInfL1}
-\title{Title}
+\title{Infinity-Wasserstein Linear Projections With an L1 Penalty}
 \usage{
 WInfL1(
   X,
@@ -13,7 +13,7 @@ WInfL1(
   lambda.min.ratio = 1e-04,
   gamma = 1.5,
   nlambda = 10,
-  solver = c("mosek", "gurobi"),
+  solver = c("cone", "mosek", "gurobi"),
   options = list(solver_opts = NULL, init = NULL, tol = 1e-07, iter = 100),
   model.size = NULL,
   display.progress = FALSE,
@@ -21,35 +21,36 @@ WInfL1(
 )
 }
 \arguments{
-\item{X}{}
+\item{X}{An n x p matrix of covariates}
 
-\item{Y}{}
+\item{Y}{An n x s matrix of predictions}
 
-\item{theta}{}
+\item{theta}{optional parameter matrix for selection methods. Should be p x s.}
 
-\item{penalty}{}
+\item{penalty}{Form of penalty. One of "none", "lasso", "mcp","scad"}
 
-\item{lambda}{}
+\item{lambda}{Penalty parameter for lasso regression.}
 
-\item{lambda.min.ratio}{}
+\item{lambda.min.ratio}{Minimum lambda ratio for self selected lambda.}
 
-\item{gamma}{}
+\item{gamma}{tuning parameters for SCAD and MCP.}
 
-\item{nlambda}{}
+\item{nlambda}{Number of lambda values.}
 
-\item{solver}{}
+\item{solver}{Which solver to use. One of "cone","mosek", or "gurobi". Note "mosek" and "gurobi" are commercial installers.}
 
-\item{options}{}
+\item{options}{A list containing slots \code{solver_opts}, options for each solver, \code{init}, initial conditions fed into each solver, \code{tol}, tolerance for convergence, and \code{iter}, the maximum number of iterations}
 
-\item{model.size}{}
+\item{model.size}{The maximum number of paramters to consider. Should be an integer greater than 1 and less than or equal to the number of covariates}
 
-\item{display.progress}{}
+\item{display.progress}{Whether to display progress. TRUE or FALSE}
 
-\item{...}{}
+\item{...}{Additional arguments passed to the solver as needed}
 }
 \value{
-`WpProj` object
+A \code{WpProj} object
 }
 \description{
-Title
+Infinity-Wasserstein Linear Projections With an L1 Penalty
 }
+\keyword{internal}

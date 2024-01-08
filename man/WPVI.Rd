@@ -2,11 +2,11 @@
 % Please edit documentation in R/WPVI.R
 \name{WPVI}
 \alias{WPVI}
-\title{p-Wasserstein variable importance}
+\title{p-Wasserstein Variable Importance}
 \usage{
 WPVI(
   X,
-  Y,
+  eta,
   theta,
   pred.fun = NULL,
   p = 2,
@@ -19,31 +19,44 @@ WPVI(
 )
 }
 \arguments{
-\item{X}{covariates}
+\item{X}{Covariates}
 
-\item{Y}{predictions}
+\item{eta}{Predictions from the estimated model}
 
-\item{theta}{parameters from prediction}
+\item{theta}{Parameters from the estimated model.}
 
-\item{pred.fun}{prediction function. must take variables x, theta}
+\item{pred.fun}{A prediction function. must take variables x, theta as arguments: \code{pred.fun(x,theta)}}
 
-\item{p}{Power of Wasserstein power}
+\item{p}{Power of Wasserstein distance}
 
 \item{ground_p}{Power of distance metric}
 
-\item{transport.method}{Transport methods. One of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert"}
+\item{transport.method}{Transport methods. See \code{\link[=transport_options]{transport_options()}} for more details.}
 
 \item{epsilon}{Hyperparameter for sinkhorn iterations}
 
-\item{OTmaxit}{maximum number of iterations for the Wasserstein method}
+\item{OTmaxit}{Maximum number of iterations for the Wasserstein method}
 
 \item{display.progress}{Display intermediate progress}
 
-\item{parallel}{foreach backend}
+\item{parallel}{a foreach backend if already created}
 }
 \value{
-
+Returns an integer vector ranking covariate importance from most to least important.
 }
 \description{
-p-Wasserstein variable importance
+This function will measure how much removing each covariate harms prediction accuracy.
+}
+\examples{
+n <- 128
+p <- 10
+s <- 99
+x <- matrix(1, nrow = n, ncol = p )
+beta <- (1:10)/10
+y <- x \%*\% beta 
+post_beta <- matrix(beta, nrow=p, ncol=s) 
+post_mu <- x \%*\% post_beta
+
+fit <-  WpProj(X=x, eta=post_mu, power = 2.0)
+WPVI(X = x, eta = post_mu, theta = post_beta, transport.method = "hilbert")
 }

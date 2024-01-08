@@ -6,7 +6,7 @@ extractCoef <- function(fit, drop=FALSE) {
   if(any(class(fit) == "glmnet")){
     nvar <- fit$df+1
     extractCoefVar <- tapply(lambda, nvar, min)
-    coefs <- coef(fit, s = extractCoefVar)
+    coefs <- stats::coef(fit, s = extractCoefVar)
     idx <- which(lambda %in% extractCoefVar)
   } else if(any(class(fit)=="oem")){
       nvar <- colSums(fit$beta[[1]] != 0)

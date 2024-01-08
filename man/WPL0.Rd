@@ -8,13 +8,13 @@ WPL0(
   X,
   Y = NULL,
   theta,
-  p = 2,
-  ground_p = 2,
+  power = 2,
   method = c("selection.variable", "projection"),
   transport.method = transport_options(),
   epsilon = 0.05,
-  maxit = 100,
-  parallel = NULL
+  OTmaxit = 100,
+  parallel = NULL,
+  ...
 )
 }
 \arguments{
@@ -24,23 +24,22 @@ WPL0(
 
 \item{theta}{optional matrix of coefficients from original model, if relevant}
 
-\item{p}{power of the Wasserstein distance}
+\item{power}{power of the Wasserstein distance}
 
-\item{ground_p}{power of the distance metric}
-
-\item{method}{One of "selection.variable" or "projection". Methods decide whether covariate matrix in `theta` is preserved ("selection.variable") or if new projections are generated ("projection")}
+\item{method}{One of "selection.variable" or "projection". Methods decide whether covariate matrix in \code{theta} is preserved ("selection.variable") or if new projections are generated ("projection")}
 
 \item{transport.method}{Method for wasserstein distance. One of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert"}
 
 \item{epsilon}{hyperparameter for sinkhorn iterations}
 
-\item{maxit}{max iteration for sinkhorn iterations}
+\item{OTmaxit}{max iteration for sinkhorn iterations}
 
 \item{parallel}{foreach backend}
 }
 \value{
-`WpProj` object
+\code{WpProj} object
 }
 \description{
 p-Wasserstein projections with an L0 penalty
 }
+\keyword{internal}

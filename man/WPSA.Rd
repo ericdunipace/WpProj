@@ -8,11 +8,11 @@ WPSA(
   X,
   Y = NULL,
   theta,
+  power = 2,
   force = NULL,
-  p = 2,
-  ground_p = 2,
   model.size = 3,
-  iter = 1,
+  nvars = NULL,
+  maxit = 1,
   temps = 1000,
   max.time = 3600,
   const = NULL,
@@ -23,9 +23,10 @@ WPSA(
     OTmaxit = 100),
   display.progress = FALSE,
   parallel = NULL,
-  get.theta = TRUE,
+  calc.theta = TRUE,
   xtx = NULL,
-  xty = NULL
+  xty = NULL,
+  ...
 )
 }
 \arguments{
@@ -33,41 +34,42 @@ WPSA(
 
 \item{Y}{Predictions}
 
-\item{theta}{optional matrix of parameters for generating predictions}
+\item{theta}{Optional matrix of parameters for generating predictions}
 
-\item{force}{any covariates to force into the model?}
+\item{power}{Power of the Wassersetin distance}
 
-\item{p}{power of the wassersetin distance}
-
-\item{ground_p}{power of the distance metric. Typically same as `p`}
+\item{force}{Any covariates to force into the model?}
 
 \item{model.size}{Maximum number of coefficients}
 
-\item{iter}{Maximum number of iterations}
+\item{nvars}{The number of variables to explore. Should be an integer vector of model sizes. Default is NULL which will explore all models from 1 to \code{model.size}.}
 
-\item{temps}{number of temperatures}
+\item{maxit}{Maximum number of iterations}
 
-\item{max.time}{maximum time in seconds to run}
+\item{temps}{Number of temperatures}
 
-\item{const}{maximum value for simulated annealing distance}
+\item{max.time}{Maximum time in seconds to run}
 
-\item{proposal}{proposal function. There is a default method but can provide your own with parameters xty, cur, idx, force, d, method}
+\item{const}{Maximum value for simulated annealing distance}
 
-\item{options}{options for simulated annealing}
+\item{proposal}{Proposal function. There is a default method but can provide your own with parameters \code{xty}, \code{cur}, \code{idx}, \code{force}, \code{d}, \code{method}}
 
-\item{display.progress}{}
+\item{options}{Options for simulated annealing}
 
-\item{parallel}{foreach backend}
+\item{display.progress}{Whether to display solver progress. TRUE or FALSE. Default is FALSE.}
 
-\item{get.theta}{Should the model save the linear coefficients?}
+\item{parallel}{A \code{\link[foreach:foreach]{foreach::foreach()}} backend}
+
+\item{calc.theta}{Should the model save the linear coefficients? TRUE or FALSE. Default is TRUE}
 
 \item{xtx}{precomputed crossproduct \code{crossprod(X,X)}}
 
 \item{xty}{precomputed \code{crossprod(X, Y)}}
 }
 \value{
-
+An object of class \code{WpProj}
 }
 \description{
 p-Wasserstein distance projections using simulated annealing
 }
+\keyword{internal}

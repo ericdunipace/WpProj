@@ -1,4 +1,4 @@
-testthat::test_that("stepwise works", {
+test_that("stepwise works", {
   require(WpProj)
   set.seed(111)
   
@@ -29,10 +29,10 @@ testthat::test_that("stepwise works", {
   
   active.idx <- seq(2,10,2)
   
-  out <- WPSW(x, post_mu, t(post_beta), force = 1, p = 2, ground_p = 2,
+  out <- WPSW(x, post_mu, t(post_beta), force = 1, power = 2,
               direction = c("backward"), 
               method=c("selection.variable"))
-  out1 <- WPSW(x, post_mu, t(post_beta), force = 1, p = 2, ground_p = 2,
+  out1 <- WPSW(x, post_mu, t(post_beta), force = 1, power = 2,
                direction = c("forward"), 
                method=c("selection.variable"))
   
@@ -40,10 +40,10 @@ testthat::test_that("stepwise works", {
   testthat::expect_true(all(out1$beta %in% c(0,1)))
   
   #check model size truncation
-  out <- WPSW(x, t(post_mu), t(post_beta), force = 1, p = 2, ground_p = 2,
+  out <- WPSW(x, t(post_mu), t(post_beta), force = 1, power = 2,
               direction = c("backward"), 
               method=c("selection.variable"), model.size = 8)
-  out1 <- WPSW(x, t(post_mu), t(post_beta), force = 1, p = 2,
+  out1 <- WPSW(x, t(post_mu), t(post_beta), force = 1, power = 2,
                direction = c("forward"), 
                method=c("selection.variable"), model.size = 3)
   
@@ -53,20 +53,20 @@ testthat::test_that("stepwise works", {
   testthat::expect_true(all(out1$beta %in% c(NA, 0,1)))
   
   #check projection
-  out2 <- WPSW(x, t(post_mu), t(post_beta), force = 1, p = 2,
+  out2 <- WPSW(x, t(post_mu), t(post_beta), force = 1, power = 2,
                direction = c("backward"), 
                method=c("projection"))
-  out3 <- WPSW(x, t(post_mu), t(post_beta), force = 1, p = 2,
+  out3 <- WPSW(x, t(post_mu), t(post_beta), force = 1, power = 2,
                direction = c("forward"), 
                method=c("projection"))
   testthat::expect_true(all((colSums(out2$beta!=0)/s) %in% 1:10))
   testthat::expect_true(all((colSums(out3$beta!=0)/s) %in% 1:10))
   
   #check modelsize truncation
-  out4 <- WPSW(x, t(post_mu), t(post_beta), force = 1, p = 2,
+  out4 <- WPSW(x, t(post_mu), t(post_beta), force = 1, power = 2,
                direction = c("backward"), 
                method=c("projection"), model.size = 8)
-  out5 <- WPSW(x, t(post_mu), t(post_beta), force = 1, p = 2,
+  out5 <- WPSW(x, t(post_mu), t(post_beta), force = 1, power = 2,
                direction = c("forward"), 
                method=c("projection"), model.size = 3)
 
@@ -105,13 +105,13 @@ testthat::test_that("model size works when force is null", {
   
   active.idx <- seq(2,10,2)
   
-  testthat::expect_invisible( out <- WPSW(x, t(post_mu), t(post_beta), p = 2,
+  testthat::expect_invisible( out <- WPSW(x, t(post_mu), t(post_beta), power = 2,
                direction = c("backward"), 
                method=c("projection"), model.size = 8))
-  testthat::expect_invisible(out1 <- WPSW(x, t(post_mu), t(post_beta), p = 2,
+  testthat::expect_invisible(out1 <- WPSW(x, t(post_mu), t(post_beta), power = 2,
                direction = c("forward"), 
                method=c("projection"), model.size = 3))
-  testthat::expect_invisible( out2 <- WPSW(x, t(post_mu), t(post_beta), p = 2,
+  testthat::expect_invisible( out2 <- WPSW(x, t(post_mu), t(post_beta), power = 2,
                                            direction = c("backward"), 
                                            method=c("projection")))
   
@@ -148,10 +148,10 @@ testthat::test_that("nzero gives right number", {
   
   active.idx <- seq(2,10,2)
   
-  out <- WPSW(x, post_mu, t(post_beta), force = 1, p = 2, ground_p = 2,
+  out <- WPSW(x, post_mu, t(post_beta), force = 1, power = 2,
               direction = c("backward"), 
               method=c("selection.variable"))
-  out1 <- WPSW(x, post_mu, t(post_beta), force = 1, p = 2, ground_p = 2,
+  out1 <- WPSW(x, post_mu, t(post_beta), force = 1, power = 2,
                direction = c("forward"), 
                method=c("selection.variable"))
   
@@ -159,10 +159,10 @@ testthat::test_that("nzero gives right number", {
   testthat::expect_true(all(out1$nzero %in% 1:p))
   
   #check model size truncation
-  out <- WPSW(x, t(post_mu), t(post_beta), force = 1, p = 2, ground_p = 2,
+  out <- WPSW(x, t(post_mu), t(post_beta), force = 1, power = 2,
               direction = c("backward"), 
               method=c("selection.variable"), model.size = 8)
-  out1 <- WPSW(x, t(post_mu), t(post_beta), force = 1, p = 2,
+  out1 <- WPSW(x, t(post_mu), t(post_beta), force = 1, power = 2,
                direction = c("forward"), 
                method=c("selection.variable"), model.size = 3)
   
@@ -172,10 +172,10 @@ testthat::test_that("nzero gives right number", {
   testthat::expect_true(all(out1$beta %in% c(NA, 0,1)))
   
   #check projection
-  out2 <- WPSW(x, t(post_mu), t(post_beta), force = 1, p = 2,
+  out2 <- WPSW(x, t(post_mu), t(post_beta), force = 1, power = 2,
                direction = c("backward"), 
                method=c("projection"))
-  out3 <- WPSW(x, t(post_mu), t(post_beta), force = 1, p = 2,
+  out3 <- WPSW(x, t(post_mu), t(post_beta), force = 1, power = 2,
                direction = c("forward"), 
                method=c("projection"))
   testthat::expect_true(all(out2$nzero %in% 1:p))
@@ -184,10 +184,10 @@ testthat::test_that("nzero gives right number", {
   testthat::expect_true(all((colSums(out3$beta!=0)/s) %in% 1:p))
   
   #check modelsize truncation
-  out4 <- WPSW(x, t(post_mu), t(post_beta), force = 1, p = 2,
+  out4 <- WPSW(x, t(post_mu), t(post_beta), force = 1, power = 2,
                direction = c("backward"), 
                method=c("projection"), model.size = 8)
-  out5 <- WPSW(x, t(post_mu), t(post_beta), force = 1, p = 2,
+  out5 <- WPSW(x, t(post_mu), t(post_beta), force = 1, power = 2,
                direction = c("forward"), 
                method=c("projection"), model.size = 3)
   testthat::expect_true(all(out4$nzero %in% 1:p))

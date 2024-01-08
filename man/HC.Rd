@@ -2,16 +2,16 @@
 % Please edit documentation in R/HC.R
 \name{HC}
 \alias{HC}
-\title{Run the Hahn-Carvalho method}
+\title{Run the Hahn-Carvalho Method}
 \usage{
 HC(
   X,
   Y = NULL,
   theta,
   family = "gaussian",
-  penalty = c("elastic.net", "selection.lasso", "lasso", "ols", "mcp", "scad",
-    "mcp.net", "scad.net", "grp.lasso", "grp.lasso.net", "grp.mcp", "grp.scad",
-    "grp.mcp.net", "grp.scad.net", "sparse.grp.lasso"),
+  penalty = c("elastic.net", "selection.lasso", "lasso", "ols", "mcp", "scad", "mcp.net",
+    "scad.net", "grp.lasso", "grp.lasso.net", "grp.mcp", "grp.scad", "grp.mcp.net",
+    "grp.scad.net", "sparse.grp.lasso"),
   method = c("selection.variable", "projection"),
   lambda = numeric(0),
   nlambda = 100L,
@@ -25,8 +25,7 @@ HC(
   maxit = 500L,
   tol = 1e-07,
   irls.maxit = 100L,
-  irls.tol = 0.001,
-  intercept = TRUE
+  irls.tol = 0.001
 )
 }
 \arguments{
@@ -67,12 +66,25 @@ HC(
 \item{irls.maxit}{IRLS max iterations for OEM}
 
 \item{irls.tol}{IRLS tolerance for OEM}
-
-\item{intercept}{Should the method include an intercept}
 }
 \value{
-a `WpProj` object with selected covariates and their values
+a \code{WpProj} object with selected covariates and their values
 }
 \description{
-Runs the Hahn-Carvalho method but adapted to return full distributions
+Runs the Hahn-Carvalho method but adapted to return full distributions.
+}
+\examples{
+n <- 32
+p <- 10
+s <- 99
+x <- matrix( 1, nrow = n, ncol = p )
+beta <- (1:10)/10
+y <- x \%*\% beta
+post_beta <- matrix(beta, nrow=p, ncol=s) 
+post_mu <- x \%*\% post_beta
+
+fit <-  HC(X=x, Y=post_mu, theta = post_beta,
+               penalty = "lasso", 
+               method = "projection"
+)
 }

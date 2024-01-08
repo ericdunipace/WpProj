@@ -1,4 +1,4 @@
-#' p-Wasserstein linear projections with an \eqn{L_1} penalty
+#' p-Wasserstein Linear Projections With an \eqn{L_1} Penalty
 #'
 #' @param X matrix of covariates
 #' @param Y matrix of predictions
@@ -15,7 +15,25 @@
 #' @param ... arguments passed to other methods such as Wasserstein distance
 #'
 #' @return object of class `WpProj`
-#' @export
+#' @keywords internal
+#' @seealso [W1L1()], [W2L1()], [WInfL1]
+#' 
+# @examples
+#  if(rlang::is_installed("stats")) {
+# n <- 128
+# p <- 10
+# s <- 99
+# x <- matrix( stats::rnorm( p * n ), nrow = n, ncol = p )
+# beta <- (1:10)/10
+# y <- x %*% beta + stats::rnorm(n)
+# post_beta <- matrix(beta, nrow=p, ncol=s) + stats::rnorm(p*s, 0, 0.1)
+# post_mu <- x %*% post_beta
+# 
+# fit <-  WPL1(X=x, Y=post_mu, power = 2.0,
+#                penalty = "lasso",
+#                method = "projection" #default
+# )
+# }
 WPL1 <- function(X, Y=NULL, theta = NULL, power = 2.0,
                  penalty =  c("lasso", "ols", "mcp", "elastic.net",
                               "selection.lasso",
@@ -37,7 +55,7 @@ WPL1 <- function(X, Y=NULL, theta = NULL, power = 2.0,
   this.call <- as.list(match.call()[-1])
   stopifnot(power >= 1)
   if(power == 2.0) {
-    w2l1.arg.sel <- which(names(pot.args) %in% formalArgs("W2L1"))
+    w2l1.arg.sel <- which(names(pot.args) %in% methods::formalArgs("W2L1"))
     w2l1.args <- pot.args[w2l1.arg.sel]
     argn <- lapply(names(w2l1.args), as.name)
     names(argn) <- names(w2l1.args)
@@ -45,24 +63,24 @@ WPL1 <- function(X, Y=NULL, theta = NULL, power = 2.0,
     output <- eval(f.call, envir = w2l1.args)
     # output <- W2L1(X = X, Y = Y, theta = theta, penalty = penalty,
     #                )
-  } else if (power == 1) {
-    w1l1.args <- pot.args
-    w1l1.args$alpha <- w1l1.args$tau <-  w1l1.args$power <- NULL
-    # w2l1.arg.sel <- which(names(pot.args) %in% formalArgs("W2L1"))
-    # w2l1.args <- pot.args[w2l1.arg.sel]
-    argn <- lapply(names(w1l1.args), as.name)
-    names(argn) <- names(w1l1.args)
-    f.call <- as.call(c(list(as.name("W1L1")), argn))
-    output <- eval(f.call, envir = w1l1.args)
-  } else if (power == Inf) {
-    winfl1.args <- pot.args
-    winfl1.args$alpha <- winfl1.args$tau <- winfl1.args$power <- NULL
-    # w2l1.arg.sel <- which(names(pot.args) %in% formalArgs("W2L1"))
-    # w2l1.args <- pot.args[w2l1.arg.sel]
-    argn <- lapply(names(winfl1.args), as.name)
-    names(argn) <- names(winfl1.args)
-    f.call <- as.call(c(list(as.name("WInfL1")), argn))
-    output <- eval(f.call, envir = winfl1.args)
+  # } else if (power == 1) {
+  #   w1l1.args <- pot.args
+  #   w1l1.args$alpha <- w1l1.args$tau <-  w1l1.args$power <- NULL
+  #   # w2l1.arg.sel <- which(names(pot.args) %in% formalArgs("W2L1"))
+  #   # w2l1.args <- pot.args[w2l1.arg.sel]
+  #   argn <- lapply(names(w1l1.args), as.name)
+  #   names(argn) <- names(w1l1.args)
+  #   f.call <- as.call(c(list(as.name("W1L1")), argn))
+  #   output <- eval(f.call, envir = w1l1.args)
+  # } else if (power == Inf) {
+  #   winfl1.args <- pot.args
+  #   winfl1.args$alpha <- winfl1.args$tau <- winfl1.args$power <- NULL
+  #   # w2l1.arg.sel <- which(names(pot.args) %in% formalArgs("W2L1"))
+  #   # w2l1.args <- pot.args[w2l1.arg.sel]
+  #   argn <- lapply(names(winfl1.args), as.name)
+  #   names(argn) <- names(winfl1.args)
+  #   f.call <- as.call(c(list(as.name("WInfL1")), argn))
+  #   output <- eval(f.call, envir = winfl1.args)
   } else {
     # lp.arg.sel <- which(names(pot.args) %in% formalArgs("lp_reg"))
     # lp.args <- pot.args[lp.arg.sel]
@@ -120,6 +138,19 @@ lp_reg <- function(x, y, theta = NULL, power,
     #   return(log(rowSums(exp(x_temp)))+ mx)
     # }
   }
+  obs_weight_update <- function(X,Y,beta,power,pmin_limit) {
+    resid <- log(abs(Y - X %*% beta))
+    w <- resid * (power - 2)
+    if(is.finite(power) && all(is.finite(w))) {
+      w <- resid * (power - 2)
+      w <- pmin(w, pmin_limit)
+      w <- exp(w - log_sum_exp(w) )@x # because is sparseMat
+    } else {
+      w <- rep(0, nrow(X))
+      w[which.max(resid@x)] <- 1.0
+    }
+    return(w)
+  }
   n <- nrow(x)
   d <- ncol(x)
   
@@ -149,6 +180,7 @@ lp_reg <- function(x, y, theta = NULL, power,
   ow <- list()
   Xw <- list()
   Yw <- list()
+  pmin_limit <- log(1e20)
   # XtX <- list()
   # XtY <- list()
   oem_holder <- list()
@@ -170,7 +202,7 @@ lp_reg <- function(x, y, theta = NULL, power,
   }
   
   beta <- beta_old <- lapply(1:length(lambda), function(l) rep(Inf, d * s))
-  if(display.progress) pb <- txtProgressBar(min = 0, max = length(lambda), style = 3)
+  if(display.progress) pb <- utils::txtProgressBar(min = 0, max = length(lambda), style = 3)
   
   for(l in seq_along(lambda)) {
     lam <- lambda[l]
@@ -194,16 +226,14 @@ lp_reg <- function(x, y, theta = NULL, power,
       beta[[l]] <-  c(oem_holder[[1]]$beta[[1]][-1])
       if(not.converged(beta[[l]], beta_old[[l]], tol)){
         beta_old[[l]] <- beta[[l]]
-        obs.weights[[1]] <- log(abs(Y - Xmat %*% beta[[1]])) * (power - 2)
-        obs.weights[[1]] <- pmin(obs.weights[[1]], log(1e4))
-        obs.weights[[1]] <- exp(obs.weights[[1]] - log_sum_exp(obs.weights[[1]]) )@x
+        obs.weights[[1]] <- obs_weight_update(Xmat,Y,beta[[l]],power,pmin_limit)
       } else {
         break
       }
       if(sum(beta[[l]] != 0) > model.size) break
       
     }
-    if(display.progress) setTxtProgressBar(pb, l)
+    if(display.progress) utils::setTxtProgressBar(pb, l)
   }
   
   output <- list()

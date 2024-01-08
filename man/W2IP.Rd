@@ -10,9 +10,11 @@ W2IP(
   theta,
   transport.method = transport_options(),
   model.size = NULL,
-  infimum.maxit = 100,
+  nvars = NULL,
+  maxit = 100L,
+  infimum.maxit = 100L,
   tol = 1e-07,
-  solution.method = c("cone", "lp", "cplex", "gurobi", "mosek"),
+  solver = c("cone", "lp", "mosek", "cplex", "gurobi"),
   display.progress = FALSE,
   parallel = NULL,
   ...
@@ -29,18 +31,26 @@ W2IP(
 
 \item{model.size}{Maximum number of coefficients in interpretable model}
 
+\item{nvars}{The number of variables to explore. Should be an integer vector of model sizes. Default is NULL which will explore all models from 1 to \code{model.size}.}
+
+\item{maxit}{Maximum number of solver iterations}
+
 \item{infimum.maxit}{Maximum iterations to alternate binary program and Wasserstein distance calculation}
 
 \item{tol}{Tolerance for convergence of coefficients}
 
-\item{solution.method}{solver to use. Must be one of "cone","lp", "cplex", "gurobi","mosek"}
+\item{solver}{The solver to use. Must be one of "cone","lp", "cplex", "gurobi","mosek".}
 
 \item{display.progress}{Should progress be printed?}
 
-\item{parallel}{foreach back end}
+\item{parallel}{foreach back end. See \code{\link[foreach:foreach]{foreach::foreach()}} for more details.}
 
-\item{...}{Extra args to wasserstein distance methods}
+\item{...}{Extra args to Wasserstein distance methods}
 }
 \description{
 2-Wasserstein distance selection by Integer Programming
 }
+\details{
+For argument \code{solution.method}, options "cone" and "lp" use the free solvers "ECOS" and "lpSolver", respectively. "cplex", "gurobi" and "mosek" require installing the corresponding commercial solvers.
+}
+\keyword{internal}

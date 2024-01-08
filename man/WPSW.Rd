@@ -2,24 +2,24 @@
 % Please edit documentation in R/WPstepwise.R
 \name{WPSW}
 \alias{WPSW}
-\title{p-Wasserstein distance linear projections using a stepwise method}
+\title{p-Wasserstein Distance Linear Projections Using a Stepwise Method}
 \usage{
 WPSW(
   X,
   Y,
   theta,
+  power = 2,
   force = NULL,
-  p = 2,
-  ground_p = 2,
   direction = c("backward", "forward"),
   method = c("selection.variable", "scale", "projection"),
   transport.method = transport_options(),
-  epsilon = 0.05,
   OTmaxit = 100,
+  epsilon = 0.05,
   calc.theta = TRUE,
   model.size = NULL,
   parallel = NULL,
-  display.progress = FALSE
+  display.progress = FALSE,
+  ...
 )
 }
 \arguments{
@@ -29,11 +29,9 @@ WPSW(
 
 \item{theta}{optional parameter matrix for selection methods.}
 
+\item{power}{Power of the wasserstein distance}
+
 \item{force}{Any covariates to force into the model?}
-
-\item{p}{Power of the wasserstein distance}
-
-\item{ground_p}{Distance metric power. Typically the same as `p`}
 
 \item{direction}{forward or backward selection}
 
@@ -41,9 +39,9 @@ WPSW(
 
 \item{transport.method}{Method for calculating the wasserstein distance. One of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert"}
 
-\item{epsilon}{hyperparameter if using sinkhorn iterations to approximate OT}
-
 \item{OTmaxit}{maximum number of iterations for the opt?imal transport methods}
+
+\item{epsilon}{hyperparameter if using sinkhorn iterations to approximate OT}
 
 \item{calc.theta}{should we get the linear coefficients}
 
@@ -54,8 +52,9 @@ WPSW(
 \item{display.progress}{Display intermediate progress}
 }
 \value{
-
+An object of class \code{WpProj}
 }
 \description{
-p-Wasserstein distance linear projections using a stepwise method
+p-Wasserstein Distance Linear Projections Using a Stepwise Method
 }
+\keyword{internal}

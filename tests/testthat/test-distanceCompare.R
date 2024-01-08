@@ -1,4 +1,4 @@
-testthat::test_that("distance compare gives correct values for wass", {
+test_that("distance compare gives correct values for wass", {
   
   set.seed(84370158)
   
@@ -15,22 +15,20 @@ testthat::test_that("distance compare gives correct values for wass", {
   transp <- "exact"
   model.size <- c(2,4,8)
   
-  test <- W2IP(X = x, Y = post_mu, theta = post_beta, transport.method = transp, 
-               infimum.maxit = 10, 
-               tol = 1e-7, solution.method = "cone",
-               display.progress = FALSE,model.size = model.size)
+  test <- WpProj(X = x, eta = post_mu, theta = post_beta, method = "binary program",
+                 solver = "ecos")
   
-  proj <- W2L1(x, post_mu, post_beta, penalty = "lasso", method = "projection", infimum.maxit = 1)
-  sel <- W2L1(x, post_mu, post_beta, penalty = "selection.lasso", method = "selection.variable")
+  proj <- WpProj(x, post_mu, post_beta)
+  sel <- WpProj(x, post_mu, post_beta, method = "binary program")
   
   out <- list(test, proj, sel)
   # debugonce(distCompare)
-  dist <- distCompare(out, list(posterior = post_beta, mean = post_mu), p = 2, ground_p = 2, quantity = c("posterior", "mean"))
+  dist <- distCompare(out, list(parameters = post_beta, predictions = post_mu),power = 2, quantity = c("parameters", "predictions"))
   compost <- unlist(sapply(out, function(o) sapply(o$theta, function(tt)  WpProj::wasserstein(tt, post_beta, 2, 2, "colwise","exact"))))
-  commean <- unlist(sapply(out, function(o) sapply(o$eta, function(tt)  WpProj::wasserstein(tt, post_mu, 2, 2, "colwise","exact"))))
+  compredictions <- unlist(sapply(out, function(o) sapply(o$fitted.values, function(tt)  WpProj::wasserstein(tt, post_mu, 2, 2, "colwise","exact"))))
   
-  testthat::expect_equal(dist$posterior$dist, compost)
-  testthat::expect_equal(dist$mean$dist, commean)
+  testthat::expect_equal(dist$parameters$dist, compost)
+  testthat::expect_equal(dist$predictions$dist, compredictions)
 })
 
 testthat::test_that("distance compare gives correct values for mse", {
@@ -51,22 +49,20 @@ testthat::test_that("distance compare gives correct values for mse", {
   transp <- "exact"
   model.size <- c(2,4,8)
   
-  test <- W2IP(X = x, Y = post_mu, theta = post_beta, transport.method = transp, 
-               infimum.maxit = 10, 
-               tol = 1e-7, solution.method = "cone",
-               display.progress = FALSE,model.size = model.size)
+  test <- WpProj(X = x, eta = post_mu, theta = post_beta, method = "binary program",
+                 solver = "ecos")
   
-  proj <- W2L1(x, post_mu, post_beta, penalty = "lasso", method = "projection", infimum.maxit = 1)
-  sel <- W2L1(x, post_mu, post_beta, penalty = "selection.lasso", method = "selection.variable")
+  proj <- WpProj(x, post_mu, post_beta)
+  sel <- WpProj(x, post_mu, post_beta, method = "binary program")
   
   out <- list(test, proj, sel)
   # debugonce(distCompare)
-  mse <- distCompare(out, list(posterior = beta, mean =  mu), p = 2, ground_p = 2, quantity = c("posterior", "mean"), method = "mse")
+  mse <- distCompare(out, list(parameters = beta, predictions =  mu),power = 2, quantity = c("parameters", "predictions"), method = "mse")
   compost <- unlist(sapply(out, function(o) sapply(o$theta, function(tt)  WpProj::wasserstein(tt, as.matrix(beta), 2, 2, "colwise","exact"))))^2/p
-  commean <- unlist(sapply(out, function(o) sapply(o$eta, function(tt)  WpProj::wasserstein(tt,  as.matrix(mu), 2, 2, "colwise","exact"))))^2/n
+  compredictions <- unlist(sapply(out, function(o) sapply(o$fitted.values, function(tt)  WpProj::wasserstein(tt,  as.matrix(mu), 2, 2, "colwise","exact"))))^2/n
   
-  testthat::expect_equal(mse$posterior$dist, compost)
-  testthat::expect_equal(mse$mean$dist, commean)
+  testthat::expect_equal(mse$parameters$dist, compost)
+  testthat::expect_equal(mse$predictions$dist, compredictions)
 })
 
 testthat::test_that("distance compare gives correct group names", {
@@ -87,27 +83,22 @@ testthat::test_that("distance compare gives correct group names", {
   transp <- "exact"
   model.size <- c(2,4,8)
 
-  test <- W2IP(X = x, Y = post_mu, theta = post_beta, transport.method = transp,
-               infimum.maxit = 10,
-               tol = 1e-7, solution.method = "cone",
-               display.progress = FALSE,model.size = model.size)
-
-  proj <- W2L1(x, post_mu, post_beta, penalty = "lasso", method = "projection", infimum.maxit = 1)
-  sel <- W2L1(x, post_mu, post_beta, penalty = "selection.lasso", method = "selection.variable")
+  test <- WpProj(X = x, eta = post_mu, theta = post_beta, method = "binary program",
+                 solver = "ecos")
+  
+  proj <- WpProj(x, post_mu, post_beta)
+  sel <- WpProj(x, post_mu, post_beta, method = "binary program")
 
   out <- list(Test=test, Projection = proj, Selection = sel)
   # debugonce(distCompare)
-  mse <- distCompare(out, list(posterior = beta, mean =  mu), p = 2, ground_p = 2, quantity = c("posterior", "mean"), method = "mse")
+  mse <- distCompare(out, list(parameters = beta, predictions =  mu),power = 2, quantity = c("parameters", "predictions"), method = "mse")
   compost <- unlist(sapply(out, function(o) sapply(o$theta, function(tt)  WpProj::wasserstein(tt, as.matrix(beta), 2, 2, "colwise","exact"))))^2/p
-  commean <- unlist(sapply(out, function(o) sapply(o$eta, function(tt)  WpProj::wasserstein(tt,  as.matrix(mu), 2, 2, "colwise","exact"))))^2/n
+  compredictions <- unlist(sapply(out, function(o) sapply(o$fitted.values, function(tt)  WpProj::wasserstein(tt,  as.matrix(mu), 2, 2, "colwise","exact"))))^2/n
 
-  expectnames <- c('Test', 'Test', 'Test', 'Projection', 'Projection', 'Projection', 
-                   'Projection', 'Projection', 'Projection', 'Projection', 'Projection', 
-                   'Projection', 'Projection', 'Selection', 'Selection', 'Selection', 
-                   'Selection', 'Selection', 'Selection', 'Selection', 'Selection', 
-                   'Selection', 'Selection')
-  testthat::expect_equivalent(mse$posterior$dist, compost)
-  testthat::expect_equivalent(mse$mean$dist, commean)
-  testthat::expect_equal(as.character(mse$posterior$groups), expectnames)
-  testthat::expect_equal(as.character(mse$mean$groups), expectnames)
+  expectnames <- c(rep('Test',10), rep('Projection',11),
+                   rep('Selection',11))
+  testthat::expect_equivalent(mse$parameters$dist, compost)
+  testthat::expect_equivalent(mse$predictions$dist, compredictions)
+  testthat::expect_equal(as.character(mse$parameters$groups), expectnames)
+  testthat::expect_equal(as.character(mse$predictions$groups), expectnames)
 })

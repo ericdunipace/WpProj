@@ -2,7 +2,7 @@
 % Please edit documentation in R/WP_rsquared.R
 \name{combine.WPR2}
 \alias{combine.WPR2}
-\title{Combine \eqn{W_p R^2} objects}
+\title{A Function to Combine \eqn{W_p R ^2} Objects}
 \usage{
 combine.WPR2(...)
 }
@@ -10,8 +10,37 @@ combine.WPR2(...)
 \item{...}{List of \eqn{W_p R^2} objects}
 }
 \value{
-
+A vector of \eqn{W_p R^2} objects
 }
 \description{
-Combine \eqn{W_p R^2} objects
+A Function to Combine \eqn{W_p R ^2} Objects
+}
+\examples{
+if(rlang::is_installed("stats")) {
+n <- 128
+p <- 10
+s <- 99
+x <- matrix( stats::rnorm( p * n ), nrow = n, ncol = p )
+beta <- (1:10)/10
+y <- x \%*\% beta + stats::rnorm(n)
+post_beta <- matrix(beta, nrow=p, ncol=s) + stats::rnorm(p*s, 0, 0.1)
+post_mu <- x \%*\% post_beta
+
+
+fit1 <-  WpProj(X=x, eta=post_mu, theta = post_beta,
+               power = 2.0, method = "binary program")
+fit2 <-  WpProj(X=x, eta=post_mu, power = 2.0,
+               options = list(penalty = "lasso")
+)
+
+
+
+out1 <- WPR2(predictions = post_mu, projected_model = fit1)
+out2 <- WPR2(predictions = post_mu, projected_model = fit2)
+
+combine <- combine.WPR2(out1, out2)
+}
+}
+\seealso{
+\code{\link[=WPR2]{WPR2()}}
 }

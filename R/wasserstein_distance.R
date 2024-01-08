@@ -4,19 +4,35 @@
 #' @param Y Matrix for second group
 #' @param p Powr of the wasserstein distance
 #' @param ground_p Powr of the distance metric. Usually same as `p`
-#' @param observation.orientation Are observations unique by rows or colummns? Set with "colwise" or "rowwise"
+#' @param observation.orientation Are observations unique by rows or colummns? One of "colwise" or "rowwise"
 #' @param method "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn", "hilbert"
 #' @param ... additional options for sinkhorn based methods. `epsilon` and `niter` determining the hyperparameters for the negative entropy penalty
 #'
-#' @return
+#' @return A numeric value
+#' 
+#' @description 
+#' `r lifecycle::badge("experimental")`
+#' This function will calculate exact or approximate Wasserstein distances between two groups of observations. Please note that this function will likely be deprecated in favor of using the native function from the `approxOT` package.
 #' @export
-wasserstein <- function (X, Y, p = 2, ground_p = 2, observation.orientation = c("colwise","rowwise"), 
+#' 
+#' @examples
+#' if(rlang::is_installed("stats")) {
+#' n <- 128
+#' p <- 10
+#' x <- matrix( stats::rnorm( p * n ), nrow = n, ncol = p )
+#' y <- matrix( stats::rnorm( p * n ), nrow = n, ncol = p )
+#' 
+#' dist <- wasserstein(x,y, p = 2, ground_p = 1, observation.orientation = "rowwise",
+#'             method = "hilbert") #fast
+#' print(dist)
+#' }
+wasserstein <- function (X, Y, p = 2, ground_p = 2, observation.orientation = c("rowwise","colwise"), 
                          method = c("exact", "sinkhorn", "greenkhorn",
-                                    "randkhorn", "gandkhorn",
-                                    "hilbert", "rank", "sinkhorn2",
+                                    # "randkhorn", "gandkhorn",
+                                    "hilbert", "rank", #"sinkhorn2",
                                     "univariate.approximation", 
                                     "univariate.approximation.pwr","univariate"), ... ) {
-  obs <- match.arg(observation.orientation,  c("colwise","rowwise"))
+  obs <- match.arg(observation.orientation)
   method <- match.arg(method)
   
   if(missing(X)) stop("Must specify X")
@@ -66,7 +82,10 @@ wasserstein <- function (X, Y, p = 2, ground_p = 2, observation.orientation = c(
     # if (method == "exact") {
       
       tplan <- transport_plan_given_C(mass_x, mass_y, p, cost, method, ...)
-      loss <- wasserstein_(tplan$mass, cost, p, from=tplan$from, to = tplan$to)
+      loss <- wasserstein_(mass_ = tplan$mass, 
+                           cost_ = cost, 
+                           p = p, from_ = tplan$from, 
+                           to_ = tplan$to)
       
     # } else if (method == "sinkhorn") {
     #   dots <- list(...)
@@ -106,7 +125,7 @@ wasserstein <- function (X, Y, p = 2, ground_p = 2, observation.orientation = c(
 #   return(out)
 # }
 
-wasserstein_individual <- function(X,Y, ground_p, observation.orientation = c("colwise","rowwise")) {
+wasserstein_individual <- function(X,Y, ground_p, p, observation.orientation = c("colwise","rowwise")) {
   if(!is.matrix(X)) X <- as.matrix(X)
   if(!is.matrix(Y)) Y <- as.matrix(Y)
   obs <- match.arg(observation.orientation)

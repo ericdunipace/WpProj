@@ -2,16 +2,16 @@
 % Please edit documentation in R/WPL1.R
 \name{WPL1}
 \alias{WPL1}
-\title{p-Wasserstein linear projections with an \eqn{L_1} penalty}
+\title{p-Wasserstein Linear Projections With an \eqn{L_1} Penalty}
 \usage{
 WPL1(
   X,
   Y = NULL,
   theta = NULL,
   power = 2,
-  penalty = c("lasso", "ols", "mcp", "elastic.net", "selection.lasso", "scad",
-    "mcp.net", "scad.net", "grp.lasso", "grp.lasso.net", "grp.mcp", "grp.scad",
-    "grp.mcp.net", "grp.scad.net", "sparse.grp.lasso"),
+  penalty = c("lasso", "ols", "mcp", "elastic.net", "selection.lasso", "scad", "mcp.net",
+    "scad.net", "grp.lasso", "grp.lasso.net", "grp.mcp", "grp.scad", "grp.mcp.net",
+    "grp.scad.net", "sparse.grp.lasso"),
   model.size = NULL,
   lambda = numeric(0),
   nlambda = 100L,
@@ -50,8 +50,12 @@ WPL1(
 \item{...}{arguments passed to other methods such as Wasserstein distance}
 }
 \value{
-object of class `WpProj`
+object of class \code{WpProj}
 }
 \description{
-p-Wasserstein linear projections with an \eqn{L_1} penalty
+p-Wasserstein Linear Projections With an \eqn{L_1} Penalty
 }
+\seealso{
+\code{\link[=W1L1]{W1L1()}}, \code{\link[=W2L1]{W2L1()}}, \link{WInfL1}
+}
+\keyword{internal}

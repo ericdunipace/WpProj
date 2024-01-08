@@ -5,22 +5,50 @@
 #' @param theta Parameters of original linear model. Required
 #' @param transport.method Method for Wasserstein distance calculation. Should be one of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert".
 #' @param model.size Maximum number of coefficients in interpretable model
+#' @param nvars The number of variables to explore. Should be an integer vector of model sizes. Default is NULL which will explore all models from 1 to `model.size`.
+#' @param maxit Maximum number of solver iterations
 #' @param infimum.maxit Maximum iterations to alternate binary program and Wasserstein distance calculation
 #' @param tol Tolerance for convergence of coefficients
-#' @param solution.method solver to use. Must be one of "cone","lp", "cplex", "gurobi","mosek"
+#' @param solver The solver to use. Must be one of "cone","lp", "cplex", "gurobi","mosek". 
 #' @param display.progress Should progress be printed?
-#' @param parallel foreach back end
-#' @param ... Extra args to wasserstein distance methods
-#' @export
+#' @param parallel foreach back end. See [foreach::foreach()] for more details.
+#' @param ... Extra args to Wasserstein distance methods
+#' 
+#' @details
+#' For argument `solution.method`, options "cone" and "lp" use the free solvers "ECOS" and "lpSolver", respectively. "cplex", "gurobi" and "mosek" require installing the corresponding commercial solvers.
+#' 
+#' @keywords internal
+# @examples
+# if(rlang::is_installed("stats")) {
+# n <- 128
+# p <- 10
+# s <- 100
+# 
+# x <- matrix( stats::rnorm( p * n ), nrow = n, ncol = p )
+# x_ <- t(x)
+# beta <- (1:p)/p
+# y <- x %*% beta + stats::rnorm(n)
+# post_beta <- matrix(beta, nrow=p, ncol=s) + stats::rnorm(p*s, 0, 0.1)
+# post_mu <- x %*% post_beta
+# 
+# test <- W2IP(X = x, Y = post_mu, theta = post_beta, transport.method = "exact",
+#              infimum.maxit = 10,
+#              tol = 1e-7, solution.method = "cone",
+#              display.progress = FALSE,nvars = c(2,4,8))
+#              }
 W2IP <- function(X, Y=NULL, theta,
                  transport.method = transport_options(),
                  model.size = NULL,
-                 infimum.maxit = 100,
+                 nvars = NULL,
+                 maxit = 100L,
+                 infimum.maxit = 100L,
                  tol = 1e-7,
-                 solution.method = c("cone","lp", "cplex", "gurobi","mosek"),
+                 solver = c("cone","lp", "mosek", "cplex", "gurobi"),
                  display.progress=FALSE, parallel = NULL, ...) 
 {
   this.call <- as.list(match.call()[-1])
+  
+  solution.method <- solver
   
   # `%doRNG%`` <- doRNG::`%dorng%`
   
@@ -38,9 +66,12 @@ W2IP <- function(X, Y=NULL, theta,
   }
   
   if (is.null(model.size)) {
-    model.size <- 1:p
+    model.size <- p
   }
-  p_star <- length(model.size)
+  
+  if(is.null(nvars)) nvars <- 1:model.size
+  
+  p_star <- length(nvars)
   
   if(is.null(transport.method)){
     transport.method <- "exact"
@@ -51,7 +82,7 @@ W2IP <- function(X, Y=NULL, theta,
   if(is.null(solution.method)) {
     solution.method <- "cone"
   } else {
-    solution.method <- match.arg(solution.method)
+    solution.method <- match.arg(solution.method, choices = c("cone","lp", "mosek", "cplex", "gurobi"))
   }
   
   
@@ -65,15 +96,30 @@ W2IP <- function(X, Y=NULL, theta,
     )
   }
   
+  # using internal functions likely faster but not OK for being on CRAN
+  # solver <- function(obj, control, solution.method, start) {
+  #   switch(solution.method, 
+  #          cone = ROI.plugin.ecos:::solve_OP(obj, control),
+  #          lp =  ROI.plugin.lpsolve:::solve_OP(obj, control),
+  #          cplex = ROI.plugin.cplex:::solve_OP(obj, control),
+  #          gurobi = gurobi_solver(obj, control, start),
+  #          mosek = mosek_solver(obj, control,start)
+  #   )
+  # }
+  
   solver <- function(obj, control, solution.method, start) {
     switch(solution.method, 
-           cone = ROI.plugin.ecos:::solve_OP(obj, control),
-           lp =  ROI.plugin.lpsolve:::solve_OP(obj, control),
-           cplex = ROI.plugin.cplex:::solve_OP(obj, control),
-           gurobi = gurobi_solver(obj, control, start),
+           cone = ROI::ROI_solve(obj, solver = "ecos", control),
+           lp =  ROI::ROI_solve(obj, solver = "lpsolve", control),
+           cplex = ROI::ROI_solve(obj, solver = "cplex", control),
+           # gurobi = gurobi_solver(obj, control, start),
            mosek = mosek_solver(obj, control,start)
     )
   }
+  
+  register_solver(solution.method) # registers ROI solver if needed
+  
+  # if ( solution.method %in% c("cone","lpsolve","cplex") ) ROI::ROI_require_solver(solution.method)
   
   if(ncol(theta) == ncol(X)){
     theta_ <- t(theta)
@@ -137,15 +183,15 @@ W2IP <- function(X, Y=NULL, theta,
   infm.maxit <- as.integer(infm.maxit)
   display.progress <- as.logical(display.progress)
   transport.method <- as.character(transport.method)
-  model.size <- as.integer(model.size)
+  nvars <- as.integer(nvars)
   
   if (infm.maxit <=0) {
     stop("infimum.maxit should be greater than 0")
   }
   
   if(!is.null(parallel)){
-    if(!inherits(parallel, "cluster")) {
-      stop("parallel must be a registered cluster backend")
+    if(!inherits(parallel, "cluster") && !is.numeric(parallel)) {
+      stop("parallel must be a registered cluster backend or the number of cores desired")
     }
     doParallel::registerDoParallel(parallel)
     display.progress <- FALSE
@@ -155,24 +201,24 @@ W2IP <- function(X, Y=NULL, theta,
   
   options <- list(infm_maxit = infm.maxit,
                   display_progress = display.progress, 
-                  model_size = model.size)
+                  model_size = nvars)
   OToptions <- list(same = same,
                     method = "selection.variable",
                     transport.method = transport.method,
                     epsilon = epsilon,
                     niter = OTmaxit)
   
-  ss <- WpProj:::sufficientStatistics(X, Y_, theta_, OToptions)
+  ss <- sufficientStatistics(X, Y_, theta_, OToptions)
   xtx <- ss$XtX
   xty <- xty_init <- ss$XtY
   Ytemp <- Y_
   
   if(display.progress){
-    pb <- txtProgressBar(min = 0, max = p_star, style = 3)
-    setTxtProgressBar(pb, 0)
+    pb <- utils::txtProgressBar(min = 0, max = p_star, style = 3)
+    utils::setTxtProgressBar(pb, 0)
   }
   
-  QP <- QP_orig <- WpProj:::qp_w2(ss$XtX,ss$XtY,1)
+  QP <- QP_orig <- qp_w2(ss$XtX,ss$XtY,1)
   # LP <- ROI::ROI_reformulate(QP,"lp",method = "bqp_to_lp" )
   alpha <- alpha_save <- rep(0,p)
   beta <- matrix(0, nrow = p, ncol = p_star)
@@ -184,6 +230,8 @@ W2IP <- function(X, Y=NULL, theta,
     )
   }
   
+  idx <- NULL
+  
   output <- foreach::foreach(idx=1:p_star, .combine='comb', .multicombine=TRUE,
                              .init=list(list(), list()),
                              .errorhandling = 'pass', 
@@ -191,10 +239,15 @@ W2IP <- function(X, Y=NULL, theta,
     {
        m <- options$model_size[idx]
        QP <- QP_orig
-       QP$constraints$rhs[1] <- m
+       QP$constraints$rhs[1L] <- m
        results <- list(NULL, NULL)
        for(inf in 1:options$infm_maxit) {
          TP <- translate(QP, solution.method)
+         # sol.meth <- if ( solution.method == "cone" && !("cone" %in% names(TP)) ) {
+         #   "lp"
+         # } else {
+         #   solution.method
+         # }
          # browser()
          # sol <- ROI::ROI_solve(LP, "glpk")
          # can use ROI.plugin.glpk:::.onLoad("ROI.plugin.glpk","ROI.plugin.glpk") to use base solver ^
@@ -208,17 +261,17 @@ W2IP <- function(X, Y=NULL, theta,
            warning("Likely terminated early")
            break
          }
-         if(WpProj:::not.converged(alpha, alpha_save, tol)){
+         if(not.converged(alpha, alpha_save, tol)){
            alpha_save <- alpha
-           Ytemp <- WpProj:::selVarMeanGen(X_, theta_, as.double(alpha))
-           xty <- WpProj:::xtyUpdate(X, Ytemp, theta_, result_ = alpha, 
+           Ytemp <- selVarMeanGen(X_, theta_, as.double(alpha))
+           xty <- xtyUpdate(X, Ytemp, theta_, result_ = alpha, 
                                              OToptions)
-           QP <- WpProj:::qp_w2(xtx,xty,m)
+           QP <- qp_w2(xtx,xty,m)
          } else {
            break
          }
        }
-       if(display.progress) setTxtProgressBar(pb, idx)
+       if(display.progress) utils::setTxtProgressBar(pb, idx)
        results[[2]] <- inf
        results[[1]] <- alpha
        return(results)
@@ -228,9 +281,9 @@ W2IP <- function(X, Y=NULL, theta,
        # beta[,idx] <- alpha
     }
   if (display.progress) close(pb)
-  names(output) <- c("beta","iter")
+  names(output) <- c("beta","niter")
   output$beta <- do.call("cbind", output$beta)
-  output$iter <- unlist(output$iter)
+  output$niter <- unlist(output$niter)
   
   # if (!is.null(parallel) ){
   #   parallel::stopCluster(parallel)
@@ -275,39 +328,39 @@ qp_w2 <- function(xtx, xty, K) {
 }
 
 
-gurobi_solver <- function(problem,opts = NULL, start) {
-  
-  prob <-  list()
-  prob$Q <- Matrix::sparseMatrix(i=problem$objective$Q$i,
-                                 j = problem$objective$Q$j,
-                                 x = problem$objective$Q$v/2)
-  prob$modelsense <- 'min'
-  prob$obj <- as.numeric(problem$objective$L$v)
-  num_param <- length(problem$objective$L$v)
-  
-  prob$A <- Matrix::sparseMatrix(i=problem$constraints$L$i,
-                                 j = problem$constraints$L$j,
-                                 x = problem$constraints$L$v)
-  
-  prob$sense <- ifelse(problem$constraints$dir == "==", "=", NA)
-  # prob$sense <- rep(NA, length(qp$LC$dir))
-  # prob$sense[qp$LC$dir=="E"] <- '='
-  # prob$sense[qp$LC$dir=="L"] <- '<='
-  # prob$sense[qp$LC$dir=="G"] <- '>='
-  prob$rhs <- problem$constraints$rhs
-  prob$vtype <- rep("B", num_param)
-  prob$start <- start
-  
-  if(is.null(opts) | length(opts) == 0) {
-    opts <- list(OutputFlag = 0)
-  }
-  
-  res <- gurobi::gurobi(prob, opts)
-  
-  sol <- as.integer(res$x)
-  
-  return(sol)
-}
+# gurobi_solver <- function(problem,opts = NULL, start) {
+#   
+#   prob <-  list()
+#   prob$Q <- Matrix::sparseMatrix(i=problem$objective$Q$i,
+#                                  j = problem$objective$Q$j,
+#                                  x = problem$objective$Q$v/2)
+#   prob$modelsense <- 'min'
+#   prob$obj <- as.numeric(problem$objective$L$v)
+#   num_param <- length(problem$objective$L$v)
+#   
+#   prob$A <- Matrix::sparseMatrix(i=problem$constraints$L$i,
+#                                  j = problem$constraints$L$j,
+#                                  x = problem$constraints$L$v)
+#   
+#   prob$sense <- ifelse(problem$constraints$dir == "==", "=", NA)
+#   # prob$sense <- rep(NA, length(qp$LC$dir))
+#   # prob$sense[qp$LC$dir=="E"] <- '='
+#   # prob$sense[qp$LC$dir=="L"] <- '<='
+#   # prob$sense[qp$LC$dir=="G"] <- '>='
+#   prob$rhs <- problem$constraints$rhs
+#   prob$vtype <- rep("B", num_param)
+#   prob$start <- start
+#   
+#   if(is.null(opts) | length(opts) == 0) {
+#     opts <- list(OutputFlag = 0)
+#   }
+#   
+#   res <- gurobi::gurobi(prob, opts)
+#   
+#   sol <- as.integer(res$x)
+#   
+#   return(sol)
+# }
 
 mosek_solver <- function(problem, opts = NULL, start) {
   

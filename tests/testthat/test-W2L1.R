@@ -2,15 +2,15 @@ testthat::test_that("W2L1 function for selection variable, exact", {
   set.seed(111)
   
   ##### Testing R Functions ####
-  n <- 128
+  n <- 32
   p <- 10
-  s <- 99
+  s <- 21
   
-  x <- matrix( rnorm( p * n ), nrow = n, ncol = p )
+  x <- matrix( stats::rnorm( p * n ), nrow = n, ncol = p )
   x_ <- t(x)
   beta <- (1:10)/10
-  y <- x %*% beta + rnorm(n)
-  post_beta <- matrix(beta, nrow=p, ncol=s) + rnorm(p*s, 0, 0.1)
+  y <- x %*% beta + stats::rnorm(n)
+  post_beta <- matrix(beta, nrow=p, ncol=s) + stats::rnorm(p*s, 0, 0.1)
   post_mu <- x %*% post_beta
   
   xtx <- crossprod(x)/n #* wt + diag(1,p,p) * (1 - wt)
@@ -37,15 +37,15 @@ testthat::test_that("W2L1 function for selection variable,hilbert", {
   set.seed(111)
   
   ##### Testing R Functions ####
-  n <- 128
+  n <- 32
   p <- 10
-  s <- 99
+  s <- 21
   
-  x <- matrix( rnorm( p * n ), nrow = n, ncol = p )
+  x <- matrix( stats::rnorm( p * n ), nrow = n, ncol = p )
   x_ <- t(x)
   beta <- (1:10)/10
-  y <- x %*% beta + rnorm(n)
-  post_beta <- matrix(beta, nrow=p, ncol=s) + rnorm(p*s, 0, 0.1)
+  y <- x %*% beta + stats::rnorm(n)
+  post_beta <- matrix(beta, nrow=p, ncol=s) + stats::rnorm(p*s, 0, 0.1)
   post_mu <- x %*% post_beta
   
   xtx <- crossprod(x)/n #* wt + diag(1,p,p) * (1 - wt)
@@ -73,15 +73,15 @@ testthat::test_that("W2L1 function for selection variable,rank", {
   set.seed(111)
   
   ##### Testing R Functions ####
-  n <- 128
+  n <- 32
   p <- 10
-  s <- 99
+  s <- 21
   
-  x <- matrix( rnorm( p * n ), nrow = n, ncol = p )
+  x <- matrix( stats::rnorm( p * n ), nrow = n, ncol = p )
   x_ <- t(x)
   beta <- (1:10)/10
-  y <- x %*% beta + rnorm(n)
-  post_beta <- matrix(beta, nrow=p, ncol=s) + rnorm(p*s, 0, 0.1)
+  y <- x %*% beta + stats::rnorm(n)
+  post_beta <- matrix(beta, nrow=p, ncol=s) + stats::rnorm(p*s, 0, 0.1)
   post_mu <- x %*% post_beta
   
   xtx <- crossprod(x)/n #* wt + diag(1,p,p) * (1 - wt)
@@ -108,15 +108,15 @@ testthat::test_that("W2L1 function for selection variable, univariate.approx.pwr
   set.seed(111)
   
   ##### Testing R Functions ####
-  n <- 128
+  n <- 32
   p <- 10
-  s <- 99
+  s <- 21
   
-  x <- matrix( rnorm( p * n ), nrow = n, ncol = p )
+  x <- matrix( stats::rnorm( p * n ), nrow = n, ncol = p )
   x_ <- t(x)
   beta <- (1:10)/10
-  y <- x %*% beta + rnorm(n)
-  post_beta <- matrix(beta, nrow=p, ncol=s) + rnorm(p*s, 0, 0.1)
+  y <- x %*% beta + stats::rnorm(n)
+  post_beta <- matrix(beta, nrow=p, ncol=s) + stats::rnorm(p*s, 0, 0.1)
   post_mu <- x %*% post_beta
   
   xtx <- crossprod(x)/n #* wt + diag(1,p,p) * (1 - wt)
@@ -149,25 +149,25 @@ testthat::test_that("W2L1 function for selection variable, univariate.approx.pwr
 testthat::test_that("W2L1 matches oem, univ approx",{
   set.seed(283947)
   
-  n <- 128
+  n <- 32
   p <- 10
-  s <- 99
+  s <- 21
   
-  x <- matrix(rnorm(p*n), nrow=n, ncol=p)
+  x <- matrix(stats::rnorm(p*n), nrow=n, ncol=p)
   beta <- (1:10)/10
-  y <- x %*% beta + rnorm(n)
+  y <- x %*% beta + stats::rnorm(n)
   
   #posterior
   prec <- crossprod(x) + diag(1,p,p)*1
   mu_post <- solve(prec, crossprod(x,y))
   alpha <- 1 + n/2
   beta <- 1 + 0.5 * (crossprod(y) + t(mu_post) %*% prec %*% mu_post )
-  sigma_post <- 1/rgamma(s, alpha, 1/beta)
-  theta <- sapply(sigma_post, function(ss) mu_post + t(chol(ss * solve(prec))) %*% matrix(rnorm(p, 0, 1),p,1))
+  sigma_post <- 1/stats::rgamma(s, alpha, 1/beta)
+  theta <- sapply(sigma_post, function(ss) mu_post + t(chol(ss * solve(prec))) %*% matrix(stats::rnorm(p, 0, 1),p,1))
   
   post_mu <- x %*% theta
-  post_diff <- matrix(c(y),nrow=n,ncol=s) + matrix(rnorm(s*n,0,0.01),nrow=n,ncol=s)
-  post_vdiff <- matrix(rnorm(n*s),nrow=n,ncol=s)
+  post_diff <- matrix(c(y),nrow=n,ncol=s) + matrix(stats::rnorm(s*n,0,0.01),nrow=n,ncol=s)
+  post_vdiff <- matrix(stats::rnorm(n*s),nrow=n,ncol=s)
   xtx <- crossprod(x)/n 
   xty <- crossprod(x, post_mu)/n 
   lambda <- 0
@@ -231,25 +231,25 @@ testthat::test_that("W2L1 matches oem, univ approx",{
 testthat::test_that("W2L1 matches oem, rank",{
   set.seed(283947)
   
-  n <- 128
+  n <- 32
   p <- 10
-  s <- 99
+  s <- 21
   
-  x <- matrix(rnorm(p*n), nrow=n, ncol=p)
+  x <- matrix(stats::rnorm(p*n), nrow=n, ncol=p)
   beta <- (1:10)/10
-  y <- x %*% beta + rnorm(n)
+  y <- x %*% beta + stats::rnorm(n)
   
   #posterior
   prec <- crossprod(x) + diag(1,p,p)*1
   mu_post <- solve(prec, crossprod(x,y))
   alpha <- 1 + n/2
   beta <- 1 + 0.5 * (crossprod(y) + t(mu_post) %*% prec %*% mu_post )
-  sigma_post <- 1/rgamma(s, alpha, 1/beta)
-  theta <- sapply(sigma_post, function(ss) mu_post + t(chol(ss * solve(prec))) %*% matrix(rnorm(p, 0, 1),p,1))
+  sigma_post <- 1/stats::rgamma(s, alpha, 1/beta)
+  theta <- sapply(sigma_post, function(ss) mu_post + t(chol(ss * solve(prec))) %*% matrix(stats::rnorm(p, 0, 1),p,1))
   
   post_mu <- x %*% theta
-  post_diff <- matrix(c(y),nrow=n,ncol=s) + matrix(rnorm(s*n,0,0.01),nrow=n,ncol=s)
-  post_vdiff <- matrix(rnorm(n*s),nrow=n,ncol=s)
+  post_diff <- matrix(c(y),nrow=n,ncol=s) + matrix(stats::rnorm(s*n,0,0.01),nrow=n,ncol=s)
+  post_vdiff <- matrix(stats::rnorm(n*s),nrow=n,ncol=s)
   xtx <- crossprod(x)/n 
   xty <- crossprod(x, post_mu)/n 
   lambda <- 0
@@ -314,25 +314,25 @@ testthat::test_that("W2L1 matches oem, rank",{
 testthat::test_that("W2L1 matches oem, hilbert",{
   set.seed(283947)
   
-  n <- 128
+  n <- 32
   p <- 10
-  s <- 99
+  s <- 21
   
-  x <- matrix(rnorm(p*n), nrow=n, ncol=p)
+  x <- matrix(stats::rnorm(p*n), nrow=n, ncol=p)
   beta <- (1:10)/10
-  y <- x %*% beta + rnorm(n)
+  y <- x %*% beta + stats::rnorm(n)
   
   #posterior
   prec <- crossprod(x) + diag(1,p,p)*1
   mu_post <- solve(prec, crossprod(x,y))
   alpha <- 1 + n/2
   beta <- 1 + 0.5 * (crossprod(y) + t(mu_post) %*% prec %*% mu_post )
-  sigma_post <- 1/rgamma(s, alpha, 1/beta)
-  theta <- sapply(sigma_post, function(ss) mu_post + t(chol(ss * solve(prec))) %*% matrix(rnorm(p, 0, 1),p,1))
+  sigma_post <- 1/stats::rgamma(s, alpha, 1/beta)
+  theta <- sapply(sigma_post, function(ss) mu_post + t(chol(ss * solve(prec))) %*% matrix(stats::rnorm(p, 0, 1),p,1))
   
   post_mu <- x %*% theta
-  post_diff <- matrix(c(y),nrow=n,ncol=s) + matrix(rnorm(s*n,0,0.01),nrow=n,ncol=s)
-  post_vdiff <- matrix(rnorm(n*s),nrow=n,ncol=s)
+  post_diff <- matrix(c(y),nrow=n,ncol=s) + matrix(stats::rnorm(s*n,0,0.01),nrow=n,ncol=s)
+  post_vdiff <- matrix(stats::rnorm(n*s),nrow=n,ncol=s)
   xtx <- crossprod(x)/n 
   xty <- crossprod(x, post_mu)/n 
   lambda <- 0
@@ -396,25 +396,25 @@ testthat::test_that("W2L1 matches oem, hilbert",{
 testthat::test_that("W2L1 matches oem, exact",{
   set.seed(283947)
   
-  n <- 128
+  n <- 32
   p <- 10
-  s <- 99
+  s <- 21
   
-  x <- matrix(rnorm(p*n), nrow=n, ncol=p)
+  x <- matrix(stats::rnorm(p*n), nrow=n, ncol=p)
   beta <- (1:10)/10
-  y <- x %*% beta + rnorm(n)
+  y <- x %*% beta + stats::rnorm(n)
   
   #posterior
   prec <- crossprod(x) + diag(1,p,p)*1
   mu_post <- solve(prec, crossprod(x,y))
   alpha <- 1 + n/2
   beta <- 1 + 0.5 * (crossprod(y) + t(mu_post) %*% prec %*% mu_post )
-  sigma_post <- 1/rgamma(s, alpha, 1/beta)
-  theta <- sapply(sigma_post, function(ss) mu_post + t(chol(ss * solve(prec))) %*% matrix(rnorm(p, 0, 1),p,1))
+  sigma_post <- 1/stats::rgamma(s, alpha, 1/beta)
+  theta <- sapply(sigma_post, function(ss) mu_post + t(chol(ss * solve(prec))) %*% matrix(stats::rnorm(p, 0, 1),p,1))
   
   post_mu <- x %*% theta
-  post_diff <- matrix(c(y),nrow=n,ncol=s) + matrix(rnorm(s*n,0,0.01),nrow=n,ncol=s)
-  post_vdiff <- matrix(rnorm(n*s),nrow=n,ncol=s)
+  post_diff <- matrix(c(y),nrow=n,ncol=s) + matrix(stats::rnorm(s*n,0,0.01),nrow=n,ncol=s)
+  post_vdiff <- matrix(stats::rnorm(n*s),nrow=n,ncol=s)
   xtx <- crossprod(x)/n 
   xty <- crossprod(x, post_mu)/n 
   lambda <- 0
@@ -479,25 +479,25 @@ testthat::test_that("W2L1 matches oem, exact",{
 testthat::test_that("W2L1 gives right values for selection.lasso",{
   set.seed(283947)
   
-  n <- 128
+  n <- 32
   p <- 10
-  s <- 99
+  s <- 21
   
-  x <- matrix(rnorm(p*n), nrow=n, ncol=p)
+  x <- matrix(stats::rnorm(p*n), nrow=n, ncol=p)
   beta <- (1:10)/10
-  y <- x %*% beta + rnorm(n)
+  y <- x %*% beta + stats::rnorm(n)
   
   #posterior
   prec <- crossprod(x) + diag(1,p,p)*1
   mu_post <- solve(prec, crossprod(x,y))
   alpha <- 1 + n/2
   beta <- 1 + 0.5 * (crossprod(y) + t(mu_post) %*% prec %*% mu_post )
-  sigma_post <- 1/rgamma(s, alpha, 1/beta)
-  theta <- sapply(sigma_post, function(ss) mu_post + t(chol(ss * solve(prec))) %*% matrix(rnorm(p, 0, 1),p,1))
+  sigma_post <- 1/stats::rgamma(s, alpha, 1/beta)
+  theta <- sapply(sigma_post, function(ss) mu_post + t(chol(ss * solve(prec))) %*% matrix(stats::rnorm(p, 0, 1),p,1))
   
   post_mu <- x %*% theta
-  post_diff <- matrix(c(y),nrow=n,ncol=s) + matrix(rnorm(s*n,0,0.01),nrow=n,ncol=s)
-  post_vdiff <- matrix(rnorm(n*s),nrow=n,ncol=s)
+  post_diff <- matrix(c(y),nrow=n,ncol=s) + matrix(stats::rnorm(s*n,0,0.01),nrow=n,ncol=s)
+  post_vdiff <- matrix(stats::rnorm(n*s),nrow=n,ncol=s)
   xtx <- crossprod(x)/n 
   xty <- crossprod(x, post_mu)/n 
   lambda <- 0
@@ -567,23 +567,23 @@ testthat::test_that("W2L1 function for projection", {
   
   n <- 256
   p <- 10
-  s <- 99
+  s <- 21
   
-  x <- matrix(rnorm(p*n), nrow=n, ncol=p)
+  x <- matrix(stats::rnorm(p*n), nrow=n, ncol=p)
   beta <- (1:10)/10
-  y <- x %*% beta + rnorm(n)
+  y <- x %*% beta + stats::rnorm(n)
   
   #posterior
   prec <- crossprod(x) + diag(1,p,p)*1
   mu_post <- solve(prec, crossprod(x,y))
   alpha <- 1 + n/2
   beta <- 1 + 0.5 * (crossprod(y) + t(mu_post) %*% prec %*% mu_post )
-  sigma_post <- 1/rgamma(s, alpha, 1/beta)
-  theta <- sapply(sigma_post, function(ss) mu_post + t(chol(ss * solve(prec))) %*% matrix(rnorm(p, 0, 1),p,1))
+  sigma_post <- 1/stats::rgamma(s, alpha, 1/beta)
+  theta <- sapply(sigma_post, function(ss) mu_post + t(chol(ss * solve(prec))) %*% matrix(stats::rnorm(p, 0, 1),p,1))
   
   post_mu <- x %*% theta
-  post_diff <- matrix(c(y),nrow=n,ncol=s) + matrix(rnorm(s*n,0,0.01),nrow=n,ncol=s)
-  post_vdiff <- matrix(rnorm(n*s),nrow=n,ncol=s)
+  post_diff <- matrix(c(y),nrow=n,ncol=s) + matrix(stats::rnorm(s*n,0,0.01),nrow=n,ncol=s)
+  post_vdiff <- matrix(stats::rnorm(n*s),nrow=n,ncol=s)
   xtx <- crossprod(x)/n 
   xty <- crossprod(x, post_mu)/n 
   lambda <- 0
@@ -661,24 +661,24 @@ testthat::test_that("W2L1 function for grouped projection", {
   
   n <- 256
   p <- 100
-  s <- 99
+  s <- 21
   
-  x <- matrix(rnorm(p*n), nrow=n, ncol=p)
+  x <- matrix(stats::rnorm(p*n), nrow=n, ncol=p)
   beta <- rep((1:10)/10, 10)
   groups <- rep(1:10, 10)
-  y <- x %*% beta + rnorm(n)
+  y <- x %*% beta + stats::rnorm(n)
   
   #posterior
   prec <- crossprod(x) + diag(1,p,p)*1
   mu_post <- solve(prec, crossprod(x,y))
   alpha <- 1 + n/2
   beta <- 1 + 0.5 * (crossprod(y) + t(mu_post) %*% prec %*% mu_post )
-  sigma_post <- 1/rgamma(s, alpha, 1/beta)
-  theta <- sapply(sigma_post, function(ss) mu_post + t(chol(ss * solve(prec))) %*% matrix(rnorm(p, 0, 1),p,1))
+  sigma_post <- 1/stats::rgamma(s, alpha, 1/beta)
+  theta <- sapply(sigma_post, function(ss) mu_post + t(chol(ss * solve(prec))) %*% matrix(stats::rnorm(p, 0, 1),p,1))
   
   post_mu <- x %*% theta
-  post_diff <- matrix(c(y),nrow=n,ncol=s) + matrix(rnorm(s*n,0,0.01),nrow=n,ncol=s)
-  post_vdiff <- matrix(rnorm(n*s),nrow=n,ncol=s)
+  post_diff <- matrix(c(y),nrow=n,ncol=s) + matrix(stats::rnorm(s*n,0,0.01),nrow=n,ncol=s)
+  post_vdiff <- matrix(stats::rnorm(n*s),nrow=n,ncol=s)
   xtx <- crossprod(x)/n 
   xty <- crossprod(x, post_mu)/n 
   lambda <- 0

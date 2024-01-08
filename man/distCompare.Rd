@@ -2,42 +2,64 @@
 % Please edit documentation in R/distanceCompare.R
 \name{distCompare}
 \alias{distCompare}
-\title{Title}
+\title{Compares Optimal Transport Distances Between WpProj and Original Models}
 \usage{
 distCompare(
   models,
-  target = list(posterior = NULL, mean = NULL),
-  p = 2,
-  ground_p = 2,
+  target = list(parameters = NULL, predictions = NULL),
+  power = 2,
   method = "exact",
-  quantity = c("posterior", "mean"),
+  quantity = c("parameters", "predictions"),
   parallel = NULL,
-  transform = function(x) {     return(x) },
+  transform = function(x) {
+     return(x)
+ },
   ...
 )
 }
 \arguments{
 \item{models}{Models from WpProj methods}
 
-\item{target}{The target to compare the methods to. Should be a list with slots "posterior" to compare the parameters and "mean" to compare predictions}
+\item{target}{The target to compare the methods to. Should be a list with slots "parameters" to compare the parameters and "predictions" to compare predictions}
 
-\item{p}{The power parameter of the Wasserstein distance}
-
-\item{ground_p}{The power of the distance metric. Typically set the same as `p`}
+\item{power}{The power parameter of the Wasserstein distance.}
 
 \item{method}{Which approximation to the Wasserstein distance to use. Should be one of "exact", "sinkhorn", "greenkhorn", "gandkhorn", "randkhorn", or "hilbert".}
 
-\item{quantity}{Should the function target the "posterior" or the "mean". Can choose both.}
+\item{quantity}{Should the function target the "parameters" or the "predictions". Can choose both.}
 
-\item{parallel}{Parallel backend to use for the `foreach` package}
+\item{parallel}{Parallel backend to use for the \code{foreach} package. See \verb{foreach::registerDoParallel(} for more details.}
 
 \item{transform}{Transformation function for the predictions.}
 
 \item{...}{other options passed to the wasserstein distance function}
 }
 \value{
-an object of class `distancecompare` with slots `posterior`, `mean`, and `p`.
+an object of class \code{distcompare} with slots \code{parameters}, \code{predictions}, and \code{p}.
 }
 \description{
-Title
+Compares Optimal Transport Distances Between WpProj and Original Models
+}
+\examples{
+if(rlang::is_installed("stats")) {
+n <- 32
+p <- 10
+s <- 21
+x <- matrix( stats::rnorm( p * n ), nrow = n, ncol = p )
+beta <- (1:10)/10
+y <- x \%*\% beta + stats::rnorm(n)
+post_beta <- matrix(beta, nrow=p, ncol=s) + stats::rnorm(p*s, 0, 0.1)
+post_mu <- x \%*\% post_beta
+
+fit1 <-  WpProj(X=x, eta=post_mu, power = 2.0,
+               options = list(penalty = "lasso")
+)
+fit2 <-  WpProj(X=x, eta=post_mu, theta = post_beta, power = 2.0,
+               method = "binary program", solver = "lasso",
+               options = list(solver.options = list(penalty = "mcp"))
+)
+dc <- distCompare(models = list(fit1, fit2),
+                 target = list(parameters = post_beta, predictions = post_mu))
+plot(dc)
+}
 }

@@ -15,7 +15,7 @@ W1L1(
   nlambda = 10,
   gamma = 1,
   display.progress = FALSE,
-  solver = c("rqPen", "gurobi", "mosek"),
+  solver = c("cone", "rqPen", "gurobi", "mosek"),
   ...
 )
 }
@@ -45,8 +45,9 @@ W1L1(
 \item{...}{options to pass to solvers}
 }
 \value{
-`WpProj` object
+\code{WpProj} object
 }
 \description{
 1-Wasserstein projection
 }
+\keyword{internal}

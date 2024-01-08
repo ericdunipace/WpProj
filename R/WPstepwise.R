@@ -1,11 +1,10 @@
-#' p-Wasserstein distance linear projections using a stepwise method
+#' p-Wasserstein Distance Linear Projections Using a Stepwise Method
 #'
 #' @param X matrix of covariates
 #' @param Y matrix of predictions
 #' @param theta optional parameter matrix for selection methods.
+#' @param power Power of the wasserstein distance
 #' @param force Any covariates to force into the model?
-#' @param p Power of the wasserstein distance
-#' @param ground_p Distance metric power. Typically the same as `p`
 #' @param direction forward or backward selection
 #' @param method "selection.variable" or "projection
 #' @param transport.method Method for calculating the wasserstein distance. One of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert"
@@ -16,19 +15,40 @@
 #' @param parallel foreach backend
 #' @param display.progress Display intermediate progress
 #'
-#' @return
-#' @export
-WPSW <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
-                        direction = c("backward","forward"), 
-                        method=c("selection.variable","scale","projection"),
-                        transport.method = transport_options(),
-                        epsilon = 0.05,
-                        OTmaxit = 100,
-                        calc.theta = TRUE,
-                        model.size = NULL,
-                        parallel = NULL,
-                        display.progress = FALSE) {
+#' @return An object of class `WpProj`
+#' @keywords internal
+# @examples
+# if(rlang::is_installed("stats")) {
+# n <- 128
+# p <- 10
+# s <- 99
+# x <- matrix( stats::rnorm( p * n ), nrow = n, ncol = p )
+# beta <- (1:10)/10
+# y <- x %*% beta + stats::rnorm(n)
+# post_beta <- matrix(beta, nrow=p, ncol=s) + stats::rnorm(p*s, 0, 0.1)
+# post_mu <- x %*% post_beta
+# 
+# fit <-  WPSW(X=x, Y=t(post_mu), theta = t(post_beta),
+#              power = 2,
+#              method = "selection.variable",
+#              transport.method = "hilbert"
+# )
+# }
+WPSW <- function(X, Y, theta, power = 2,
+                 force = NULL, 
+                 direction = c("backward","forward"), 
+                 method=c("selection.variable","scale","projection"),
+                 transport.method = transport_options(),
+                 OTmaxit = 100,
+                 epsilon = 0.05,
+                 calc.theta = TRUE,
+                 model.size = NULL,
+                 parallel = NULL,
+                 display.progress = FALSE, ...) {
   this.call <- as.list(match.call()[-1])
+  
+  p <- power
+  ground_p <- power
   
   d <- ncol(X)
   n <- nrow(X)
@@ -204,7 +224,7 @@ WPSW <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
   # }
   
   if(display.progress){
-    pb <- txtProgressBar(min = 0, max = max_iter, style = 3)
+    pb <- utils::txtProgressBar(min = 0, max = max_iter, style = 3)
   }
   if (direction == "forward") {
     in.idx <- rep(FALSE,d)
@@ -215,6 +235,7 @@ WPSW <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
     wP_traj[1] <- WpProj::wasserstein(temp_mu, Y_, p, ground_p, obs.direction, transport.method, epsilon = epsilon, niter = OTmaxit)
     # wP_traj[1] <- mean((Y_ - temp_mu)^2)
      
+    cand <- NULL
     for(i in 1:max_iter){
       candidates <- which(!in.idx & not.force.logical )
       wP_list <- foreach::foreach(cand = candidates) %dopar% {
@@ -231,7 +252,7 @@ WPSW <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
       beta_store[,i] <- c(wP_list[[min_cand]]$beta)
       wP_traj[i+1] <- wP[min_cand] 
       if(!is.null(model.size)) if((l_force + i) == model.size) break
-      if(display.progress) setTxtProgressBar(pb, i)
+      if(display.progress) utils::setTxtProgressBar(pb, i)
     }
   }
   if(direction == "backward") {
@@ -258,7 +279,7 @@ WPSW <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
       beta_store[,max_iter - i + 1] <- c(wP_list[[min_cand]]$beta)
       wP_traj[max_iter - i + 1] <- wP[min_cand]
       if(!is.null(model.size)) if(d-i == model.size) break
-      if(display.progress) setTxtProgressBar(pb, i)
+      if(display.progress) utils::setTxtProgressBar(pb, i)
     }
   }
   if(display.progress) close(pb)

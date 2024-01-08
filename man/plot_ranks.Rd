@@ -2,12 +2,12 @@
 % Please edit documentation in R/combine.dist.compare.R
 \name{plot_ranks}
 \alias{plot_ranks}
-\title{Plot the rankings on the combine.dist.compare objects}
+\title{Plot the Rankings of the 'combine.distcompare' Objects}
 \usage{
 plot_ranks(distances, ylim = NULL, ylabs = c(NULL, NULL), ...)
 }
 \arguments{
-\item{distances}{combine.dist.compare objects}
+\item{distances}{A \code{combine.distcompare} object resulting from the \code{\link[=combine.distcompare]{combine.distcompare()}} function}
 
 \item{ylim}{y-axis limits}
 
@@ -16,8 +16,9 @@ plot_ranks(distances, ylim = NULL, ylabs = c(NULL, NULL), ...)
 \item{...}{additional plot arguments like alpha parameter in ggplot2}
 }
 \value{
-object of plotrank
+object of class \code{plotrank} which is a list with slots "parameters" and "predictions"
 }
 \description{
-Plot the rankings on the combine.dist.compare objects
+Plot the Rankings of the 'combine.distcompare' Objects
 }
+\keyword{internal}

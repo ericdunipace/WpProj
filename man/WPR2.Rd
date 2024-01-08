@@ -2,27 +2,67 @@
 % Please edit documentation in R/WP_rsquared.R
 \name{WPR2}
 \alias{WPR2}
-\alias{WPR2.matrix}
-\alias{WPR2.distcompare}
-\alias{WPR2.list}
-\title{\eqn{W_p R ^2} function to evaluate performance}
+\alias{WPR2,ANY,matrix-method}
+\alias{WPR2,ANY,distcompare-method}
+\alias{WPR2,ANY,list-method}
+\alias{WPR2,ANY,WpProj-method}
+\title{\eqn{W_p R^2} Function to Evaluate Performance}
 \usage{
-WPR2(Y = NULL, nu, p = 2, method = "exact", ...)
+WPR2(
+  predictions = NULL,
+  projected_model,
+  p = 2,
+  method = "exact",
+  base = NULL,
+  ...
+)
 
-\method{WPR2}{matrix}(Y, nu, p = 2, method = "exact", base = NULL, ...)
+\S4method{WPR2}{ANY,matrix}(
+  predictions = NULL,
+  projected_model,
+  p = 2,
+  method = "exact",
+  base = NULL,
+  ...
+)
 
-\method{WPR2}{distcompare}(Y = NULL, nu, ...)
+\S4method{WPR2}{ANY,distcompare}(
+  predictions = NULL,
+  projected_model,
+  p = 2,
+  method = "exact",
+  base = NULL,
+  ...
+)
 
-\method{WPR2}{list}(Y, nu, p = 2, method = "exact", base = NULL, ...)
+\S4method{WPR2}{ANY,list}(
+  predictions = NULL,
+  projected_model,
+  p = 2,
+  method = "exact",
+  base = NULL,
+  ...
+)
+
+\S4method{WPR2}{ANY,WpProj}(
+  predictions = NULL,
+  projected_model,
+  p = 2,
+  method = "exact",
+  base = NULL,
+  ...
+)
 }
 \arguments{
-\item{Y}{Predictions of interest}
+\item{predictions}{Predictions of interest, likely from the original model}
 
-\item{nu}{A matrix of competing predictions, a list of matrices from competing predictions or the result from \code{\link{distCompare}}}
+\item{projected_model}{A matrix of competing predictions, possibly from a WpProj fit, a WpProj fit itself, or a list of WpProj objects}
 
-\item{p}{Power of the wasserstein distance}
+\item{p}{Power of the Wasserstein distance to use in distance calculations}
 
 \item{method}{Method for calculating Wasserstein distance}
+
+\item{base}{The baseline result to compare to. If not provided, defaults to the model with no covariates and only an intercept.}
 
 \item{...}{Arguments passed to Wasserstein distance calculation. See \code{\link{wasserstein}}}
 }
@@ -30,5 +70,25 @@ WPR2(Y = NULL, nu, p = 2, method = "exact", ...)
 \eqn{W_p R ^2} values
 }
 \description{
-\eqn{W_p R ^2} function to evaluate performance
+This function will calculate p-Wassterstein distances between the predictions of interest and the projected model.
+}
+\examples{
+if (rlang::is_installed("stats")) {
+# this example is not a true posterior estimation, but is used for illustration
+n <- 32
+p <- 10
+s <- 21
+x <- matrix( stats::rnorm(n*p), nrow = n, ncol = p )
+beta <- (1:10)/10
+y <- x \%*\% beta + stats::rnorm(n)
+post_beta <- matrix(beta, nrow=p, ncol=s) + 
+    matrix(rnorm(p*s), p, s) # not a true posterior
+post_mu <- x \%*\% post_beta
+
+fit <-  WpProj(X=x, eta=post_mu, power = 2.0)
+
+out <- WPR2(predictions = post_mu, projected_model = fit, 
+base = rowMeans(post_mu) # same as intercept only projection
+)
+}
 }

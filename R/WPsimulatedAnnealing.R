@@ -2,29 +2,54 @@
 #'
 #' @param X Covariate vector
 #' @param Y Predictions
-#' @param theta optional matrix of parameters for generating predictions
-#' @param force any covariates to force into the model?
-#' @param p power of the wassersetin distance
-#' @param ground_p power of the distance metric. Typically same as `p`
+#' @param theta Optional matrix of parameters for generating predictions
+#' @param power Power of the Wassersetin distance
+#' @param force Any covariates to force into the model?
 #' @param model.size Maximum number of coefficients
-#' @param iter Maximum number of iterations
-#' @param temps number of temperatures
-#' @param max.time maximum time in seconds to run
-#' @param const maximum value for simulated annealing distance
-#' @param proposal proposal function. There is a default method but can provide your own with parameters xty, cur, idx, force, d, method
-#' @param options options for simulated annealing
-#' @param display.progress 
-#' @param parallel foreach backend
-#' @param get.theta Should the model save the linear coefficients?
+#' @param nvars The number of variables to explore. Should be an integer vector of model sizes. Default is NULL which will explore all models from 1 to `model.size`.
+#' @param maxit Maximum number of iterations
+#' @param temps Number of temperatures
+#' @param max.time Maximum time in seconds to run
+#' @param const Maximum value for simulated annealing distance
+#' @param proposal Proposal function. There is a default method but can provide your own with parameters `xty`, `cur`, `idx`, `force`, `d`, `method`
+#' @param options Options for simulated annealing
+#' @param display.progress Whether to display solver progress. TRUE or FALSE. Default is FALSE.
+#' @param parallel A [foreach::foreach()] backend
+#' @param calc.theta Should the model save the linear coefficients? TRUE or FALSE. Default is TRUE
 #' @param xtx precomputed crossproduct \code{crossprod(X,X)}
 #' @param xty precomputed \code{crossprod(X, Y)}
 #'
-#' @return
-#' @export
+#' @return An object of class `WpProj`
+#' @keywords internal
+#' 
+# @examples
+# if(rlang::is_installed("stats")) {
+# n <- 128
+# p <- 10
+# s <- 99
+# x <- matrix( stats::rnorm( p * n ), nrow = n, ncol = p )
+# x_ <- t(x)
+# beta <- (1:10)/10
+# y <- x %*% beta + rnorm(n)
+# post_beta <- matrix(beta, nrow=p, ncol=s) + rnorm(p*s, 0, 0.1)
+# post_mu <- x %*% post_beta
+# sv <-  WPSA(X=x, Y=t(post_mu), theta = t(post_beta),
+# force = 1, p = 2, nvars = 2:(p-1),
+# maxit=5, temps = 5,
+# max.time = 100,
+# options = list(method = c("selection.variable"),
+#                energy.distribution = "boltzman",
+#                transport.method = "exact",
+#                cooling.schedule = "Geman-Geman",
+#                proposal.method = "covariance")
+# )
+# }
 WPSA <- function(X, Y=NULL, theta, 
-                 force = NULL, p = 2, ground_p = 2, model.size = 3,
+                 power = 2, force = NULL, 
+                 model.size = 3,
+                 nvars = NULL,
                  # groups = NULL,
-                 iter=1, temps = 1000,
+                 maxit=1, temps = 1000,
                  max.time = 3600, const = NULL,
                  proposal = proposal.fun,
                  options = list(method = c("selection.variable","scale","projection"),
@@ -36,9 +61,10 @@ WPSA <- function(X, Y=NULL, theta,
                                 OTmaxit = 100),
                  display.progress = FALSE,
                  parallel = NULL,
-                 get.theta = TRUE,
+                 calc.theta = TRUE,
                  xtx = NULL,
-                 xty = NULL
+                 xty = NULL,
+                 ...
 ) 
 {
   # groups <- as.integer(groups)
@@ -49,6 +75,18 @@ WPSA <- function(X, Y=NULL, theta,
   time.exceed <- function(max.time, start.time) {
     elapsed <- proc.time() - start.time
     return(elapsed[3] > max.time)
+  }
+  
+  get.theta <- calc.theta
+  iter <- maxit
+  
+  p <- ground_p <- power
+  if (is.null(model.size)) {
+    model.size <- ncol(X)-1L
+  }
+  
+  if (is.null(nvars)) {
+    nvars <- 1:model.size
   }
   
   names(options) <- match.arg(names(options), c("energy.distribution",
@@ -151,8 +189,41 @@ WPSA <- function(X, Y=NULL, theta,
     const <- max(w2s)
   }
   
-  if(length(model.size) == 1) {
-    if(length(force) == model.size) stop("Length of variables forced into model the same as model size")
+  if(length(nvars) == 1) {
+    if(length(force) == max(nvars)) {
+      # warning("Number of variables forced into model the same as desired model size")
+      old.dist <- best.dist <- dist.fun(X_, force, theta_, Y_, xtx, xty, OToptions, obs.direction, p, ground_p)
+      final.beta <- best.beta <- calc.beta(xtx,xty,force, meth, OToptions = OToptions,
+                                           x=X_, theta= theta_, Y = Y_, niter = 500)
+      output <- list(final = list(index = force, 
+                                  distance = old.dist,
+                                  beta = final.beta),
+                     optimal = list(index = force,
+                                    distance = best.dist,
+                                    beta = best.beta),
+                     force = force,
+                     history = old.dist,
+                     temps = NULL,
+                     accept.pct = NULL,
+                     call = this.call,
+                     message = message,
+                     method = meth)
+      
+      class(output)   <- c("WpProj", "annealing")
+      
+      if(get.theta == TRUE){
+        extract       <- extractTheta(output, theta_)
+        output$theta  <- extract$theta
+        output$nzero  <- extract$nzero
+        output$eta    <- lapply(output$theta, function(tt) crossprod(X_, tt))
+      } else {
+        output$theta  <- NULL
+        output$nzero  <- nvars
+        output$eta    <- NULL
+      }
+      
+      return(output) 
+    }
     
     if (iter <= 0) {
       stop("iter should be greater than 0")
@@ -178,7 +249,7 @@ WPSA <- function(X, Y=NULL, theta,
     # w_xtx <- wt * diag(theta_norm) + (1-wt) * xtx
     # w_xty <- wt * theta_norm + (1-wt) * xty
     
-    if(d == model.size) {
+    if(d == nvars) {
       warning("Model is same size as number of parameters")
       
       old.dist <- best.dist <- dist.fun(X_, 1:d, theta_, Y_, xtx, xty, OToptions, obs.direction, p, ground_p)
@@ -200,7 +271,7 @@ WPSA <- function(X, Y=NULL, theta,
                      message = message,
                      method = meth)
       
-      class(output)   <- c("sparse-posterior", "annealing")
+      class(output)   <- c("WpProj", "annealing")
       
       if(get.theta == TRUE){
         extract       <- extractTheta(output, theta_)
@@ -209,7 +280,7 @@ WPSA <- function(X, Y=NULL, theta,
         output$eta    <- lapply(output$theta, function(tt) crossprod(X_, tt))
       } else {
         output$theta  <- NULL
-        output$nzero  <- model.size
+        output$nzero  <- nvars
         output$eta    <- NULL
       }
       
@@ -221,7 +292,7 @@ WPSA <- function(X, Y=NULL, theta,
     
     previous   <- const
     active.set <- idx[!(idx %in% force)]
-    mod.size   <- model.size - length(force)
+    mod.size   <- nvars - length(force)
     
     active.idx <- sort(c(force, sample(active.set, mod.size)))
     old.dist   <- dist.fun(X_, active.idx, theta_, Y_, xtx, xty, OToptions, obs.direction, p,ground_p)
@@ -234,16 +305,16 @@ WPSA <- function(X, Y=NULL, theta,
     best.dist  <- old.dist
     acpct      <- rep(NA, temps) #accept percentage
     accept_cnt <- zero_counter <- 0
-    max.save   <- min(c(choose(d, model.size), length(temp_sched)*iter, 1e6))
+    max.save   <- min(c(choose(d, nvars), length(temp_sched)*iter, 1e6))
     saved.dist <- rep(Inf, max.save)
     idx.key    <- rep(-Inf, max.save)
-    # pot.comb <- rbind(force, combn(idx[!(idx %in% force)], model.size-length(force)))
+    # pot.comb <- rbind(force, combn(idx[!(idx %in% force)], nvars-length(force)))
     # names(saved.dist) <- apply(pot.comb,2,paste, collapse="")
-    if(display.progress) pb <- txtProgressBar(min = 0, max = length(temp_sched), style = 3)
+    if(display.progress) pb <- utils::txtProgressBar(min = 0, max = length(temp_sched), style = 3)
     
     for (i in seq_along(temp_sched) ){
       # print(i)
-      if(display.progress) setTxtProgressBar(pb, i)
+      if(display.progress) utils::setTxtProgressBar(pb, i)
       for (j in 1:iter) {
         #get proposal
         proposed <- proposal(xty, active.idx, idx, force, d, prop.meth)
@@ -274,7 +345,7 @@ WPSA <- function(X, Y=NULL, theta,
         # if(is.na(log.MHprob)) browser()
         
         # if(all(idx.switch$active %in% c(1,6,7))) browser()
-        if(log(runif(1)) < log.MHprob){
+        if(log(stats::runif(1)) < log.MHprob){
           active.idx <- idx.switch$active
           old.dist <- proposed.dist
           accept_cnt <- accept_cnt + 1
@@ -323,27 +394,27 @@ WPSA <- function(X, Y=NULL, theta,
                    message = message,
                    method = meth)
   }
-  else if (length(model.size) > 1) {
-    if(display.progress) pb <- txtProgressBar(min = 0, max = length(model.size), style = 3)
-    # vector("list", length(model.size))
-    out <- foreach::foreach( i = seq_along(model.size), 
+  else if (length(nvars) > 1) {
+    if(display.progress) pb <- utils::txtProgressBar(min = 0, max = length(nvars), style = 3)
+    # vector("list", length(nvars))
+    out <- foreach::foreach( i = seq_along(nvars), 
                              .inorder = FALSE) %dorng% {
-      mm <- model.size[i]
-      if(display.progress) setTxtProgressBar(pb, i)
+      mm <- nvars[i]
+      if(display.progress) utils::setTxtProgressBar(pb, i)
       if ( time.exceed(max.time, start.time) ) { # doesn't work in parallel
         # message <- "Hit max time exploring model sizes"
         # if (i < length(out)) out[(i + 1):length(out)] <- NULL
         return(NULL)
       }
       result <- WPSA(X=X, Y=Y_, theta=theta_, 
-                       force = force, p = p, model.size = mm,
-                       iter=iter, temps = temps,
-                       max.time = max.time/length(model.size), const = const,
+                       force = force, power = p, nvars = mm,
+                       maxit=iter, temps = temps,
+                       max.time = max.time/length(nvars), const = const,
                        proposal = proposal,
                        options = options,
                        display.progress = FALSE,
                        parallel = NULL,
-                       get.theta = FALSE,
+                       calc.theta = FALSE,
                        xtx = xtx,
                        xty = xty)
       return(result)
@@ -381,7 +452,7 @@ WPSA <- function(X, Y=NULL, theta,
     output$eta    <- lapply(output$theta, function(tt) X %*% tt)
   } else {
     output$theta  <- NULL
-    output$nzero  <- model.size
+    output$nzero  <- nvars
     output$eta    <- NULL
   }
   
@@ -468,8 +539,8 @@ proposal.fun <- function(xty, cur, idx, force, d, method = "covariance") {
   if(all(probs_rem == 0)) probs_rem <- 1/n.old
   if(all(probs_add == 0)) probs_add <- 1/n.new
   
-  proposed.removal  <- which(rmultinom(n=1, size=1, prob=probs_rem)==1)
-  proposed.addition <- which(rmultinom(n=1, size=1, prob=probs_add)==1)
+  proposed.removal  <- which(stats::rmultinom(n=1, size=1, prob=probs_rem)==1)
+  proposed.addition <- which(stats::rmultinom(n=1, size=1, prob=probs_add)==1)
   
   new.act     <- c(not.act.idx[proposed.addition], act.idx[-(proposed.removal)])
   new.not.act <- c(act.idx[proposed.removal], not.act.idx[-(proposed.addition)])

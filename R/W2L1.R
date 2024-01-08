@@ -1,21 +1,22 @@
 #' 2-Wasserstein distance linear projections with an \eqn{L_1} penalty
 #'
-#' @param X matrix of covariates
-#' @param Y matrix of predictions
-#' @param theta optional parameter matrix for selection methods.
+#' @param X An n x p matrix of covariates
+#' @param Y An n x s matrix of predictions
+#' @param theta optional parameter matrix for selection methods. Should be p x s.
 #' @param penalty Form of penalty. One of "lasso", "ols", "mcp", "elastic.net","selection.lasso", "scad", "mcp.net", "scad.net", "grp.lasso", "grp.lasso.net", "grp.mcp","grp.scad", "grp.mcp.net", "grp.scad.net", "sparse.grp.lasso"
 #' @param method "selection.variable" or "projection
-#' @param transport.method Method for calculating the wasserstein distance. One of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert" 
-#' @param epsilon 
-#' @param OTmaxit 
-#' @param model.size 
-#' @param lambda lambda for lasso. See \link[oem]{oem}.
+#' @param transport.method Method for calculating the wasserstein distance. One of "exact", "sinkhorn", "greenkhorn","hilbert" 
+#' @param epsilon Penalty parameter for Sinkhorn and Greenkhorn and  optimal transport
+#' @param OTmaxit Maximum iterations for the optimal transport iterations
+#' @param model.size The maximum number of desired covariates. Defaults to the number of covariates.
+#' @param lambda Penalty parameter for lasso regression. See \link[oem]{oem}.
 #' @param nlambda Number of lambda values. See \link[oem]{oem}.
 #' @param lambda.min.ratio Minimum lambda ratio for self selected lambda. See \link[oem]{oem}.
 #' @param alpha elastic net mixing. See \link[oem]{oem}.
 #' @param gamma tuning parameters for SCAD and MCP. See \link[oem]{oem}.
 #' @param tau mixing parameter for sparse group lasso. See \link[oem]{oem}.
 #' @param groups A vector of grouping values. See \link[oem]{oem}.
+#' @param scale.factor Value to standardize the covariates by. Typically, is the standard deviation. Should have length 1 or length same as the number of covariates
 #' @param penalty.factor Penalty factor for OEM. See \link[oem]{oem}.
 #' @param group.weights Weights for group lasso. See \link[oem]{oem}.
 #' @param maxit Max iteration for OEM. See \link[oem]{oem}.
@@ -26,7 +27,33 @@
 #' @param display.progress Display intermediate progress?
 #'
 #' @return Object of class `WpProj`
-#' @export
+#' @keywords internal
+#' 
+# @examples
+# if(rlang::is_installed("stats")) {
+# n <- 128
+# p <- 10
+# s <- 99
+# x <- matrix( stats::rnorm( p * n ), nrow = n, ncol = p )
+# beta <- (1:10)/10
+# y <- x %*% beta + stats::rnorm(n)
+# post_beta <- matrix(beta, nrow=p, ncol=s) + stats::rnorm(p*s, 0, 0.1)
+# post_mu <- x %*% post_beta
+# 
+# # for selection method, must specify an OT method and theta
+# fit.s <-  W2L1(X=x, Y=t(post_mu), theta = t(post_beta),
+#              penalty = "lasso",
+#              method = "selection.variable",
+#              transport.method = "sinkhorn",
+#              epsilon = 0.05, OTmaxit = 100
+# )
+# 
+# # for projection method, no OT method or theta need be specified
+# fit.p <-  W2L1(X=x, Y=t(post_mu),
+#              penalty = "lasso",
+#              method = "projection"
+# )
+# }
 W2L1 <- function(X, Y=NULL, theta = NULL, 
                  penalty =  c("lasso", "ols", "mcp", "elastic.net", 
                               "selection.lasso",
@@ -37,7 +64,7 @@ W2L1 <- function(X, Y=NULL, theta = NULL,
                               "grp.scad", "grp.mcp.net",
                               "grp.scad.net",
                               "sparse.grp.lasso"), 
-                 method = c("selection.variable","projection","location.scale","scale"),
+                 method = c("projection","selection.variable","location.scale","scale"),
                  transport.method = transport_options(),
                  epsilon = 0.05,
                  OTmaxit = 100,
@@ -67,27 +94,82 @@ W2L1 <- function(X, Y=NULL, theta = NULL,
     penalty <- match.arg(penalty, several.ok = FALSE)
   }
   if(is.null(method)){
-    method <- "selection.variable"
+    method <- "projection"
   }
   method <- match.arg(method)
+  
+  # make sure X is a matrix
   if(!is.matrix(X)) X <- as.matrix(X)
-  if(!is.null(theta)) {
-    if(!is.matrix(theta)) theta <- as.matrix(theta)
-  } else if (!is.null(Y) & method == "projection") {
-    theta <- matrix(1, nrow = ncol(X),ncol(Y))
-  } else {
-    stop("Must specify Y and/or theta if method == 'projection'. If method != 'projection' you must always specify theta. In the latter case, Y is optional")
-  }
+  
+  # confirm dims
   dims <- dim(X)
-  # if (dims[1] != dims[2])
-  #   stop("xtx must be a square matrix equal to X'X. do NOT provide design matrix")
-  p <- dims[2]
+  n_obs <- dims[1L]
+  p <- dims[2L]
+  
+  # make sure isn't a sparse matrix
+  if (inherits(X, "sparseMatrix")) {
+    stop("Sparse matrices not allowed at this time")
+  }
+  
+  #transpose X so covariates are by row
+  X_ <- t(X)
+  
+  # is Y the same as X*theta ?
+  same <- FALSE # default is false
+  
+  if(!is.null(theta)) {
+    
+    # make sure theta is a matrix
+    if(!is.matrix(theta)) theta <- as.matrix(theta)
+    
+    # transpose theta if covariates are not by row
+    if(ncol(theta) == p){
+      theta_ <- t(theta)
+    } else {
+      theta_ <- theta
+    }
+    
+    # create Y if needed
+    if (is.null(Y) ) {
+      same <- TRUE
+      Y <- crossprod(X_,theta_)
+    }
+    
+    
+  } else if (is.null(Y)) {
+    stop("Must specify Y or theta if method == 'projection'. If method != 'projection' you must always specify theta. In the latter case, Y is optional")
+  }
+  
+  if(!any(dim(Y) %in% dim(X_))) stop("Number of observations of Y must match X")
+  if(!is.matrix(Y)) Y <- as.matrix(Y)
+  
+  # properly orient Y
+  if (nrow(Y) == n_obs) { 
+    Y_ <- Y
+  } else if (ncol(Y) == n_obs) {
+    Y_ <- t(Y)
+  } else {
+    stop("The number of observations of Y do not match X")
+  }
+  
+  if(method != "projection") if(all(Y_==crossprod(X_, theta_))) same <- TRUE
+  
+  # create dummy theta for projection method
+  if (!is.null(Y_) && method == "projection") {
+    theta_ <- matrix(1, nrow = p, ncol = ncol(Y_))
+  }
+  theta_save <- theta_
+  
+  if (method != "projection") {
+    if(nrow(theta_) != p) stop("dimensions of theta must match X")
+    if(ncol(Y_) != ncol(theta_)) stop("ncol of Y should be same as ncol of theta")
+  }
+  if(nrow(Y_) != n_obs) stop("The number of observations in Y and X don't line up. Make sure X is input with observations in rows.")
+  
+  
   # xty <- drop(xty)
   # if (p != NROW(xty))
   #   stop("xty must have length equal to the number of columns and rows of xtx. do NOT provide response vector")
-  if (inherits(X, "sparseMatrix")) {
-    stop("Sparse matrices not allowed")
-  }
   if (family == "binomial")
     stop("binomial not implemented yet")
   if (is.null(penalty.factor)) {
@@ -189,35 +271,7 @@ W2L1 <- function(X, Y=NULL, theta = NULL,
     transport.method <- "univariate.approximation.pwr"
   }
   
-  if(ncol(theta) == ncol(X)){
-    theta_ <- t(theta)
-  } else {
-    theta_ <- theta
-  }
-  if(nrow(theta) != p) stop("dimensions of theta must match X")
-  theta_save <- theta_
   
-  #transpose X
-  X_ <- t(X)
-  
-  same <- FALSE
-  if(is.null(Y)) {
-    same <- TRUE
-    Y_ <- crossprod(X_,theta_)
-  } 
-  else {
-    if(!any(dim(Y) %in% dim(X_))) stop("dimensions of Y must match X")
-    if(!is.matrix(Y)) Y <- as.matrix(Y)
-    if(nrow(Y) == ncol(X_)){ 
-      # print("Transpose")
-      Y_ <- Y
-    } else{
-      Y_ <- t(Y)
-    }
-    if(method != "projection") if(all(Y_==crossprod(X_, theta_))) same <- TRUE
-  }
-  if(ncol(Y_) != ncol(theta_)) stop("ncol of Y should be same as ncols of theta")
-  if(nrow(Y_) != ncol(X_)) stop("The number of observations in Y and X don't line up. Make sure X is input with observations in rows.")
   rmv.idx <- NULL
   if(any(apply(theta_,1, function(x) all(x == 0)))) {
     rmv.idx <- which(apply(theta_,1, function(x) all(x == 0)))
@@ -225,7 +279,7 @@ W2L1 <- function(X, Y=NULL, theta = NULL,
     X_ <- X_[-rmv.idx, ,drop=FALSE]
     theta_ <- theta_[-rmv.idx,, drop = FALSE]
     penalty.factor <- penalty.factor[-rmv.idx]
-    warning("Some dimensions of theta have no variation. These have been removed")
+    warning("Some dimensions of 'theta' have no variation. These have been removed")
   }
   
   if ( method == "projection") {
@@ -234,7 +288,7 @@ W2L1 <- function(X, Y=NULL, theta = NULL,
     if(penalty != "ols") penalty <- paste0("projection.",penalty)
     if( infm.maxit != 1){
       infm.maxit <- 1
-      warning("Infimum iterations set to 1 for projection method.")
+      # warning("Infimum iterations set to 1 for projection method.")
     }
   }
   if ( method == "location.scale" ) {

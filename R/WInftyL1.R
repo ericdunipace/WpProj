@@ -1,27 +1,44 @@
-#' Title
+#' Infinity-Wasserstein Linear Projections With an L1 Penalty
 #'
-#' @param X 
-#' @param Y 
-#' @param theta 
-#' @param penalty 
-#' @param lambda 
-#' @param lambda.min.ratio 
-#' @param gamma 
-#' @param nlambda 
-#' @param solver 
-#' @param options 
-#' @param model.size 
-#' @param display.progress 
-#' @param ... 
+#' @param X An n x p matrix of covariates
+#' @param Y An n x s matrix of predictions
+#' @param theta optional parameter matrix for selection methods. Should be p x s.
+#' @param penalty Form of penalty. One of "none", "lasso", "mcp","scad"
+#' @param lambda Penalty parameter for lasso regression.
+#' @param lambda.min.ratio Minimum lambda ratio for self selected lambda.
+#' @param gamma tuning parameters for SCAD and MCP. 
+#' @param nlambda Number of lambda values. 
+#' @param solver Which solver to use. One of "cone","mosek", or "gurobi". Note "mosek" and "gurobi" are commercial installers.
+#' @param options A list containing slots `solver_opts`, options for each solver, `init`, initial conditions fed into each solver, `tol`, tolerance for convergence, and `iter`, the maximum number of iterations
+#' @param model.size The maximum number of paramters to consider. Should be an integer greater than 1 and less than or equal to the number of covariates
+#' @param display.progress Whether to display progress. TRUE or FALSE
+#' @param ... Additional arguments passed to the solver as needed
 #'
-#' @return `WpProj` object
-#' @export
+#' @return A `WpProj` object
+#' @keywords internal
+#'
+# @examples
+# if(rlang::is_installed("stats")) {
+# n <- 128
+# p <- 10
+# s <- 99
+# x <- matrix( stats::rnorm( p * n ), nrow = n, ncol = p )
+# beta <- (1:10)/10
+# y <- x %*% beta + stats::rnorm(n)
+# post_beta <- matrix(beta, nrow=p, ncol=s) + stats::rnorm(p*s, 0, 0.1)
+# post_mu <- x %*% post_beta
+# 
+# fit <-  WInfL1(X=x, Y=t(post_mu), theta = t(post_beta),
+#              penalty = "lasso",
+#              solver = "cone", lambda = 0.5
+# )
+# }
 WInfL1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "mcp","scad"), 
                  lambda = numeric(0), 
                  lambda.min.ratio = 1e-4, 
                  gamma = 1.5,
                  nlambda = 10, 
-                 solver = c("mosek","gurobi"),
+                 solver = c("cone","mosek","gurobi"),
                  options = list(solver_opts = NULL,
                                 init = NULL,
                                 tol = 1e-7,
@@ -29,6 +46,13 @@ WInfL1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "mcp","scad")
                  model.size = NULL,
                  display.progress = FALSE,
                  ...) {
+  
+  mosek_found <- rlang::is_installed("Rmosek")
+  gurobi_found <- rlang::is_installed("gurobi")
+  ecos_found <- rlang::is_installed("ROI.plugin.ecos")
+  if (!mosek_found && !gurobi_found && !ecos_found) {
+    stop("One of `Rmosek`, `gurobi`, or `ROI` with `ROI.plugin.ecos` must be installed to use this function")
+  }
   
   this.call <- as.list(match.call()[-1])
   
@@ -85,13 +109,21 @@ WInfL1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "mcp","scad")
     model.size <- model.size * s
   }
   
-  beta <- GroupLambda(X = Xmat, Y = Y, power = Inf, groups = rep(1:d,s), lambda = lambda,
-                           penalty = penalty,
-                     gamma = gamma, solver = solver,
-                     model.size = model.size,
-                     options = options, 
-                     display.progress = display.progress, 
-                     ...)
+  # check duplicated names in dots
+  dots <- list(...)
+  if ( any(...names() %in% methods::formalArgs(GroupLambda)) ) {
+    dots <- dots[!names(dots) %in% methods::formalArgs(GroupLambda)]
+  }
+  
+  GL_args <- c(list(X = Xmat, Y = Y, power = Inf, groups = rep(1:d,s), lambda = lambda,
+                  penalty = penalty,
+                  gamma = gamma, solver = solver,
+                  model.size = model.size,
+                  options = options, 
+                  display.progress = display.progress),
+  dots)
+  
+  beta <- do.call("GroupLambda", GL_args)
     # beta <- linf_norm(X = Xmat, Y = Y, deriv_func = deriv_func, thresholder = thresh_fun,
     #                  lambda = lambda, groups=rep(1:d, s), solver = solver, 
     #                  gamma = gamma, opts = options$solver_opts, init = options$init, iter = options$iter, tol = options$tol)

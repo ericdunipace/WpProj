@@ -9,10 +9,9 @@ wasserstein(
   Y,
   p = 2,
   ground_p = 2,
-  observation.orientation = c("colwise", "rowwise"),
-  method = c("exact", "sinkhorn", "greenkhorn", "randkhorn", "gandkhorn", "hilbert",
-    "rank", "sinkhorn2", "univariate.approximation", "univariate.approximation.pwr",
-    "univariate"),
+  observation.orientation = c("rowwise", "colwise"),
+  method = c("exact", "sinkhorn", "greenkhorn", "hilbert", "rank",
+    "univariate.approximation", "univariate.approximation.pwr", "univariate"),
   ...
 )
 }
@@ -23,17 +22,30 @@ wasserstein(
 
 \item{p}{Powr of the wasserstein distance}
 
-\item{ground_p}{Powr of the distance metric. Usually same as `p`}
+\item{ground_p}{Powr of the distance metric. Usually same as \code{p}}
 
-\item{observation.orientation}{Are observations unique by rows or colummns? Set with "colwise" or "rowwise"}
+\item{observation.orientation}{Are observations unique by rows or colummns? One of "colwise" or "rowwise"}
 
 \item{method}{"exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn", "hilbert"}
 
-\item{...}{additional options for sinkhorn based methods. `epsilon` and `niter` determining the hyperparameters for the negative entropy penalty}
+\item{...}{additional options for sinkhorn based methods. \code{epsilon} and \code{niter} determining the hyperparameters for the negative entropy penalty}
 }
 \value{
-
+A numeric value
 }
 \description{
-Calculate Wasserstein distances
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+This function will calculate exact or approximate Wasserstein distances between two groups of observations. Please note that this function will likely be deprecated in favor of using the native function from the \code{approxOT} package.
+}
+\examples{
+if(rlang::is_installed("stats")) {
+n <- 128
+p <- 10
+x <- matrix( stats::rnorm( p * n ), nrow = n, ncol = p )
+y <- matrix( stats::rnorm( p * n ), nrow = n, ncol = p )
+
+dist <- wasserstein(x,y, p = 2, ground_p = 1, observation.orientation = "rowwise",
+            method = "hilbert") #fast
+print(dist)
+}
 }

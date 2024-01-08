@@ -7,3 +7,5 @@ src/*.so
 src/*.o.*
 src/testing_src/
 .DS_store
+dev/
+cran-comments.md

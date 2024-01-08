@@ -2,7 +2,7 @@
 % Please edit documentation in R/ridgePlot.R
 \name{ridgePlot}
 \alias{ridgePlot}
-\title{Ridge plots for range of coefficients}
+\title{Ridge Plots for a Range of Coefficients}
 \usage{
 ridgePlot(
   fit,
@@ -12,13 +12,15 @@ ridgePlot(
   scale = 1,
   alpha = 0.5,
   full = NULL,
-  transform = function(x) {     x },
+  transform = function(x) {
+     x
+ },
   xlab = "Predictions",
   bandwidth = NULL
 )
 }
 \arguments{
-\item{fit}{A `WpProj` object of list of `WpProj` objects}
+\item{fit}{A \code{WpProj} object or list of \code{WpProj} objects}
 
 \item{index}{The observation number to select. Can be a vector}
 
@@ -39,8 +41,24 @@ ridgePlot(
 \item{bandwidth}{Bandwidth for kernel}
 }
 \value{
-a `ggridges` plot
+a \code{ggridges} plot
 }
 \description{
-Ridge plots for range of coefficients
+Ridge Plots for a Range of Coefficients
+}
+\examples{
+if(rlang::is_installed("stats")) {
+n <- 128
+p <- 10
+s <- 99
+x <- matrix(stats::rnorm(n*p), nrow = n, ncol = p )
+beta <- (1:10)/10
+y <- x \%*\% beta + stats::rnorm(n)
+post_beta <- matrix(beta, nrow=p, ncol=s) + matrix(stats::rnorm(p*s, 0, 0.1), p, s)
+post_mu <- x \%*\% post_beta
+fit <-  WpProj(X=x, eta=post_mu, 
+             power = 2
+)
+ridgePlot(fit)
+}
 }

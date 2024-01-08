@@ -32,7 +32,7 @@ transport_plan_given_C <- function(mass_x, mass_y, p = 2,
   } else if (method == "sinkhorn2") {
     
     sinkhorn_transport(mass_x = mass_x, mass_y = mass_y, cost = cost^p, 
-                       eps = epsilon, niter = niter)
+                       eps = epsilon, niterations = niter)
     
   } else {
     stop( paste0( "Transport method ", method, " not supported" ) )
@@ -101,7 +101,7 @@ transport_plan <- function(X, Y, p = 2, ground_p = 2,
     if(is.null(dots$is.X.sorted)) dots$is.X.sorted <- FALSE
     is.A.sorted <- as.logical(dots$is.X.sorted)
     tplan <- transport_(A_ = X, B_ = Y, p = p, ground_p = ground_p, 
-               method_ = method, a_sort = is.A.sorted, epsilon = 0.0, niter = 0)
+               method_ = method, a_sort = is.A.sorted, epsilon_ = 0.0, niter_ = 0)
     cost <- c((((colSums(abs(X[, tplan$from, drop=FALSE] - Y[, tplan$to, drop=FALSE])^ground_p))^(1/ground_p))^p %*% tplan$mass)^(1/p))
   } else {
     stop( paste0( "Transport method ", method, " not supported" ) )

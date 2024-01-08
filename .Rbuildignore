@@ -1,2 +1,8 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^dev$
+^src/testing_src/$
+^cran-comments\.md$
+^revdep$
+^\.github$
+^README\.Rmd$

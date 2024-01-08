@@ -1,17 +1,18 @@
 GroupLambda <- function(X, Y, groups, lambda, penalty = "lasso", power = 1,
-                             gamma = 1.5, solver = c("mosek","gurobi"),
+                             gamma = 1.5, solver = c("ecos","mosek","gurobi"),
                              model.size = NULL,
                              options = list(solver_opts = NULL,
                                             init = NULL,
                                             tol = 1e-7,
                                             iter = 100), 
                              display.progress=FALSE, ...) 
-{
+{ 
+  register_solver(solver) #register lpSolve
   
   nlambda <- length(lambda)
   stopifnot(nlambda >= 1)
   return_val <- vector("list", nlambda)
-  if(is.null(solver)) solver <- "mosek"
+  if(is.null(solver)) solver <- "ecos"
   
   if(is.null(options$init)) options$init <- rep(0, ncol(X))
   
@@ -22,14 +23,14 @@ GroupLambda <- function(X, Y, groups, lambda, penalty = "lasso", power = 1,
   opts <- convert$opts
   if(penalty == "lasso") options$iter <- 1
   
-  deriv_func <- switch(penalty ,"mcp"= rqPen::mcp_deriv,
-                       "scad" = rqPen::scad_deriv,
+  deriv_func <- switch(penalty ,"mcp"= rqPen_mcp_deriv,
+                       "scad" = rqPen_scad_deriv,
                        "lasso" = function(x, lambda, a){lambda},
                        "none" = function(x, lambda, a){0})
   
   thresh_fun <- switch( penalty,
                         "lasso"=soft_threshold,
-                        "mcp"=mcp_threshold,
+                        "mcp"= mcp_threshold,
                         "scad" = scad_threshold,
                         "none" = function(x, lambda, gamma){x})
   
@@ -37,19 +38,20 @@ GroupLambda <- function(X, Y, groups, lambda, penalty = "lasso", power = 1,
     model.size <- ncol(X)
   }
   
-  
   if(all(lambda == 0)) {
     return_val <- list( 
       lp_solve(model, problem$beta_idx, rep(0, length(problem$lambda_idx)), gamma, opts, solver, thresh_fun, problem$group_idx)
     )
   } else {
-    if(display.progress) pb <- txtProgressBar(min = 0, max = length(lambda), style = 3)
+    if(display.progress) pb <- utils::txtProgressBar(min = 0, max = length(lambda), style = 3)
     
     for (pos in seq_along(lambda) ) {
       if(solver == "gurobi") {
         model$obj[problem$lambda_idx] <- lambda[[pos]]
       } else if (solver == "mosek") {
         model$c[problem$lambda_idx] <- lambda[[pos]]
+      } else if (solver == "cone") {
+        model$objective$L[problem$lambda_idx] <- lambda[[pos]]
       }
       # return_val[[pos]] <- rqPen::rq.group.fit(x = x, y = y, groups = groups, 
       #                                          tau = tau, lambda = lam, intercept = intercept, 
@@ -65,7 +67,7 @@ GroupLambda <- function(X, Y, groups, lambda, penalty = "lasso", power = 1,
         break
       }
       options$init <- return_val[[pos]]
-      if(display.progress) setTxtProgressBar(pb, pos)
+      if(display.progress) utils::setTxtProgressBar(pb, pos)
       
     }
   }
@@ -90,28 +92,31 @@ lp_norm <- function(X, Y, power = 1, problem = NULL, model = NULL, deriv_func, t
   lambda_update <- list(rep(lambda, length(problem$lambda_idx)))
   
   
-  beta <- beta_old <- list(rep(0,d))
+  beta <- beta_old <- list(rep(0.0,d))
   group_deriv <- list()
   
   for(i in 1:iter) {
-    beta[[1]] <- lp_solve(model, problem$beta_idx, lambda_update[[1]], gamma, opts, solver, thresholder, problem$group_idx)
+    beta[[1L]] <- lp_solve(model, problem$beta_idx, lambda_update[[1L]], gamma, opts, solver, thresholder, problem$group_idx)
     
-    if(!not.converged(beta[[1]], beta_old[[1]], tol)) {
+    if(!not.converged(beta[[1L]], beta_old[[1L]], tol)) {
       break
     }
-    beta_old[[1]] <- beta[[1]]
+    beta_old[[1L]] <- beta[[1L]]
     # group_deriv[[1]] <- rqPen::group_derivs(deriv_func = deriv_func, groups = groups,
     #                                         coefs = beta[[1]],
     #                                         lambda = lambda_update[[1]], a = gamma)
-    group_deriv[[1]] <- group_deriv(deriv_func = deriv_func, groups = problem$group_idx,
-                                    coefs = beta[[1]],
-                                    lambda = lambda_update[[1]], a = gamma)
-    lambda_update[[1]] <- group_deriv[[1]]
+    group_deriv[[1L]] <- group_deriv(deriv_func = deriv_func, groups = problem$group_idx,
+                                    coefs = beta[[1L]],
+                                    lambda = lambda_update[[1L]], a = gamma)
+    lambda_update[[1L]] <- group_deriv[[1L]]
     
     if(solver == "mosek") {
-      model$c[problem$lambda_idx] <- lambda_update[[1]]
+      model$c[problem$lambda_idx] <- lambda_update[[1L]]
     } else if (solver == "gurobi") {
-      model$obj[problem$lambda_idx] <- lambda_update[[1]]
+      model$obj[problem$lambda_idx] <- lambda_update[[1L]]
+    } else if (solver == "cone") {
+      model$objective$L[problem$lambda_idx] <- lambda_update[[1L]]
+      # browser()
     }
   }
   if(i == iter & iter > 1) warning("Maximum number of iterations hit!")
@@ -119,16 +124,24 @@ lp_norm <- function(X, Y, power = 1, problem = NULL, model = NULL, deriv_func, t
 }
 
 lp_solve <- function(problem, beta.idx, lambda, gamma, opts, solver, thresholder, groups) {
-  solvefun <- switch(solver,
-                     "mosek" = Rmosek::mosek,
-                     "gurobi" = gurobi::gurobi)
   
-  res <- solvefun(problem, opts)
+  register_solver(solver) # registers ecos solver if needed
+  # if (solver == "cone") {
+  #   ROI::ROI_require_solver("ecos")
+  # }
+  
+  res <- switch(solver,
+                "cone" = ROI::ROI_solve(problem, "ecos", opts),
+                "mosek" = Rmosek::mosek(problem, opts)#,
+                # "gurobi" = gurobi::gurobi(problem,opts)
+  )
   
   if(solver == "mosek") {
     param <- res$sol$itr$xx
   } else if (solver == "gurobi") {
     param <- res$x
+  } else if (solver == "cone") {
+    param <- res$solution
   }
   
   sol <- group_threshold(param[beta.idx], thresholder, lambda, gamma, groups)
@@ -143,15 +156,15 @@ lp_prob_to_model <- function(problem, solver, init, opts) {
   init_full[problem$beta_idx] <- init[1:length(problem$beta_idx)]
   if(is.null(init)) init <- rep(0, num_param)
   if (solver == "mosek") {
-    ngroups <- length(problem$Quad_const)
+    ngroups <- length(problem$group_idx)
     if(ngroups > 0) {
-      cones <- matrix(list(), nrow = 2, ncol = ngroups)
-      rownames(cones) <- c("type","sub")
+      cone <- matrix(list(), nrow = 2, ncol = ngroups)
+      rownames(cone) <- c("type","sub")
       for(i in 1:ngroups) {
-        cones[,i] <- list("QUAD", c(problem$lambda_idx[i], problem$beta_idx[problem$group_idx[[i]]]))
+        cone[,i] <- list("QUAD", c(problem$lambda_idx[i], problem$beta_idx[problem$group_idx[[i]]]))
       }
     } else {
-      cones <- NULL
+      cone <- NULL
     }
     
     prob <-  list(sense = problem$sense,
@@ -160,7 +173,7 @@ lp_prob_to_model <- function(problem, solver, init, opts) {
                   bc = rbind(problem$Const_lower, problem$Const_upper),
                   bx = rbind(problem$LB, problem$UB),
                   sol = list(itr = list(xx = init_full)),
-                  cones = cones
+                  cones = cone
     )
     if(is.null(opts)) opts <- list(verbose = 0)
   } else if (solver == "gurobi") {
@@ -180,7 +193,19 @@ lp_prob_to_model <- function(problem, solver, init, opts) {
     prob$vtype <- rep("C", num_param)
     prob$lb <- problem$LB
     prob$ub <- problem$UB
-    prob$quadcon <- lapply(problem$Quad_const, function(xx) list(Qc=xx,
+    total_length <- length(problem$C)
+    Quad_con <- lapply(seq_along(problem$group_idx), 
+                         function(g) {
+                           grp <- problem$group_idx[[g]]
+                           beta_grp <- problem$beta_idx[grp]
+                           n_grp <- length(grp)
+                           return(Matrix::sparseMatrix(i = c(beta_grp, problem$lambda_idx[g]),
+                                                       j = c(beta_grp, problem$lambda_idx[g]),
+                                                       x = c(rep(1,n_grp),-1),
+                                                       dims = c(total_length, total_length)))
+                         }
+                       )
+    prob$quadcon <- lapply(Quad_con, function(xx) list(Qc=xx,
                                                                  rhs = 0,
                                                                  sense = "<="))
     prob$start <- init_full
@@ -188,6 +213,60 @@ lp_prob_to_model <- function(problem, solver, init, opts) {
       opts <- list(OutputFlag = 0)
     }
     # opts$NonConvex <- 2
+  } else if (solver == "cone") {
+    # browser()
+    nvars <- length(problem$C)
+    equiv.indices <- which(problem$Const_upper == problem$Const_lower)
+    A <- rbind(problem$Const, 
+               problem$Const[-equiv.indices,])
+    dir <- c(rep("<=", nrow(problem$Const)), rep(">=", nrow(problem$Const) - length(equiv.indices)))
+    dir[equiv.indices] <- "=="
+    # prob$sense <- rep(NA, length(qp$LC$dir))
+    # prob$sense[qp$LC$dir=="E"] <- '='
+    # prob$sense[qp$LC$dir=="L"] <- '<='
+    # prob$sense[qp$LC$dir=="G"] <- '>='
+    rhs <- c(problem$Const_upper, problem$Const_lower[-equiv.indices])
+    
+    finite_rhs <- which(is.finite(rhs)) #ECOS can't handle infinite bounds
+    
+    lin_constr <- ROI::as.C_constraint(ROI::L_constraint(L = slam::as.simple_triplet_matrix(A[finite_rhs,]),
+                                                        dir = dir[finite_rhs],
+                                                        rhs = rhs[finite_rhs])
+                                       )
+    cone <- do.call(c, lapply(problem$group_idx, function(b) ROI::K_soc(length(b) + 1L)) )
+    
+    L     <- do.call("rbind",
+                     lapply(1:length(problem$group_idx), function(i) {
+      l_idx <- problem$lambda_idx[[i]]
+      b_idx <- problem$beta_idx[problem$group_idx[[i]]]
+      cmb_idx <- c(l_idx,b_idx)
+      cur_nvar <- length(cmb_idx)
+      v <- c(-1.0, rep(-1.0, length(b_idx)))
+      temp <- slam::simple_triplet_matrix(i = 1:cur_nvar, j = cmb_idx, v = v, nrow = cur_nvar,  ncol = nvars)
+      return(temp)
+    }) )
+    
+    conic_constr <- ROI::C_constraint(
+      L = L,
+      cone = cone,
+      rhs = rep(0,nrow(L))
+    )
+    
+    obj_non_zero <- which(problem$C!=0)
+    obj_length_non_zero <- length(obj_non_zero)
+    objective <- slam::simple_triplet_matrix(i = rep(1,obj_length_non_zero), 
+                                               j = obj_non_zero, 
+                                               v = problem$C[obj_non_zero], ncol = nvars) %>% 
+      ROI::L_objective()
+     
+     
+    prob <- ROI::OP(
+      objective = objective,
+      constraints = rbind(lin_constr, conic_constr),
+      types = NULL,
+      bounds = ROI::V_bound(lb = problem$LB, ub = problem$UB),
+      maximum = ifelse(problem$sense == "min", FALSE, TRUE)
+    )
   }
   return(list(prob = prob, opts = opts))
 }
@@ -205,31 +284,50 @@ lp_prob_winf <- function(X, Y, lambda, groups = NULL) {
   }
   stopifnot(length(lambda) == ngroups)
   
-  beta_idx <- (1+d_length + 1):(1 + d_length + beta_length)
-  total_length <- beta_length + d_length + ngroups + 1
-  lambda_idx <- (total_length - ngroups + 1):(total_length )
+  # setup indices
+  beta_idx <- (1+d_length + 1):(1 + d_length + beta_length) # where beta coef found in model
+  total_length <- beta_length + d_length + ngroups + 1 # length of all variables in model
+  # beta coef, residual coef, group penalty coef, variable to enforce max norm
   
+  lambda_idx <- (total_length - ngroups + 1):(total_length ) # the conic/quadratic constraints
   
+  # setup problem list
+  # this problem will be min t + crossprod(s,1)
+                   #                 st  |d|          <= t
+                   #                     y-x %*% beta == d
+                   # \sqrt{\sum_{k \in K_g} beta_k^2} <= s_g \forall g \in \{1,...,G\}
   problem <- list(C = c(1, #max bound
-                        rep(0, d_length + beta_length), #parameters for: d residuals, beta_length beta
+                        rep(0, d_length + beta_length), #parameters for: d residuals, beta_length beta coefficients
                         lambda), #l1 penalty of length ngroup
-                  LB = c(0, rep(-Inf, d_length + beta_length), rep(0, ngroups)),
-                  UB = c(Inf, rep(Inf, d_length + beta_length), rep(Inf, ngroups)),
-                  Const = rbind(Matrix::sparseMatrix(i = rep(1:d_length, 2), 
-                                                     j = c(rep(1,d_length), 2:(d_length + 1)),
-                                                     x = c(rep(-1,d_length), rep(1, d_length)),
-                                                     dims = c(d_length,total_length)), #residual and upper bound
-                                Matrix::sparseMatrix(i = rep(1:d_length, 2),
-                                                     j = c(rep(1,d_length), 2:(d_length + 1)),
-                                                     x = 1,
-                                                     dims = c(d_length,total_length)), #residual and lower bound
-                                cbind(rep(0, d_length), Matrix::sparseMatrix(i = 1:d_length,
-                                                                             j = 1:d_length,
-                                                                             x = 1,
-                                                                             dims = c(d_length, d_length)),
-                                      X,
-                                      Matrix::sparseMatrix(i = 1, j = 1, x = 0, 
-                                                           dims = c(d_length, ngroups))) # residual to equal y
+                  LB = c(0, rep(-Inf, d_length + beta_length), rep(0, ngroups)), # lower bounds of variables
+                  UB = c(Inf, rep(Inf, d_length + beta_length), rep(Inf, ngroups)), # upper bounds of variables
+                  Const = rbind(
+                    #residual and upper bound
+                    # residual <= t
+                    Matrix::sparseMatrix(i = rep(1:d_length, 2), 
+                                                     j = c(rep(1,d_length), #t
+                                                           2:(d_length + 1)), #residual
+                                                     x = c(rep(-1,d_length), # t
+                                                           rep(1, d_length)), # residual
+                                                     dims = c(d_length,total_length)), 
+                                
+                    #residual >= -t
+                    Matrix::sparseMatrix(i = rep(1:d_length, 2),
+                                         j = c(rep(1,d_length), 2:(d_length + 1)),
+                                         x = 1,
+                                         dims = c(d_length,total_length)), 
+                    #residual and lower bound
+                                
+                    # this is XB + residual = Y
+                    cbind(rep(0, d_length), # t variable doesn't contribute
+                          Matrix::sparseMatrix(i = 1:d_length,
+                                               j = 1:d_length,
+                                               x = 1,
+                                               dims = c(d_length, d_length)), # residual
+                          X, # multiples X %*% beta
+                          Matrix::sparseMatrix(i = 1, j = 1, x = 0, 
+                                               dims = c(d_length, ngroups))) # lambda variable not contribute
+                    
                                 # Matrix::sparseMatrix(i = rep(1:beta_length,2),
                                 #                      j = c(beta_idx, max(beta_idx) + beta_idx),
                                 #                      x = 1,
@@ -268,19 +366,19 @@ lp_prob_winf <- function(X, Y, lambda, groups = NULL) {
                   group_idx = group_idx
                   
   )
-  if ( beta_length != ngroups ) { # not quite right but probably good enough
-    problem$Quad_const_L <- rep(0, ngroups)
-    problem$Quad_const_U <- rep(0, ngroups)
-    problem$Quad_const <- lapply(seq_along(group_idx), function(g) {
-      grp <- group_idx[[g]]
-      beta_grp <- beta_idx[grp]
-      n_grp <- length(grp)
-      return(Matrix::sparseMatrix(i = c(beta_grp, lambda_idx[g]),
-                                  j = c(beta_grp, lambda_idx[g]),
-                                  x = c(rep(1,n_grp),-1),
-                                  dims = c(total_length, total_length)))
-    })
-  }
+  # if ( beta_length != ngroups ) { # not quite right but probably good enough
+  #   problem$Quad_const_L <- rep(0, ngroups)
+  #   problem$Quad_const_U <- rep(0, ngroups)
+  #   problem$Quad_const <- lapply(seq_along(group_idx), function(g) {
+  #     grp <- group_idx[[g]]
+  #     beta_grp <- beta_idx[grp]
+  #     n_grp <- length(grp)
+  #     return(Matrix::sparseMatrix(i = c(beta_grp, lambda_idx[g]),
+  #                                 j = c(beta_grp, lambda_idx[g]),
+  #                                 x = c(rep(1,n_grp),-1),
+  #                                 dims = c(total_length, total_length)))
+  #   })
+  # }
   
   return(problem)
 }
@@ -338,21 +436,21 @@ lp_prob_w1 <- function(X, Y, lambda, groups = NULL) {
                   group_idx = group_idx
                   
   )
-  if ( beta_length != ngroups ) { # not quite right but probably good enough
-    problem$Quad_const_L <- rep(0, ngroups)
-    problem$Quad_const_U <- rep(0, ngroups)
-    problem$Quad_const <- lapply(seq_along(group_idx), 
-                function(g) {
-                  grp <- group_idx[[g]]
-                  beta_grp <- beta_idx[grp]
-                  n_grp <- length(grp)
-                  return(Matrix::sparseMatrix(i = c(beta_grp, lambda_idx[g]),
-                                              j = c(beta_grp, lambda_idx[g]),
-                                              x = c(rep(1,n_grp),-1),
-                                              dims = c(total_length, total_length)))
-                }
-              )
-  }
+  # if ( beta_length != ngroups ) { # not quite right but probably good enough
+  #   problem$Quad_const_L <- rep(0, ngroups)
+  #   problem$Quad_const_U <- rep(0, ngroups)
+  #   problem$Quad_const <- lapply(seq_along(group_idx), 
+  #               function(g) {
+  #                 grp <- group_idx[[g]]
+  #                 beta_grp <- beta_idx[grp]
+  #                 n_grp <- length(grp)
+  #                 return(Matrix::sparseMatrix(i = c(beta_grp, lambda_idx[g]),
+  #                                             j = c(beta_grp, lambda_idx[g]),
+  #                                             x = c(rep(1,n_grp),-1),
+  #                                             dims = c(total_length, total_length)))
+  #               }
+  #             )
+  # }
   
   return(problem)
   
@@ -496,10 +594,10 @@ group_deriv <- function (deriv_func, groups, coefs, lambda, a = 3.7)
 
 
 find_gurobi <- function() {
-   return("gurobi" %in% installed.packages()[,1])
+   return( rlang::is_installed("gurobi") )
 }
 
 find_mosek <- function() {
-  return("Rmosek" %in% installed.packages()[,1])
+  return( rlang::is_installed("Rmosek") )
 }
 

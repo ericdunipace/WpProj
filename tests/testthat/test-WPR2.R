@@ -8,16 +8,15 @@ wpr2.data <- function(n, p, s) {
   transp <- "exact"
   model.size <- c(2,4,8)
   
-  test <- W2IP(X = x, Y = post_mu, theta = post_beta, transport.method = transp, 
-               infimum.maxit = 10, 
-               tol = 1e-7, solution.method = "cone",
-               display.progress = FALSE,model.size = model.size)
+  test <- WpProj(X = x, eta = post_mu, theta = post_beta, method = "binary program",
+                 solver = "ecos")
   
-  proj <- W2L1(x, post_mu, post_beta, penalty = "lasso", method = "projection", infimum.maxit = 1)
-  sel <- W2L1(x, post_mu, post_beta, penalty = "selection.lasso", method = "selection.variable")
+  proj <- WpProj(x, post_mu, post_beta)
+  sel <- WpProj(x, post_mu, post_beta, method = "binary program")
   
   out <- list(test, proj, sel)
-  dist <- distCompare(out, list(posterior = post_beta, mean = post_mu), p = 2, ground_p = 2, quantity = c("posterior", "mean"))
+  dist <- distCompare(out, list(parameters = post_beta, predictions = post_mu), power = 2, quantity = c("parameters", "predictions"))
+  # if(sum(grepl("dist", colnames(dist$predictions)))>1) browser()
   return(dist)
 }
 
@@ -25,63 +24,65 @@ wpr2.prep <- function(n, p, s) {
   out <- wpr2.data(n,p,s)
   
   
-  r2 <- WPR2(nu = out, p = 2, method = "exact")
+  r2 <- WpProj:::WPR2.distcompare(predictions = NULL, projected_model = out, power = 2, method = "exact")
   return(r2)
 }
 
-testthat::test_that("WPR2 works", {
+test_that("WPR2 works", {
   set.seed(203402)
   
   n <- 128
   p <- 10
   s <- 100
   
-  x <- matrix( rnorm( p * n ), nrow = n, ncol = p )
+  x <- matrix( stats::rnorm( p * n ), nrow = n, ncol = p )
   x_ <- t(x)
   beta <- (1:p)/p
-  y <- x %*% beta + rnorm(n)
-  post_beta <- matrix(beta, nrow=p, ncol=s) + rnorm(p*s, 0, 0.1)
+  y <- x %*% beta + stats::rnorm(n)
+  post_beta <- matrix(beta, nrow=p, ncol=s) + stats::rnorm(p*s, 0, 0.1)
   post_mu <- x %*% post_beta
   transp <- "exact"
   model.size <- c(2,4,8)
   
-  test <- W2IP(X = x, Y = post_mu, theta = post_beta, transport.method = transp, 
-               infimum.maxit = 10, 
-               tol = 1e-7, solution.method = "cone",
-               display.progress = FALSE,model.size = model.size)
+  test <- WpProj::WpProj(X = x, eta =  post_mu, theta = post_beta, method = "binary program",
+                         solver = "ecos")
   
-  proj <- W2L1(x, post_mu, post_beta, penalty = "lasso", method = "projection", infimum.maxit = 1)
-  sel <- W2L1(x, post_mu, post_beta, penalty = "selection.lasso", method = "selection.variable")
+  proj <- WpProj:::WpProj(x, post_mu, post_beta)
+  sel <- WpProj:::WpProj(x, post_mu, post_beta, method = "binary program")
   
   out <- list(test, proj, sel)
   
   
-  dist <- distCompare(out, list(posterior = post_beta, mean = post_mu), p = 2, ground_p = 2, quantity = c("posterior", "mean"))
+  dist <- WpProj:::distCompare(out, list(parameters = post_beta, predictions = post_mu), power = 2, quantity = c("parameters", "predictions"))
   
-  r2 <- WPR2(Y = post_mu, nu = dist, p = 2, method = "exact")
-  r2 <- WPR2(nu = dist, p = 2, method = "exact")
+  r2 <- WpProj:::WPR2.distcompare(predictions = post_mu, projected_model = dist, power = 2, method = "exact")
+  r2 <- WpProj:::WPR2.distcompare(predictions = NULL, projected_model = dist, power = 2, method = "exact")
   
-  maxes <- tapply(dist$mean$dist, dist$mean$groups, max)
-  r2_check <- 1 - dist$mean$dist^2/maxes[as.numeric(dist$mean$groups)]^2
+  maxes <- tapply(dist$predictions$dist, dist$predictions$groups, max)
+  r2_check <- 1 - dist$predictions$dist^2/maxes[as.numeric(dist$predictions$groups)]^2
     
-  r2_mat <- WPR2.matrix(post_mu, test$eta[[1]], p = 2, method  ="exact")
-  r2_mat_check <- 1 - (WpProj::wasserstein(post_mu, test$eta[[1]],
+  r2_mat <- WpProj:::WPR2.matrix(post_mu, test$fitted.values[[1]], p = 2, method  ="exact")
+  r2_mat_check <- 1 - (WpProj::wasserstein(t(post_mu), t(test$fitted.values[[1]]),
                                          p = 2, ground_p = 2,
                                          method = "exact", 
                                          observation.orientation = "colwise")^2/
-    WpProj::wasserstein(post_mu, 
-                       matrix(colMeans(post_mu), nrow(post_mu),
-                          ncol(post_mu), byrow=TRUE),
+    WpProj::wasserstein(t(post_mu), 
+                       t(matrix(colMeans(post_mu), nrow(post_mu),
+                          ncol(post_mu), byrow=TRUE)),
                        p = 2, ground_p = 2,
                        method = "exact", 
-                       observation.orientation = "colwise")^2)
+                       observation.orientation = "colwise")^2) 
   
-  testthat::expect_silent(r2_wpproj <- WPR2.list(post_mu, out, p = 2, method  ="exact"))
-  testthat::expect_silent(r2_wpproj <- WPR2(post_mu, out, p = 2, method  ="exact"))
+  testthat::expect_silent(r2_wpproj <- WpProj:::WPR2.list(post_mu, out, p = 2, method  ="exact"))
+  testthat::expect_silent(r2_wpproj <- WpProj:::WPR2(post_mu, out, p = 2, method  ="exact"))
   
   names(out) <- c("BP", "L2", "relaxed bp")
-  r2_wpproj <- WPR2(post_mu, out, p = 2, method  ="exact")
-  r2_wpproj_check <- 1 - (WpProj::wasserstein(post_mu, proj$eta[[1]],
+  out$BP$fitted.values <- out$BP$fitted.values
+  out$L2$fitted.values <- out$L2$fitted.values
+  out$`relaxed bp`$fitted.values <- out$`relaxed bp`$fitted.values
+  
+  r2_wpproj <- WpProj:::WPR2(post_mu, out, p = 2, method  ="exact")
+  r2_wpproj_check <- 1 - (WpProj::wasserstein(post_mu, proj$fitted.values[[1]],
                                             p = 2, ground_p = 2,
                                             method = "exact", 
                                             observation.orientation = "colwise")^2/

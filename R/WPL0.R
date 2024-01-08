@@ -3,27 +3,44 @@
 #' @param X matrix of covariates
 #' @param Y matrix of predictions
 #' @param theta optional matrix of coefficients from original model, if relevant 
-#' @param p power of the Wasserstein distance
-#' @param ground_p power of the distance metric
+#' @param power power of the Wasserstein distance
 #' @param method One of "selection.variable" or "projection". Methods decide whether covariate matrix in `theta` is preserved ("selection.variable") or if new projections are generated ("projection")
 #' @param transport.method Method for wasserstein distance. One of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert"
 #' @param epsilon hyperparameter for sinkhorn iterations
-#' @param maxit max iteration for sinkhorn iterations
+#' @param OTmaxit max iteration for sinkhorn iterations
 #' @param parallel foreach backend
 #'
 #' @return `WpProj` object
-#' @export
-WPL0 <- function(X, Y = NULL, theta, p = 2, ground_p = 2,
+#' @keywords internal
+#' 
+# @examples
+# if(rlang::is_installed("stats")) {
+# n <- 128
+# p <- 10
+# s <- 99
+# x <- matrix( stats::rnorm( p * n ), nrow = n, ncol = p )
+# beta <- (1:10)/10
+# y <- x %*% beta + stats::rnorm(n)
+# post_beta <- matrix(beta, nrow=p, ncol=s) + stats::rnorm(p*s, 0, 0.1)
+# post_mu <- x %*% post_beta
+# 
+# fit <-  WPL0(X=x, Y=t(post_mu), theta = t(post_beta),
+#              method = "selection.variable",
+#              transport.method = "hilbert"
+# )
+# }
+WPL0 <- function(X, Y = NULL, theta, power = 2,
                  method = c("selection.variable", "projection"),
                  transport.method = transport_options(),
-                 epsilon = 0.05, maxit = 100,
-                 parallel = NULL) {
+                 epsilon = 0.05, OTmaxit = 100,
+                 parallel = NULL, ...) {
   this.call <- as.list(match.call()[-1])
   d <- ncol(X)
   n <- nrow(X)
   method <- match.arg(method)
   transport.method <- match.arg(transport.method, transport_options())
   obs.direction <- "colwise"
+  p <- ground_p <- power
   
   # if (grepl("univariate", transport.method) ) {
   #   obs.direction <- "rowwise"
@@ -48,7 +65,7 @@ WPL0 <- function(X, Y = NULL, theta, p = 2, ground_p = 2,
     Y <- crossprod(X_,theta)
   } else {
     if(nrow(Y) != nrow(X)) Y <- t(Y)
-    if(all(Y_==crossprod(X_, theta))) same <- TRUE
+    if(all(Y==crossprod(X_, theta))) same <- TRUE
   }
   
   if(method == "projection") {
@@ -63,9 +80,9 @@ WPL0 <- function(X, Y = NULL, theta, p = 2, ground_p = 2,
                     method = method,
                     transport.method = transport.method, 
                     epsilon = epsilon,
-                    niter = maxit)
+                    niter = OTmaxit)
 
-  combos <- lapply(1:d, function(i) combn(d,i))
+  combos <- lapply(1:d, function(i) utils::combn(d,i))
   w2 <- lapply(combos, function(i) rep(NA, ncol(i)))
   cur_idx <- NULL
   min_w2 <- Inf
@@ -81,6 +98,7 @@ WPL0 <- function(X, Y = NULL, theta, p = 2, ground_p = 2,
     foreach::registerDoSEQ()
   }
   
+  i <- NULL
   w2 <- foreach::foreach(i  = seq_along(combos)) %dorng% {
     w2out <- rep(NA, ncol(combos[[ i]]))
     for(j in 1:ncol(combos[[i]])) {

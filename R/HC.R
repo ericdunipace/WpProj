@@ -1,6 +1,6 @@
 #' @name HC
 #' 
-#' @title Run the Hahn-Carvalho method
+#' @title Run the Hahn-Carvalho Method
 #' 
 #' @description Runs the Hahn-Carvalho method but adapted to return full distributions.
 #' 
@@ -23,11 +23,25 @@
 #' @param tol Tolerance for OEM
 #' @param irls.maxit IRLS max iterations for OEM
 #' @param irls.tol IRLS tolerance for OEM
-#' @param intercept Should the method include an intercept
 #' 
 #' @return a `WpProj` object with selected covariates and their values
 #' 
 #' @export
+#' 
+#' @examples
+#' n <- 32
+#' p <- 10
+#' s <- 99
+#' x <- matrix( 1, nrow = n, ncol = p )
+#' beta <- (1:10)/10
+#' y <- x %*% beta
+#' post_beta <- matrix(beta, nrow=p, ncol=s) 
+#' post_mu <- x %*% post_beta
+#' 
+#' fit <-  HC(X=x, Y=post_mu, theta = post_beta,
+#'                penalty = "lasso", 
+#'                method = "projection"
+#' )
 HC <- function(X, Y=NULL, theta, family="gaussian", 
                penalty =  c("elastic.net", "selection.lasso",
                             "lasso", "ols", "mcp",
@@ -48,8 +62,8 @@ HC <- function(X, Y=NULL, theta, family="gaussian",
                penalty.factor = NULL, 
                group.weights = NULL, maxit = 500L, 
                tol = 1e-07, irls.maxit = 100L, 
-               irls.tol = 0.001,
-               intercept = TRUE)
+               irls.tol = 0.001
+               )
 {
   if( family == "cox" | family == "exponential" | family == "survival") {
     if(!(penalty == "lasso")) {
@@ -58,6 +72,7 @@ HC <- function(X, Y=NULL, theta, family="gaussian",
     }
   }
   method <- match.arg(method)
+  intercept <- FALSE
   
   p <- ncol(X)
   n <- nrow(X)
@@ -82,7 +97,7 @@ HC <- function(X, Y=NULL, theta, family="gaussian",
       Y_ <- rowMeans(Y)
   }
   if(family == "binomial") {
-    prob <- rowMeans(plogis(X %*% theta))
+    prob <- rowMeans(stats::plogis(X %*% theta))
     weights <- c(prob, 1-prob)
   } else {
     weights <- numeric(0)
@@ -105,11 +120,11 @@ HC <- function(X, Y=NULL, theta, family="gaussian",
   
   if( family %in% c("gaussian")) {
     
-   output <-  oem::oem(x, Y_, family = family, penalty = penalty,
+   output <-  oem::oem(X, Y_, family = family, penalty = penalty,
                   weights = weights, lambda = lambda, nlambda = nlambda,
                   lambda.min.ratio = lambda.min.ratio, alpha=alpha, gamma = gamma, tau = tau,
                   groups = groups, penalty.factor = penalty.factor, group.weights = group.weights,
-                  standardize = TRUE, intercept = intercept, 
+                  standardize = TRUE, intercept = FALSE, 
                   maxit = maxit, tol = tol, irls.maxit = irls.maxit,
                   irls.tol = irls.tol, accelerate = FALSE, ncores = -1, 
                   compute.loss = FALSE, hessian.type = hessian.type)
@@ -137,9 +152,20 @@ HC <- function(X, Y=NULL, theta, family="gaussian",
   extract <- extractCoef(output)
   output$nzero <- c(extract$nzero,p)
   output$E_theta <- extract$coefs
-  output$E_eta <- lapply( 1:ncol(output$E_theta), function(et) X %*% output$E_theta[,et] )
-  xtx <- crossprod(X)
-  xty <- crossprod(X,Y)
+  if (intercept) {
+    output$E_eta <- lapply( 1:ncol(output$E_theta), function(et) x %*% output$E_theta[-1,et] + output$E_theta[1,et])
+  } else {
+    output$E_eta <- lapply( 1:ncol(output$E_theta), function(et) x %*% output$E_theta[,et])
+  }
+  
+  if(intercept) {
+      xtx <- crossprod(cbind(1,X))
+      xty <- crossprod(cbind(1,X),Y)
+    } else {
+      xtx <- crossprod(X)
+      xty <- crossprod(X,Y)
+    }
+  
   output$theta <- lapply(1:ncol(output$E_theta), function(i){
     et <- output$E_theta[,i]
     coefs <- matrix(0, p, s) 
@@ -155,7 +181,11 @@ HC <- function(X, Y=NULL, theta, family="gaussian",
     return(coefs)
   })
   output$theta[[length(output$theta)+1]] <- theta
-  output$eta <- lapply(output$theta, function(tt) X %*% tt)
+  if (intercept) {
+    output$eta <- lapply(output$theta, function(tt) x %*% tt[-1,,drop = FALSE] + matrix(tt[1,,drop = FALSE], nrow=n, ncol=s))
+    } else {
+      output$eta <- lapply(output$theta, function(tt) x %*% tt)
+    }
   class(output) <- c("WpProj", "HC")
   
   return(output)

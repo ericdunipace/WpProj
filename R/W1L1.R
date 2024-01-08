@@ -14,7 +14,8 @@
 #' @param ... options to pass to solvers
 #'
 #' @return `WpProj` object
-#' @export
+#' 
+#' @keywords internal
 W1L1 <- function(X, Y, theta = NULL, penalty = c("none", "lasso","scad","mcp"), 
                  model.size = NULL,
                  lambda = numeric(0), 
@@ -22,7 +23,7 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none", "lasso","scad","mcp"),
                  nlambda = 10, 
                  gamma = 1, 
                  display.progress = FALSE,
-                 solver = c("rqPen", "gurobi", "mosek"),
+                 solver = c( "cone", "rqPen", "gurobi", "mosek"),
                  ...) {
   
   this.call <- as.list(match.call()[-1])
@@ -165,7 +166,7 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none", "lasso","scad","mcp"),
     if(solver == "rqPen") {
       if(length(lambda) ==1 & penalty != "lasso" ) {
         f.call <- as.call(c(list(call("::", as.name("rqPen"), 
-                                      as.name("l1.group.fit"))), argn))
+                                      as.name("rq.group.pen"))), argn))
       } else {
         # if(penalty == "lasso") {
         #   argn <- c(argn, "solver" = solver)
