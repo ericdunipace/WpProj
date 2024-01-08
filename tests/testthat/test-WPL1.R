@@ -84,7 +84,7 @@ test_that("WPL1 refers to W2L1 appropriately", {
   testthat::expect_equal(c(projectionlasso$beta[,101]), c(theta)) #should be pretty close
 
   #should warn about infimum
-  if(Sys.info()['sysname'] == "Darwin") {
+  if(Sys.info()['nodename'] == "Cid-Highwind.local") {
     testthat::expect_silent(WpProj:::WPL1(X=x, Y=NULL, power = 2.0,
                                           theta=theta, penalty="lasso",
                                           nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,

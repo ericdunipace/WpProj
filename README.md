@@ -23,7 +23,7 @@ In the our package, if $\mu$ is the original prediction from the
 original model, such as from a Bayesian linear regression or a neural
 network, then we seek to find a new prediction $\nu$ that minimizes the
 Wasserstein distance between the two:
-$$ \text{argmin}_\nu \left(\inf_{\pi \in \Pi(\mu,\nu)} \int_{\mathbb{R}^d \times \mathbb{R}^d} \|x-y\|^p d\pi(x,y)\right)^{1/p}$$
+$$ \text{argmin}_\nu W_p(\mu,\nu)$$
 
 ## Installation
 
@@ -79,7 +79,7 @@ function (measuring distance between the reduced models and the original
 model) and then generate a plot
 
 ``` r
-dc <- distCompare(models = list("L1" = fit.p2, "BP" = fit.p2.bp),
+dc <- distCompare(models = list("L1" = fit.p2, "Binary Program" = fit.p2.bp),
                   target = list(parameters = post_beta,
                                   predictions = post_mu))
 plot(dc)

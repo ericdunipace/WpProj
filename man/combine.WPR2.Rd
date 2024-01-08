@@ -16,7 +16,7 @@ A vector of \eqn{W_p R^2} objects
 A Function to Combine \eqn{W_p R ^2} Objects
 }
 \examples{
-if(rlang::is_installed("stats")) {
+if (rlang::is_installed("stats")) {
 n <- 128
 p <- 10
 s <- 99
