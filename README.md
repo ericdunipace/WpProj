@@ -15,7 +15,7 @@ described in Eric Dunipace and Lorenzo Trippa (2020)
 
 The Wasserstein distance is a measure of distance between two
 probability distributions. It is defined as:
-$$W_p(\mu,\nu) = \left(\inf_{\pi \in \Pi(\mu,\nu)} \int_{\mathbb{R}^d \times \mathbb{R}^d} \|x-y\|^p d\pi(x,y)\right)^{1/p}}$$
+$$W_p(\mu,\nu) = \left(\inf_{\pi \in \Pi(\mu,\nu)} \int_{\mathbb{R}^d \times \mathbb{R}^d} \|x-y\|^p d\pi(x,y)\right)^{1/p}$$
 where $\Pi(\mu,\nu)$ is the set of all joint distributions with
 marginals $\mu$ and $\nu$.
 
@@ -38,7 +38,8 @@ devtools::install_github("ericdunipace/WpProj")
 ## Example
 
 This is a basic example running the `WpProj` function on a simulated
-dataset:
+dataset. Note we create a pseudo posterior from a simple dataset for
+illustration purposes:
 
 ``` r
 library(WpProj)
@@ -81,48 +82,33 @@ model) and then generate a plot
 dc <- distCompare(models = list("L1" = fit.p2, "BP" = fit.p2.bp),
                   target = list(parameters = post_beta,
                                   predictions = post_mu))
-```
-
-``` r
 plot(dc)
 ```
 
-    #> $parameters
-
-<img src="man/figures/README-example_continued_plot_noecho-1.png" width="100%" />
-
-    #> 
-    #> $predictions
-
-<img src="man/figures/README-example_continued_plot_noecho-2.png" width="100%" />
-
-    #> 
-    #> attr(,"class")
-    #> [1] "plotcompare" "WpProj"
+<img src="man/figures/README-example_continued_plot_noecho-1.png" width="100%" /><img src="man/figures/README-example_continued_plot_noecho-2.png" width="100%" />
 
 We can also compare performacne by measure the relative distance between
 a null model and the predictions of interest as a pseudo $R^2$
 
 ``` r
 r2.null  <- WPR2(projected_model = dc) # should be between 0 and 1
-```
-
-``` r
 plot(r2.null)
 ```
 
-    #> Warning: Removed 2 rows containing missing values (`geom_line()`).
-    #> Warning: Removed 2 rows containing missing values (`geom_point()`).
-
 <img src="man/figures/README-r2_plots_noecho-1.png" width="100%" />
 
-We can also examine how the predictions change in the models for
-individual observations
+We can also examine how the predictions change in the models as more
+covariates are added for individual observations.
 
 ``` r
 ridgePlot(fit.p2, index = 21, minCoef = 0, maxCoef = 10)
 ```
 
-    #> Picking joint bandwidth of 0.102
-
 <img src="man/figures/README-ridgeplots_noecho-1.png" width="100%" />
+Note how the predictions get better the more coefficients are added and
+the distribution looks closer to the full posterior predictive.
+
+# References
+
+[Eric Dunipace and Lorenzo Trippa
+(2020).](https://arxiv.org/abs/2012.09999)
