@@ -180,7 +180,7 @@ testthat::test_that("transport rank works", {
   # testthat::expect_null(transy$cost)
   # testthat::expect_null(trans.nothing$cost)
   testthat::skip_on_cran()
-  testthat::skip_on_travis()
+  testthat::skip_on_ci()
   testthat::expect_equal(x_idx[507], transx$tplan$from[508])
   testthat::expect_equal(y_idx, transy$tplan$from)
 })
