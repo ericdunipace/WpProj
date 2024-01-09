@@ -7,7 +7,7 @@
 #' @import ROI.plugin.ecos
 #' @import ROI.plugin.lpsolve
 #' @keywords internal
-#' @aliases foo-package
+#' @aliases WpProj-package
 "_PACKAGE"
 
 ## usethis namespace: start

@@ -10,23 +10,25 @@ The goal of `WpProj` is to perform Wasserstein projections from the
 predictive distributions of any model into the space of predictive
 distributions of linear models. We utilize L1 penalties to also reduce
 the complexity of the model space. This package employs the methods as
-described in Eric Dunipace and Lorenzo Trippa (2020)
-\<arXiv:2012.09999\>.
+described in [Eric Dunipace and Lorenzo Trippa
+(2020).](https://arxiv.org/abs/2012.09999) \<arXiv:2012.09999\>.
 
 The Wasserstein distance is a measure of distance between two
-probability distributions. It is defined as:
-$$W_p(\mu,\nu) = \left(\inf_{\pi \in \Pi(\mu,\nu)} \int_{\mathbb{R}^d \times \mathbb{R}^d} \|x-y\|^p d\pi(x,y)\right)^{1/p}$$
+probability distributions. It is defined as:  
+$$W_p(\mu,\nu) = \left(\inf_{\pi \in \Pi(\mu,\nu)} \int_{\mathbb{R}^d \times \mathbb{R}^d} \|x-y\|^p d\pi(x,y)\right)^{1/p}$$  
 where $\Pi(\mu,\nu)$ is the set of all joint distributions with
 marginals $\mu$ and $\nu$.
 
 In the our package, if $\mu$ is the original prediction from the
 original model, such as from a Bayesian linear regression or a neural
 network, then we seek to find a new prediction $\nu$ that minimizes the
-Wasserstein distance between the two:
-$$\text{argmin}_\nu W_p(\mu,\nu)^p.$$ subject to the constraint that
-$\nu$ is a linear model. To reduce the complexity of the number of
-parameters, we add an L1 penalty to the coefficients of the linear model
-to reduce the complexity of the model space:
+Wasserstein distance between the two:  
+$$\text{argmin}_\nu W_p(\mu,\nu)^p,$$  
+subject to the constraint that $\nu$ is a linear model.
+
+To reduce the complexity of the number of parameters, we add an L1
+penalty to the coefficients of the linear model to reduce the complexity
+of the model space:  
 $$\text{argmin}_\nu W_p(\mu,\nu)^p + P_\lambda(\nu),$$ where
 $P_\lambda(\nu)$ is the L1 penalty on the coefficients of the linear
 model.
@@ -88,10 +90,12 @@ model) and then generate a plot
 dc <- distCompare(models = list("L1" = fit.p2, "Binary Program" = fit.p2.bp),
                   target = list(parameters = post_beta,
                                   predictions = post_mu))
-plot(dc)
+p <- plot(dc, ylabs = c("2-Wasserstein Distance", "2-Wasserstein Distance"))
+p$parameters + ggplot2::ggtitle("Parameters")
+p$predictions + ggplot2::ggtitle("Predictions")
 ```
 
-<img src="man/figures/README-example_continued_plot_noecho-1.png" width="100%" /><img src="man/figures/README-example_continued_plot_noecho-2.png" width="100%" />
+<img src="man/figures/README-example_continued_plot_noecho-1.png" width="70%" /><img src="man/figures/README-example_continued_plot_noecho-2.png" width="70%" />
 
 We can also compare performacne by measure the relative distance between
 a null model and the predictions of interest as a pseudo $R^2$
@@ -101,7 +105,7 @@ r2.null  <- WPR2(projected_model = dc) # should be between 0 and 1
 plot(r2.null)
 ```
 
-<img src="man/figures/README-r2_plots_noecho-1.png" width="100%" />
+<img src="man/figures/README-r2_plots_noecho-1.png" width="70%" />
 
 We can also examine how the predictions change in the models as more
 covariates are added for individual observations.
@@ -110,7 +114,7 @@ covariates are added for individual observations.
 ridgePlot(fit.p2, index = 21, minCoef = 0, maxCoef = 10)
 ```
 
-<img src="man/figures/README-ridgeplots_noecho-1.png" width="100%" />
+<img src="man/figures/README-ridgeplots_noecho-1.png" width="70%" />
 Note how the predictions get better the more coefficients are added and
 the distribution looks closer to the full posterior predictive.
 

@@ -129,8 +129,9 @@ set_x_limits <- function(distance_data, xlim, quantity){
   return(xlim)
 }
 
-set_equal_y_limits.plotcompare <- function(distance_data){
+set_equal_y_limits.plotcompare <- function(x){
   # dist.list <- list(dist = unlist(sapply(distance_data, function(x) x[[quantity]]$data$dist )))
+  x <- distance_data
   dist <- ylim <- list(parameters = NULL, predictions = NULL)
   for(i in c("parameters", "predictions")){
     dist[[i]] <- list(dist = unlist(sapply(distance_data, function(x) x[[i]]$data$dist )))

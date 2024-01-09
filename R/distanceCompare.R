@@ -320,7 +320,8 @@ set_dist_data <- function(target, models, quantity, method, transform) {
   return(output)
 }
 
-set_equal_y_limits.distcompare <- function(distance_data){
+set_equal_y_limits.distcompare <- function(x){
+  distance_data <- x
   dist <- ylim <- list(parameters = NULL, predictions = NULL)
   for(i in c("parameters", "predictions")){
     dist[[i]] <- list(dist = unlist(sapply(distance_data, function(x) x[[i]]$dist)))

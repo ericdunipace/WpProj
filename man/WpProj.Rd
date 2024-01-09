@@ -32,14 +32,14 @@ WpProj(
 \value{
 object of class \code{WpProj}, which is a list with the following slots:
 \itemize{
-\item{call}{The call to the function}
-\item{theta}{A list of the final parameter matrices for each returned model}
-\item{fitted.values}{A list of the fitted values for each returned model}
-\item{power}{The power of the Wasserstein distance used}
-\item{method}{The method used to calculate the Wasserstein projections}
-\item{solver}{The solver used to calculate the Wasserstein projections}
-\item{niter}{The number of iterations used to calculate the Wasserstein projections. Not all methods return a number of iterations so this may be \code{NULL}}
-\item{nzero}{The number of non zero coefficients in the final models}
+\item{\code{call}: The call to the function}
+\item{\code{theta}: A list of the final parameter matrices for each returned model}
+\item{\code{fitted.values}: A list of the fitted values for each returned model}
+\item{\code{power}: The power of the Wasserstein distance used}
+\item{\code{method}: The method used to calculate the Wasserstein projections}
+\item{\code{solver}: The solver used to calculate the Wasserstein projections}
+\item{\code{niter}: The number of iterations used to calculate the Wasserstein projections. Not all methods return a number of iterations so this may be \code{NULL}}
+\item{\code{nzero}: The number of non zero coefficients in the final models}
 }
 }
 \description{
