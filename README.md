@@ -29,9 +29,9 @@ subject to the constraint that $\nu$ is a linear model.
 To reduce the complexity of the number of parameters, we add an L1
 penalty to the coefficients of the linear model to reduce the complexity
 of the model space:  
-$$\text{argmin}_\nu W_p(\mu,\nu)^p + P_\lambda(\nu),$$ where
-$P_\lambda(\nu)$ is the L1 penalty on the coefficients of the linear
-model.
+$$\text{argmin}_\nu W_p(\mu,\nu)^p + P_\lambda(\nu),$$  
+where $P_\lambda(\nu)$ is the L1 penalty on the coefficients of the
+linear model.
 
 ## Installation
 
@@ -51,6 +51,7 @@ illustration purposes:
 
 ``` r
 library(WpProj)
+set.seed(23048)
 # note we don't generate believable data with real posteriors
 # these examples are just to show how to use the function
 n <- 32
