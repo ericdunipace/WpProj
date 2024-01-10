@@ -15,7 +15,7 @@ described in [Eric Dunipace and Lorenzo Trippa
 
 The Wasserstein distance is a measure of distance between two
 probability distributions. It is defined as:  
-$$W_p(\mu,\nu) = \left(\inf_{\pi \in \Pi(\mu,\nu)} \int_{\mathbb{R}^d \times \mathbb{R}^d} \|x-y\|^p d\pi(x,y)\right)^{1/p}$$  
+$$ W_p(\mu,\nu) = \left(\inf_{\pi \in \Pi(\mu,\nu)} \int_{\mathbb{R}^d \times \mathbb{R}^d} \|x-y\|^p d\pi(x,y)\right)^{1/p} $$  
 where $\Pi(\mu,\nu)$ is the set of all joint distributions with
 marginals $\mu$ and $\nu$.
 
@@ -23,13 +23,13 @@ In the our package, if $\mu$ is the original prediction from the
 original model, such as from a Bayesian linear regression or a neural
 network, then we seek to find a new prediction $\nu$ that minimizes the
 Wasserstein distance between the two:  
-$$\text{argmin}_\nu W_p(\mu,\nu)^p,$$  
+$$ \text{argmin}_{\nu} W_{p}(\mu,\nu)^{p}, $$  
 subject to the constraint that $\nu$ is a linear model.
 
 To reduce the complexity of the number of parameters, we add an L1
 penalty to the coefficients of the linear model to reduce the complexity
 of the model space:  
-$$\text{argmin}_\nu W_p(\mu,\nu)^p + P_\lambda(\nu),$$  
+$$ \text{argmin}_{\nu} W_{p}(\mu,\nu)^{p} + P_{\lambda}(\nu), $$  
 where $P_\lambda(\nu)$ is the L1 penalty on the coefficients of the
 linear model.
 
