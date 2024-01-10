@@ -7,7 +7,7 @@
 combine.distcompare(...)
 }
 \arguments{
-\item{distances}{A list of  \code{distcompare} objects that are the result of \code{\link[=distCompare]{distCompare()}}}
+\item{...}{\code{distcompare} objects that are the result of \code{\link[=distCompare]{distCompare()}}}
 }
 \value{
 an object of class \code{combine.distcompare}, the combined \code{distcompare} class objects as returned by \code{\link[=distCompare]{distCompare()}} function

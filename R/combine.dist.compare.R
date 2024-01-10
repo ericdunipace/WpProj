@@ -2,7 +2,7 @@ methods::setClass("combine.distcompare")
 
 #' Combine distance calculations from the distCompare function
 #'
-#' @param distances A list of  `distcompare` objects that are the result of [distCompare()]
+#' @param ... `distcompare` objects that are the result of [distCompare()]
 #'
 #' @return an object of class `combine.distcompare`, the combined `distcompare` class objects as returned by [distCompare()] function
 #' @keywords internal
@@ -37,12 +37,52 @@ methods::setClass("combine.distcompare")
 # combine <- combine.distcompare(dc1, dc2)
 combine.distcompare <- function(...) {
   
+  if( (...length() == 1) && is.list(...) && !is.distcompare(...)) {
+    distances <- ...elt(1L)
+    } else if ( (...length() == 1) && is.distcompare(...)) {
+      message("Only one `distcompare` object was passed to the function. Returning original object")
+      return(...elt(1L))
+    } else {
+      distances <- list(...)
+    } 
+  
+  stopifnot(is.list(distances))
+  if (!all(sapply(distances, is.distcompare))) {
+    stop("All members must be distcompare object")
+  }
+  niter <- length(distances)
+  cmb <- list(parameters = NULL, predictions = NULL, p = NULL)
+  
+  ps <- sapply(distances, function(d) d$p)
+  stopifnot(all(diff(ps)==0))
+  
+  cmb$p <- ps[1]
+  post <- do.call("rbind", lapply(distances, function(d) d$parameters))
+  predictions <- do.call("rbind", lapply(distances, function(d) d$predictions))
+  # methods <- do.call("rbind", lapply(distances, function(d) d$method))
+  
+  if(! is.null(post)) {
+    cmb$parameters <- post
+  }
+  
+  if (!is.null(predictions)) {
+    cmb$predictions <- predictions
+  }
+  
+  class(cmb) <- class(distances[[1L]])
+  
+  return(cmb)
+}
+
+
+combine_and_augment_distcompare <- function(...) {
+  
   distances <- list(...)
   if(is.list(...)) distances <- unlist(distances, recursive = FALSE)
   
   stopifnot(is.list(distances))
   if (!all(sapply(distances, is.distcompare))) {
-    stop("All members must be  distcompare object")
+    stop("All members must be distcompare object")
   }
   niter <- length(distances)
   length.each <- sapply(distances, function(i) nrow(i$predictions))
@@ -71,15 +111,15 @@ combine.distcompare <- function(...) {
     if(!is.null(cmb$predictions)) cmb$predictions <- cbind(cmb$predictions, ranks = ranks.predictions, iter = iter)
   }
   
-  class(cmb) <- c("combine.distcompare","WpProj")
+  class(cmb) <- c("combine_distcompare","WpProj")
   
   return(cmb)
 }
 
-
-plot.combine.distcompare <- function (x, ylim = NULL, ylabs = c(NULL,NULL), facet.group = NULL, ...) {
+setOldClass("combine_distcompare")
+plot.combine_distcompare <- function (x, ylim = NULL, ylabs = c(NULL,NULL), facet.group = NULL, ...) {
   distances <- x
-  stopifnot(inherits(distances, "combine.dist.compare"))
+  stopifnot(inherits(distances, "combine_distcompare"))
   dots <- list(...)
   alpha <- dots$alpha
   base_size <- dots$base_size
@@ -394,6 +434,6 @@ print.plotrank <- function(x,...) {
 # combine <- combine.distcompare(list(dc1, dc2))
 # plot(combine)
 # }
-methods::setMethod("plot", c("x" ="combine.distcompare"), plot.combine.distcompare)
+methods::setMethod("plot", c("x" ="combine_distcompare"), plot.combine_distcompare)
 methods::setMethod("print", c("x" ="plotcombine"), print.plotcombine)
 methods::setMethod("print", c("x" ="plotrank"), print.plotrank)

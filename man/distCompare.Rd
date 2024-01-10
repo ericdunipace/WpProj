@@ -18,7 +18,7 @@ distCompare(
 )
 }
 \arguments{
-\item{models}{Models from WpProj methods}
+\item{models}{A list of models from WpProj methods}
 
 \item{target}{The target to compare the methods to. Should be a list with slots "parameters" to compare the parameters and "predictions" to compare predictions}
 
@@ -35,10 +35,13 @@ distCompare(
 \item{...}{other options passed to the wasserstein distance function}
 }
 \value{
-an object of class \code{distcompare} with slots \code{parameters}, \code{predictions}, and \code{p}.
+an object of class \code{distcompare} with slots \code{parameters}, \code{predictions}, and \code{p}. The slots \code{parameters} and \code{predictions} are data frames. See the details for more info. The slot \code{p} is the power parameter of the Wasserstein distance used in the distance calculation.
 }
 \description{
 Compares Optimal Transport Distances Between WpProj and Original Models
+}
+\details{
+For the data frames, \code{dist} is the Wasserstein distance, \code{nactive} is the number of active variables in the model, \code{groups} is the name distinguishing the model, and \code{method} is the method used to calculate the distance (i.e., exact, sinkhorn, etc.). If the list in \code{models} is named, these will be used as the group names otherwise the group names will be created based on the call from the \code{WpProj} method.
 }
 \examples{
 if(rlang::is_installed("stats")) {
@@ -58,7 +61,7 @@ fit2 <-  WpProj(X=x, eta=post_mu, theta = post_beta, power = 2.0,
                method = "binary program", solver = "lasso",
                options = list(solver.options = list(penalty = "mcp"))
 )
-dc <- distCompare(models = list(fit1, fit2),
+dc <- distCompare(models = list("L1" = fit1, "BP" = fit2),
                  target = list(parameters = post_beta, predictions = post_mu))
 plot(dc)
 }

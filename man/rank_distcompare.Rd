@@ -10,7 +10,7 @@ rank_distcompare(distances)
 \item{distances}{A \code{distcompare} object}
 }
 \value{
-The ranks of a \code{distcompare} object
+The ranks of a \code{distcompare} object as a list containing slots "predictions" and "parameters".
 }
 \description{
 Ranks \code{distcompare} Objects

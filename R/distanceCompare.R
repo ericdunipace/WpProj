@@ -5,7 +5,7 @@ methods::setClass("distcompare",
 
 #' Compares Optimal Transport Distances Between WpProj and Original Models
 #'
-#' @param models Models from WpProj methods
+#' @param models A list of models from WpProj methods
 #' @param target The target to compare the methods to. Should be a list with slots "parameters" to compare the parameters and "predictions" to compare predictions
 #' @param power The power parameter of the Wasserstein distance.
 #' @param method Which approximation to the Wasserstein distance to use. Should be one of "exact", "sinkhorn", "greenkhorn", "gandkhorn", "randkhorn", or "hilbert".
@@ -14,7 +14,10 @@ methods::setClass("distcompare",
 #' @param transform Transformation function for the predictions.
 #' @param ... other options passed to the wasserstein distance function
 #'
-#' @return an object of class `distcompare` with slots `parameters`, `predictions`, and `p`.
+#' @return an object of class `distcompare` with slots `parameters`, `predictions`, and `p`. The slots `parameters` and `predictions` are data frames. See the details for more info. The slot `p` is the power parameter of the Wasserstein distance used in the distance calculation. 
+#' 
+#' @details 
+#' For the data frames, `dist` is the Wasserstein distance, `nactive` is the number of active variables in the model, `groups` is the name distinguishing the model, and `method` is the method used to calculate the distance (i.e., exact, sinkhorn, etc.). If the list in `models` is named, these will be used as the group names otherwise the group names will be created based on the call from the `WpProj` method.
 #' 
 #' @export
 #' @examples
@@ -35,7 +38,7 @@ methods::setClass("distcompare",
 #'                method = "binary program", solver = "lasso",
 #'                options = list(solver.options = list(penalty = "mcp"))
 #' )
-#' dc <- distCompare(models = list(fit1, fit2),
+#' dc <- distCompare(models = list("L1" = fit1, "BP" = fit2),
 #'                  target = list(parameters = post_beta, predictions = post_mu))
 #' plot(dc)
 #' }
@@ -336,7 +339,7 @@ set_equal_y_limits.distcompare <- function(x){
 #'
 #' @keywords internal
 #'
-#' @return The ranks of a `distcompare` object
+#' @return The ranks of a `distcompare` object as a list containing slots "predictions" and "parameters".
 rank_distcompare <- function(distances) {
   if(!is.distcompare(distances)) stop("Must be distcompare object")
   rank.fun <- function(distance, quant) {
