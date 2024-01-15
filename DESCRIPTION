@@ -2,9 +2,45 @@ Package: WpProj
 Type: Package
 Title: Linear p-Wasserstein Projections
 Version: 0.2
-Date: 2024-01-08
-Author: Eric Dunipace
-Maintainer: Eric Dunipace <edunipace@mail.harvard.edu>
+Date: 2024-01-09
+Authors@R: 
+    c(
+    person(given = "Eric", 
+        family = "Dunipace", 
+        email = "edunipace@mail.harvard.edu",
+        role = c("aut", "cre"),
+        comment = c(ORCID = "0000-0001-8909-213X")),
+    person(given = "Clemens",
+        family = "Schmid",
+        role = c("ctb"),
+        email = "clemens@nevrome.de",
+        comment = c(ORCID = "0000-0003-3448-5715", 
+        "ETA progres bar is adapted from their code")),
+    person(given = "Espen",
+        family = "Bernton",
+        role = c("ctb"),
+        comment = "Hilbert sort adapted from their code"),
+    person(given = "Mathieu",
+        family = "Gerber",
+        role = c("ctb"),
+        comment = "Hilbert sort adapted from their code"),
+    person(given = "Pierre",
+        family = "Jacob",
+        role = c("ctb"),
+        comment = "Hilbert sort adapted from their code"),
+    person("Bin", "Dai", , "bdai@uwalumni.com", role = c("ctb"),
+        comment = "W2 projections adapted from OEM code"),
+    person("Jared", "Huling", , "jaredhuling@gmail.com", c("ctb"),
+            comment = c(ORCID = "0000-0003-0670-4845","W2 projections adapted from OEM code")),
+    person("Yixuan", "Qiu", , , c("ctb"),
+        comment = "W2 projections adapted from OEM code"),
+    person("Dominic", "Schuhmacher", 
+        email = "dominic.schuhmacher@mathematik.uni-goettingen.de", 
+        role = c("ctb"),
+        comment = "Shortsimplex optimal transport method adapted from their code"),
+    person("Nicolas", "Bonneel", role = "ctb", 
+        comment = "network simplex adapted from their code")
+    )
 Description: Performs Wasserstein projections from the predictive distributions of any model into the 
   space of predictive distributions of linear models. We utilize L1 penalties to also reduce 
   the complexity of the model space. This package employs the methods as described in 
@@ -39,7 +75,8 @@ LinkingTo:
   Rcpp (>= 1.0.0), 
   RcppEigen (>= 0.3.3.4.0), 
   RcppProgress,
-  RcppCGAL
+  RcppCGAL,
+  RSpectra
 Suggests: 
   testthat (>= 2.1.0),
   transport,

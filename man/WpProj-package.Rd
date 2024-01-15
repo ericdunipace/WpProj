@@ -8,4 +8,21 @@
 \description{
 Performs Wasserstein projections from the predictive distributions of any model into the space of predictive distributions of linear models. We utilize L1 penalties to also reduce the complexity of the model space. This package employs the methods as described in Dunipace, Eric and Lorenzo Trippa (2020) \href{https://arxiv.org/abs/2012.09999}{arXiv:2012.09999}.
 }
+\author{
+\strong{Maintainer}: Eric Dunipace \email{edunipace@mail.harvard.edu} (\href{https://orcid.org/0000-0001-8909-213X}{ORCID})
+
+Other contributors:
+\itemize{
+  \item Clemens Schmid \email{clemens@nevrome.de} (\href{https://orcid.org/0000-0003-3448-5715}{ORCID}) (ETA progres bar is adapted from their code) [contributor]
+  \item Espen Bernton (Hilbert sort adapted from their code) [contributor]
+  \item Mathieu Gerber (Hilbert sort adapted from their code) [contributor]
+  \item Pierre Jacob (Hilbert sort adapted from their code) [contributor]
+  \item Bin Dai \email{bdai@uwalumni.com} (W2 projections adapted from OEM code) [contributor]
+  \item Jared Huling \email{jaredhuling@gmail.com} (\href{https://orcid.org/0000-0003-0670-4845}{ORCID}) (W2 projections adapted from OEM code) [contributor]
+  \item Yixuan Qiu (W2 projections adapted from OEM code) [contributor]
+  \item Dominic Schuhmacher \email{dominic.schuhmacher@mathematik.uni-goettingen.de} (Shortsimplex optimal transport method adapted from their code) [contributor]
+  \item Nicolas Bonneel (network simplex adapted from their code) [contributor]
+}
+
+}
 \keyword{internal}
