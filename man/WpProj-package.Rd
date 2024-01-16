@@ -17,9 +17,9 @@ Other contributors:
   \item Espen Bernton (Hilbert sort adapted from their code) [contributor]
   \item Mathieu Gerber (Hilbert sort adapted from their code) [contributor]
   \item Pierre Jacob (Hilbert sort adapted from their code) [contributor]
-  \item Bin Dai \email{bdai@uwalumni.com} (W2 projections adapted from OEM code) [contributor]
-  \item Jared Huling \email{jaredhuling@gmail.com} (\href{https://orcid.org/0000-0003-0670-4845}{ORCID}) (W2 projections adapted from OEM code) [contributor]
-  \item Yixuan Qiu (W2 projections adapted from OEM code) [contributor]
+  \item Bin Dai \email{bdai@uwalumni.com} (W2 projections adapted from their OEM code) [contributor]
+  \item Jared Huling \email{jaredhuling@gmail.com} (\href{https://orcid.org/0000-0003-0670-4845}{ORCID}) (W2 projections adapted from their OEM code) [contributor]
+  \item Yixuan Qiu (W2 projections adapted from their OEM code) [contributor]
   \item Dominic Schuhmacher \email{dominic.schuhmacher@mathematik.uni-goettingen.de} (Shortsimplex optimal transport method adapted from their code) [contributor]
   \item Nicolas Bonneel (network simplex adapted from their code) [contributor]
 }

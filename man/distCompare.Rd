@@ -24,7 +24,7 @@ distCompare(
 
 \item{power}{The power parameter of the Wasserstein distance.}
 
-\item{method}{Which approximation to the Wasserstein distance to use. Should be one of "exact", "sinkhorn", "greenkhorn", "gandkhorn", "randkhorn", or "hilbert".}
+\item{method}{Which approximation to the Wasserstein distance to use. Should be one of the outputs of \code{\link[=transport_options]{transport_options()}}.}
 
 \item{quantity}{Should the function target the "parameters" or the "predictions". Can choose both.}
 
@@ -32,7 +32,7 @@ distCompare(
 
 \item{transform}{Transformation function for the predictions.}
 
-\item{...}{other options passed to the wasserstein distance function}
+\item{...}{other options passed to the \code{\link[=wasserstein]{wasserstein()}} distance function}
 }
 \value{
 an object of class \code{distcompare} with slots \code{parameters}, \code{predictions}, and \code{p}. The slots \code{parameters} and \code{predictions} are data frames. See the details for more info. The slot \code{p} is the power parameter of the Wasserstein distance used in the distance calculation.

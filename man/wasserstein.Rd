@@ -20,13 +20,13 @@ wasserstein(
 
 \item{Y}{Matrix for second group}
 
-\item{p}{Powr of the wasserstein distance}
+\item{p}{Power of the Wasserstein distance}
 
-\item{ground_p}{Powr of the distance metric. Usually same as \code{p}}
+\item{ground_p}{Power of the distance metric. Usually same as \code{p}}
 
-\item{observation.orientation}{Are observations unique by rows or colummns? One of "colwise" or "rowwise"}
+\item{observation.orientation}{Are observations unique by rows or columns? One of "colwise" or "rowwise"}
 
-\item{method}{"exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn", "hilbert"}
+\item{method}{One of the outputs of \code{\link[=transport_options]{transport_options()}}}
 
 \item{...}{additional options for sinkhorn based methods. \code{epsilon} and \code{niter} determining the hyperparameters for the negative entropy penalty}
 }

@@ -7,11 +7,11 @@
 #' @param scale How the densities should be scale
 #' @param alpha Alpha term from ggplot2 object
 #' @param full "True" prediction to compare to
-#' @param transform tranform for predictions
+#' @param transform transform for predictions
 #' @param xlab x-axis label
 #' @param bandwidth Bandwidth for kernel
 #'
-#' @return a `ggridges` plot
+#' @return a [ggplot2::ggplot()] plot
 #' @export
 #' 
 #' @examples

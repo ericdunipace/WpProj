@@ -5,7 +5,7 @@
 #' @param theta optional parameter matrix for selection methods. Should be p x s.
 #' @param penalty Form of penalty. One of "lasso", "ols", "mcp", "elastic.net","selection.lasso", "scad", "mcp.net", "scad.net", "grp.lasso", "grp.lasso.net", "grp.mcp","grp.scad", "grp.mcp.net", "grp.scad.net", "sparse.grp.lasso"
 #' @param method "selection.variable" or "projection
-#' @param transport.method Method for calculating the wasserstein distance. One of "exact", "sinkhorn", "greenkhorn","hilbert" 
+#' @param transport.method Method for calculating the Wasserstein distance. One of "exact", "sinkhorn", "greenkhorn","hilbert" 
 #' @param epsilon Penalty parameter for Sinkhorn and Greenkhorn and  optimal transport
 #' @param OTmaxit Maximum iterations for the optimal transport iterations
 #' @param model.size The maximum number of desired covariates. Defaults to the number of covariates.

@@ -5,7 +5,7 @@
 #' @param theta optional matrix of coefficients from original model, if relevant 
 #' @param power power of the Wasserstein distance
 #' @param method One of "selection.variable" or "projection". Methods decide whether covariate matrix in `theta` is preserved ("selection.variable") or if new projections are generated ("projection")
-#' @param transport.method Method for wasserstein distance. One of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert"
+#' @param transport.method Method for Wasserstein distance calculation. Should be one of the outputs of [transport_options()].
 #' @param epsilon hyperparameter for sinkhorn iterations
 #' @param OTmaxit max iteration for sinkhorn iterations
 #' @param parallel foreach backend

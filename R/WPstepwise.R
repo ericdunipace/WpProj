@@ -3,11 +3,11 @@
 #' @param X matrix of covariates
 #' @param Y matrix of predictions
 #' @param theta optional parameter matrix for selection methods.
-#' @param power Power of the wasserstein distance
+#' @param power Power of the Wasserstein distance
 #' @param force Any covariates to force into the model?
 #' @param direction forward or backward selection
 #' @param method "selection.variable" or "projection
-#' @param transport.method Method for calculating the wasserstein distance. One of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert"
+#' @param transport.method Method for calculating the Wasserstein distance. Should be one of the outputs of [transport_options()].
 #' @param epsilon hyperparameter if using sinkhorn iterations to approximate OT
 #' @param OTmaxit maximum number of iterations for the opt?imal transport methods
 #' @param calc.theta should we get the linear coefficients

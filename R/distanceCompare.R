@@ -8,11 +8,11 @@ methods::setClass("distcompare",
 #' @param models A list of models from WpProj methods
 #' @param target The target to compare the methods to. Should be a list with slots "parameters" to compare the parameters and "predictions" to compare predictions
 #' @param power The power parameter of the Wasserstein distance.
-#' @param method Which approximation to the Wasserstein distance to use. Should be one of "exact", "sinkhorn", "greenkhorn", "gandkhorn", "randkhorn", or "hilbert".
+#' @param method Which approximation to the Wasserstein distance to use. Should be one of the outputs of [transport_options()].
 #' @param quantity Should the function target the "parameters" or the "predictions". Can choose both.
 #' @param parallel Parallel backend to use for the `foreach` package. See `foreach::registerDoParallel(` for more details.
 #' @param transform Transformation function for the predictions.
-#' @param ... other options passed to the wasserstein distance function
+#' @param ... other options passed to the [wasserstein()] distance function
 #'
 #' @return an object of class `distcompare` with slots `parameters`, `predictions`, and `p`. The slots `parameters` and `predictions` are data frames. See the details for more info. The slot `p` is the power parameter of the Wasserstein distance used in the distance calculation. 
 #' 

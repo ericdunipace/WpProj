@@ -19,7 +19,7 @@ methods::setClass("WPR2",
 #'
 #' @return \eqn{W_p R ^2} values
 #' 
-#' @description This function will calculate p-Wassterstein distances between the predictions of interest and the projected model.
+#' @description This function will calculate p-Wasserstein distances between the predictions of interest and the projected model.
 #' 
 #' @export
 #' 

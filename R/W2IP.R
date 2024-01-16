@@ -3,7 +3,7 @@
 #' @param X Covariates
 #' @param Y Predictions from arbitrary model
 #' @param theta Parameters of original linear model. Required
-#' @param transport.method Method for Wasserstein distance calculation. Should be one of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert".
+#' @param transport.method Method for Wasserstein distance calculation. Should be one of the outputs of [transport_options()].
 #' @param model.size Maximum number of coefficients in interpretable model
 #' @param nvars The number of variables to explore. Should be an integer vector of model sizes. Default is NULL which will explore all models from 1 to `model.size`.
 #' @param maxit Maximum number of solver iterations

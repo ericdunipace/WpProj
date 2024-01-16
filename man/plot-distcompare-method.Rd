@@ -28,7 +28,7 @@
 
 \item{xlab}{X-axis labels}
 
-\item{xlim}{Limite of x-axis}
+\item{xlim}{Limits of the x-axis}
 
 \item{linesize}{How big to make the lines?}
 

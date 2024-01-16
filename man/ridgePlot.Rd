@@ -34,14 +34,14 @@ ridgePlot(
 
 \item{full}{"True" prediction to compare to}
 
-\item{transform}{tranform for predictions}
+\item{transform}{transform for predictions}
 
 \item{xlab}{x-axis label}
 
 \item{bandwidth}{Bandwidth for kernel}
 }
 \value{
-a \code{ggridges} plot
+a \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} plot
 }
 \description{
 Ridge Plots for a Range of Coefficients

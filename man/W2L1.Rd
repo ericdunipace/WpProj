@@ -45,7 +45,7 @@ W2L1(
 
 \item{method}{"selection.variable" or "projection}
 
-\item{transport.method}{Method for calculating the wasserstein distance. One of "exact", "sinkhorn", "greenkhorn","hilbert"}
+\item{transport.method}{Method for calculating the Wasserstein distance. One of "exact", "sinkhorn", "greenkhorn","hilbert"}
 
 \item{epsilon}{Penalty parameter for Sinkhorn and Greenkhorn and  optimal transport}
 

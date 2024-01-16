@@ -27,7 +27,7 @@ W2IP(
 
 \item{theta}{Parameters of original linear model. Required}
 
-\item{transport.method}{Method for Wasserstein distance calculation. Should be one of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert".}
+\item{transport.method}{Method for Wasserstein distance calculation. Should be one of the outputs of \code{\link[=transport_options]{transport_options()}}.}
 
 \item{model.size}{Maximum number of coefficients in interpretable model}
 

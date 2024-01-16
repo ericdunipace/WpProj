@@ -2,10 +2,10 @@
 #'
 #' @param X Matrix for first group
 #' @param Y Matrix for second group
-#' @param p Powr of the wasserstein distance
-#' @param ground_p Powr of the distance metric. Usually same as `p`
-#' @param observation.orientation Are observations unique by rows or colummns? One of "colwise" or "rowwise"
-#' @param method "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn", "hilbert"
+#' @param p Power of the Wasserstein distance
+#' @param ground_p Power of the distance metric. Usually same as `p`
+#' @param observation.orientation Are observations unique by rows or columns? One of "colwise" or "rowwise"
+#' @param method One of the outputs of [transport_options()]
 #' @param ... additional options for sinkhorn based methods. `epsilon` and `niter` determining the hyperparameters for the negative entropy penalty
 #'
 #' @return A numeric value

@@ -3,7 +3,7 @@
 #' @param X Covariate vector
 #' @param Y Predictions
 #' @param theta Optional matrix of parameters for generating predictions
-#' @param power Power of the Wassersetin distance
+#' @param power Power of the Wasserstein distance
 #' @param force Any covariates to force into the model?
 #' @param model.size Maximum number of coefficients
 #' @param nvars The number of variables to explore. Should be an integer vector of model sizes. Default is NULL which will explore all models from 1 to `model.size`.

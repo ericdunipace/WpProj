@@ -36,7 +36,7 @@ WPSA(
 
 \item{theta}{Optional matrix of parameters for generating predictions}
 
-\item{power}{Power of the Wassersetin distance}
+\item{power}{Power of the Wasserstein distance}
 
 \item{force}{Any covariates to force into the model?}
 

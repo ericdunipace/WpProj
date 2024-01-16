@@ -70,7 +70,7 @@ WPR2(
 \eqn{W_p R ^2} values
 }
 \description{
-This function will calculate p-Wassterstein distances between the predictions of interest and the projected model.
+This function will calculate p-Wasserstein distances between the predictions of interest and the projected model.
 }
 \examples{
 if (rlang::is_installed("stats")) {

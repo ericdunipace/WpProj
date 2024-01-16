@@ -29,7 +29,7 @@ WPSW(
 
 \item{theta}{optional parameter matrix for selection methods.}
 
-\item{power}{Power of the wasserstein distance}
+\item{power}{Power of the Wasserstein distance}
 
 \item{force}{Any covariates to force into the model?}
 
@@ -37,7 +37,7 @@ WPSW(
 
 \item{method}{"selection.variable" or "projection}
 
-\item{transport.method}{Method for calculating the wasserstein distance. One of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert"}
+\item{transport.method}{Method for calculating the Wasserstein distance. Should be one of the outputs of \code{\link[=transport_options]{transport_options()}}.}
 
 \item{OTmaxit}{maximum number of iterations for the opt?imal transport methods}
 

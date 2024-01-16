@@ -152,7 +152,7 @@ set_equal_y_limits.plotcompare <- function(x){
 #' @param ylim Limits on y-axis
 #' @param ylabs Y-axis labels
 #' @param xlab  X-axis labels
-#' @param xlim  Limite of x-axis
+#' @param xlim  Limits of the x-axis
 #' @param linesize How big to make the lines?
 #' @param pointsize How big to make the points?
 #' @param facet.group Should the plots be turned into a \link[ggplot2]{facet_grid}?

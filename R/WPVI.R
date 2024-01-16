@@ -7,7 +7,7 @@
 #' @param p Power of Wasserstein distance
 #' @param ground_p Power of distance metric
 #' @param transport.method Transport methods. See [transport_options()] for more details.
-#' @param epsilon Hyperparameter for sinkhorn iterations
+#' @param epsilon Hyperparameter for Sinkhorn iterations
 #' @param OTmaxit Maximum number of iterations for the Wasserstein method
 #' @param display.progress Display intermediate progress
 #' @param parallel a foreach backend if already created

@@ -28,7 +28,7 @@ WPL0(
 
 \item{method}{One of "selection.variable" or "projection". Methods decide whether covariate matrix in \code{theta} is preserved ("selection.variable") or if new projections are generated ("projection")}
 
-\item{transport.method}{Method for wasserstein distance. One of "exact", "sinkhorn", "greenkhorn","randkhorn", "gandkhorn","hilbert"}
+\item{transport.method}{Method for Wasserstein distance calculation. Should be one of the outputs of \code{\link[=transport_options]{transport_options()}}.}
 
 \item{epsilon}{hyperparameter for sinkhorn iterations}
 

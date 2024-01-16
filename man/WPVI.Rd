@@ -33,7 +33,7 @@ WPVI(
 
 \item{transport.method}{Transport methods. See \code{\link[=transport_options]{transport_options()}} for more details.}
 
-\item{epsilon}{Hyperparameter for sinkhorn iterations}
+\item{epsilon}{Hyperparameter for Sinkhorn iterations}
 
 \item{OTmaxit}{Maximum number of iterations for the Wasserstein method}
 
