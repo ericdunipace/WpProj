@@ -8,8 +8,7 @@
 
 The goal of `WpProj` is to perform Wasserstein projections from the
 predictive distributions of any model into the space of predictive
-distributions of linear models. We utilize L1 penalties to also reduce
-the complexity of the model space. This package employs the methods as
+distributions of linear models. This package employs the methods as
 described in [Eric Dunipace and Lorenzo Trippa
 (2020).](https://arxiv.org/abs/2012.09999) \<arXiv:2012.09999\>.
 
@@ -30,8 +29,8 @@ To reduce the complexity of the number of parameters, we add an L1
 penalty to the coefficients of the linear model to reduce the complexity
 of the model space:  
 $$\mathop{\text{argmin}} _ {\nu}  W _ {p}(\mu,\nu) ^ {p} + P_{\lambda}(\nu),$$  
-where $P_\lambda(\nu)$ is the L1 penalty on the coefficients of the
-linear model.
+where $P_\lambda(\nu)$ is a penalty on the complexity of the model space
+such as the the $L_1$ penalty on the coefficients of the linear model.
 
 ## Installation
 
