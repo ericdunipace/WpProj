@@ -32,6 +32,10 @@ wasserstein <- function (X, Y, p = 2, ground_p = 2, observation.orientation = c(
                                     "hilbert", "rank", #"sinkhorn2",
                                     "univariate.approximation", 
                                     "univariate.approximation.pwr","univariate"), ... ) {
+  # lifecycle::deprecate_soft(when = "0.2.0", 
+  #                           what = "wasserstein()", 
+  #                           details = "Please use the native function from the `approxOT` package")
+  
   obs <- match.arg(observation.orientation)
   method <- match.arg(method)
   

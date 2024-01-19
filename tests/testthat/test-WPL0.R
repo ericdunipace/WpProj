@@ -262,13 +262,13 @@ testthat::test_that("WPL0 with hilbert transport", {
   transp <- "hilbert"
   
   
-  l0 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
+  l0 <- WpProj:::WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
              method = c("selection.variable"),
              transport.method = transp,
              epsilon = 0.05, OTmaxit = 100,
              parallel = NULL)
   
-  l0.1 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
+  l0.1 <- WpProj:::WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
                method = c("projection"),
                transport.method = transp,
                epsilon = 0.05, OTmaxit = 100,
