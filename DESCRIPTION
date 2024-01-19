@@ -2,7 +2,7 @@ Package: WpProj
 Type: Package
 Title: Linear p-Wasserstein Projections
 Version: 0.2
-Date: 2024-01-18
+Date: 2024-01-19
 Authors@R: 
   c(
   person(given = "Eric", 
