@@ -92,5 +92,7 @@ Suggests:
   spelling
 RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)
+URL: https://github.com/ericdunipace/WpProj
+BugReports: https://github.com/ericdunipace/WpProj/issues
 Encoding: UTF-8
 Language: en-US
