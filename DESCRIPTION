@@ -1,7 +1,7 @@
 Package: WpProj
 Type: Package
 Title: Linear p-Wasserstein Projections
-Version: 0.2
+Version: 0.2.1
 Date: 2024-01-19
 Authors@R: 
   c(
@@ -10,6 +10,10 @@ Authors@R:
     email = "edunipace@mail.harvard.edu", 
     role = c("aut", "cre"), 
     comment = c(ORCID = "0000-0001-8909-213X")),
+  person(given = "Andrew",
+    family = "Johnson",
+    role = c("ctb"),
+    comment = c(ORCID = "0000-0001-7000-8065")),
   person(given = "Clemens",
     family = "Schmid",
     role = c("ctb"),
@@ -89,7 +93,8 @@ Suggests:
   testthat (>= 2.1.0),
   transport,
   Rmosek,
-  spelling
+  spelling,
+  ECOSolveR
 RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/ericdunipace/WpProj
