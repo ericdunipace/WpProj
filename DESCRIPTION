@@ -2,7 +2,7 @@ Package: WpProj
 Type: Package
 Title: Linear p-Wasserstein Projections
 Version: 0.2.1
-Date: 2024-01-19
+Date: 2024-01-29
 Authors@R: 
   c(
   person(given = "Eric", 
@@ -10,10 +10,6 @@ Authors@R:
     email = "edunipace@mail.harvard.edu", 
     role = c("aut", "cre"), 
     comment = c(ORCID = "0000-0001-8909-213X")),
-  person(given = "Andrew",
-    family = "Johnson",
-    role = c("ctb"),
-    comment = c(ORCID = "0000-0001-7000-8065")),
   person(given = "Clemens",
     family = "Schmid",
     role = c("ctb"),

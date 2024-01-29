@@ -2,7 +2,9 @@
 #' 
 #' @title Run the Hahn-Carvalho Method
 #' 
-#' @description Runs the Hahn-Carvalho method but adapted to return full distributions.
+#' @description 
+#' `r lifecycle::badge("experimental")` 
+#' Runs the Hahn-Carvalho method but adapted to return full distributions.
 #' 
 #' @param X Covariates
 #' @param Y Predictions

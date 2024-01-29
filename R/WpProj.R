@@ -19,6 +19,10 @@
 #' \item{`niter`: The number of iterations used to calculate the Wasserstein projections. Not all methods return a number of iterations so this may be `NULL`}
 #' \item{`nzero`: The number of non zero coefficients in the final models}
 #' }
+#' 
+#' @description 
+#' `r lifecycle::badge("experimental")`
+#' This function will calculate linear projections from a set of predictions into the space of the covariates in terms of the p-Wasserstein distance.
 #'
 #' @details
 #' ## Methods

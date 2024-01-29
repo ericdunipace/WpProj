@@ -44,7 +44,8 @@ ridgePlot(
 a \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} plot
 }
 \description{
-Ridge Plots for a Range of Coefficients
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+This function will plot the distribution of predictions for a range of active coefficients
 }
 \examples{
 if(rlang::is_installed("stats")) {

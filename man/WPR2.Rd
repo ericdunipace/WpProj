@@ -70,6 +70,7 @@ WPR2(
 \eqn{W_p R ^2} values
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 This function will calculate p-Wasserstein distances between the predictions of interest and the projected model.
 }
 \examples{

@@ -14,7 +14,9 @@
 #'
 #' @return Returns an integer vector ranking covariate importance from most to least important.
 #' 
-#' @description This function will measure how much removing each covariate harms prediction accuracy.
+#' @description 
+#' `r lifecycle::badge("experimental")`
+#' This function will measure how much removing each covariate harms prediction accuracy. 
 #' 
 #' @export
 #' 

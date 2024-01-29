@@ -20,6 +20,11 @@ methods::setClass("distcompare",
 #' For the data frames, `dist` is the Wasserstein distance, `nactive` is the number of active variables in the model, `groups` is the name distinguishing the model, and `method` is the method used to calculate the distance (i.e., exact, sinkhorn, etc.). If the list in `models` is named, these will be used as the group names otherwise the group names will be created based on the call from the `WpProj` method.
 #' 
 #' @export
+#' 
+#' @description 
+#' `r lifecycle::badge("experimental")`
+#' Will compare the Wasserstein distance between the original model and the `WpProj` model.
+#' 
 #' @examples
 #' if(rlang::is_installed("stats")) {
 #' n <- 32

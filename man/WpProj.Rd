@@ -43,7 +43,8 @@ object of class \code{WpProj}, which is a list with the following slots:
 }
 }
 \description{
-p-Wasserstein Linear Projections
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+This function will calculate linear projections from a set of predictions into the space of the covariates in terms of the p-Wasserstein distance.
 }
 \details{
 \subsection{Methods}{

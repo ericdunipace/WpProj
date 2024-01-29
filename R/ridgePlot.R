@@ -14,6 +14,10 @@
 #' @return a [ggplot2::ggplot()] plot
 #' @export
 #' 
+#' @description 
+#' `r lifecycle::badge("experimental")`
+#' This function will plot the distribution of predictions for a range of active coefficients
+#' 
 #' @examples
 #' if(rlang::is_installed("stats")) {
 #' n <- 128

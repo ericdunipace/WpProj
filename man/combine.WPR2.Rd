@@ -13,7 +13,8 @@ combine.WPR2(...)
 A vector of \eqn{W_p R^2} objects
 }
 \description{
-A Function to Combine \eqn{W_p R ^2} Objects
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+Will combine \eqn{W_p R ^2} objects into a single object.
 }
 \examples{
 if (rlang::is_installed("stats")) {

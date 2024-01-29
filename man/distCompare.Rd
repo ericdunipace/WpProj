@@ -38,7 +38,8 @@ distCompare(
 an object of class \code{distcompare} with slots \code{parameters}, \code{predictions}, and \code{p}. The slots \code{parameters} and \code{predictions} are data frames. See the details for more info. The slot \code{p} is the power parameter of the Wasserstein distance used in the distance calculation.
 }
 \description{
-Compares Optimal Transport Distances Between WpProj and Original Models
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+Will compare the Wasserstein distance between the original model and the \code{WpProj} model.
 }
 \details{
 For the data frames, \code{dist} is the Wasserstein distance, \code{nactive} is the number of active variables in the model, \code{groups} is the name distinguishing the model, and \code{method} is the method used to calculate the distance (i.e., exact, sinkhorn, etc.). If the list in \code{models} is named, these will be used as the group names otherwise the group names will be created based on the call from the \code{WpProj} method.

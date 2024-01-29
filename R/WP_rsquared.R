@@ -19,7 +19,9 @@ methods::setClass("WPR2",
 #'
 #' @return \eqn{W_p R ^2} values
 #' 
-#' @description This function will calculate p-Wasserstein distances between the predictions of interest and the projected model.
+#' @description 
+#' `r lifecycle::badge("experimental")`
+#' This function will calculate p-Wasserstein distances between the predictions of interest and the projected model.
 #' 
 #' @export
 #' 
@@ -329,6 +331,10 @@ plot.WPR2 <- function(x, xlim = NULL, ylim = NULL, linesize = 0.5, pointsize = 1
 #' @seealso [WPR2()]
 #' 
 #' @export
+#' 
+#' @description 
+#' `r lifecycle::badge("experimental")`
+#' Will combine \eqn{W_p R ^2} objects into a single object.
 #' 
 #' @examples
 #' if (rlang::is_installed("stats")) {
