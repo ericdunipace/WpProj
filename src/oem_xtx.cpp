@@ -309,8 +309,9 @@ double oemXTX_gen::compute_lambda_zero(std::string penalty_)
         temp(g) += xy_temp(g);
       }
     }
+    
     temp = temp.cwiseSqrt().eval();
-    temp = temp.cwiseQuotient(penalty_factor);
+    temp = temp.cwiseQuotient(group_weights);
   } else if ( XY.cols() > 1 ) {
     temp = XY.rowwise().norm();
     temp = temp.cwiseQuotient(penalty_factor);

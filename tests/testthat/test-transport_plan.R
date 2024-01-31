@@ -384,11 +384,11 @@ testthat::test_that("sinkhorn works", {
   
   trans <- transport_plan(A, B, 2, 2, "colwise", transp.meth, niter = niter)
   trans.row <- transport_plan(t(A), t(B), 2, 2, "rowwise", transp.meth, niter = niter)
-  transtest <- transport_plan_given_C(rep(1/n,n), rep(1/n,n),  2, cost = cost_calc(A,B,2), "sinkhorn2", niter = niter)
+  # transtest <- transport_plan_given_C(rep(1/n,n), rep(1/n,n),  2, cost = cost_calc(A,B,2), "sinkhorn2", niter = niter)
 
   testthat::expect_true((1/n) %in% tapply(trans$tplan$mass, trans$tplan$to, sum))
   testthat::expect_true((1/n) %in% tapply(trans.row$tplan$mass, trans.row$tplan$to, sum))
-  testthat::expect_lte(sum((transtest$mass-trans$tplan$mass)^2), 1e-5)
+  # testthat::expect_lte(sum((transtest$mass-trans$tplan$mass)^2), 1e-5)
   
 })
 

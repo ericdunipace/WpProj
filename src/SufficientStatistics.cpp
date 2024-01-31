@@ -112,8 +112,8 @@ void suff_stat_scale_ot(const refMatConst & X, refMat Y,
   matrix mu = X.transpose() * theta;
   
   mass.fill(1.0/double(S));
-  idx.col(0) = vectorI::LinSpaced(Eigen::Sequential,S,0,S-1);
-  idx.col(1) = vectorI::LinSpaced(Eigen::Sequential,S,0,S-1);
+  idx.col(0) = vectorI::LinSpaced(S,0,S-1);
+  idx.col(1) = vectorI::LinSpaced(S,0,S-1);
   
   bool sort_end = ((!not_same) & (transport_method == "univariate.approximation.pwr" || transport_method == "hilbert" || transport_method == "rank"));
   int count = 0;

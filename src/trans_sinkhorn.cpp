@@ -46,8 +46,8 @@ void trans_sinkhorn(const refVecConst & mass_a, const refVecConst & mass_b,
                     const matrix & exp_cost, 
                     matrix & A,
                     double eta, double epsilon, int niterations) {
-  int N = mass_a.size();
-  int M = mass_b.size();
+  // int N = mass_a.size();
+  // int M = mass_b.size();
   
   
   // matrix A_0 = exp_cost;

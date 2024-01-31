@@ -1,7 +1,8 @@
 transport_plan_given_C <- function(mass_x, mass_y, p = 2, 
                            cost=NULL, method = "exact", ...) {
-  method <- match.arg(method, c("exact","sinkhorn","greenkhorn", 
-                                "randkhorn", "gandkhorn", "sinkhorn2"))
+  method <- match.arg(method, c("exact","sinkhorn","greenkhorn" 
+                                # , "randkhorn", "gandkhorn", "sinkhorn2"
+                                ))
   
   dots <- list(...)
   epsilon <- as.double(dots$epsilon)
@@ -12,8 +13,9 @@ transport_plan_given_C <- function(mass_x, mass_y, p = 2,
   if(length(niter) == 0) niter <- as.integer(100)
   
   if (is.null(cost) ) stop("Cost matrix must be provided")
-  tplan <- if (method == "exact" | method == "greenkhorn" | method == "sinkhorn" |
-               method == "randkhorn" | method == "gandkhorn") {
+  tplan <- if (method == "exact" | method == "greenkhorn" | method == "sinkhorn"
+               # method == "randkhorn" | method == "gandkhorn"
+               ) {
     
     n1 <- length(mass_x)
     n2 <- length(mass_y)
@@ -44,7 +46,8 @@ transport_plan_given_C <- function(mass_x, mass_y, p = 2,
 transport_plan <- function(X, Y, p = 2, ground_p = 2,
                            observation.orientation = c("colwise","rowwise"), 
                            method = c("exact", "sinkhorn", "greenkhorn",
-                                      "randkhorn", "gandkhorn", "sinkhorn2",
+                                      # "randkhorn", "gandkhorn", 
+                                      "sinkhorn2",
                                       "hilbert", "rank",
                                       "univariate", 
                                       "univariate.approximation", 
