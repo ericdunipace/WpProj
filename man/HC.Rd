@@ -90,5 +90,5 @@ fit <-  HC(X=x, Y=post_mu, theta = post_beta,
 )
 }
 \references{
-Hahng, P. Richard and Carlos M. Carvalho. (2014) "Decoupling Shirnkage and Selection in Bayesian Linear Models: A Posterior Summary Perspective." \url{https://arxiv.org/pdf/1408.0464.pdf}
+Hahn, P. Richard and Carlos M. Carvalho. (2014) "Decoupling Shirnkage and Selection in Bayesian Linear Models: A Posterior Summary Perspective." \url{https://arxiv.org/pdf/1408.0464.pdf}
 }
