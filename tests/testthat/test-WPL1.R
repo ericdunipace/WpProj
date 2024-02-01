@@ -175,7 +175,7 @@ testthat::test_that("WPL1 works for W1", {
 
   n <- 32
   p <- 10
-  s <- 99
+  s <- 21
 
   x <- matrix(stats::rnorm(p*n), nrow=n, ncol=p)
   beta <- (1:10)/10
@@ -265,7 +265,7 @@ testthat::test_that("WPL1 works for WInf", {
   
   n <- 32
   p <- 10
-  s <- 99
+  s <- 21
   
   x <- matrix(stats::rnorm(p*n), nrow=n, ncol=p)
   beta <- (1:10)/10

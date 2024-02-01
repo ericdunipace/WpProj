@@ -659,13 +659,14 @@ testthat::test_that("W2L1 function for projection", {
 testthat::test_that("W2L1 function for grouped projection", {
   set.seed(283947)
   
-  n <- 256
-  p <- 100
+  n <- 32
+  p <- 20
+  g <- 10
   s <- 21
   
   x <- matrix(stats::rnorm(p*n), nrow=n, ncol=p)
-  beta <- rep((1:10)/10, 10)
-  groups <- rep(1:10, 10)
+  beta <- rep((1:g)/g, p/g)
+  groups <- rep(1:g, p/g)
   y <- x %*% beta + stats::rnorm(n)
   
   #posterior

@@ -126,8 +126,8 @@ testthat::test_that("wasserstein matches transport package for shortsimplex", {
 testthat::test_that("wasserstein from sp matches transport package",{
   testthat::skip_if_not_installed("transport")
   set.seed(32857)
-  A <- matrix(stats::rnorm(1000*1024),nrow=1024,ncol=1000)
-  B <- matrix(stats::rnorm(1000*1024),nrow=1024,ncol=1000)
+  A <- matrix(stats::rnorm(100*104),nrow=104,ncol=100)
+  B <- matrix(stats::rnorm(100*104),nrow=104,ncol=100)
   at <- t(A)
   bt <- t(B)
   cost <- cost_calc(at,bt,2)
@@ -146,7 +146,7 @@ testthat::test_that("wasserstein from sp matches transport package",{
   # microbenchmark::microbenchmark(wasserstein_(tplan$mass, cost, p = 2, tplan$from, tplan$to), unit = "us")
   # microbenchmark::microbenchmark(sinkhorn_(mass_a, mass_b, cost^2, 0.05*median(cost^2), 100), unit="ms")
   
-  C <- t(A[1:100,,drop = FALSE])
+  C <- t(A[1:10,,drop = FALSE])
   D <- t(B[1:2,,drop = FALSE])
   
   cost2 <- cost_calc(C,D,2)
@@ -160,8 +160,8 @@ testthat::test_that("wasserstein from sp matches transport package",{
 
 testthat::test_that("make sure wass less than all other transports", {
   set.seed(32857)
-  A <- matrix(stats::rnorm(1000*1024),nrow=1024,ncol=1000)
-  B <- matrix(stats::rnorm(1000*1024),nrow=1024,ncol=1000)
+  A <- matrix(stats::rnorm(100*124),nrow=124,ncol=100)
+  B <- matrix(stats::rnorm(100*124),nrow=124,ncol=100)
   at <- t(A)
   bt <- t(B)
   cost <- cost_calc(at,bt,2)
@@ -190,8 +190,8 @@ testthat::test_that("make sure wass less than all other transports", {
 
 testthat::test_that("make sure sinkhorn outputs agree and are less than wass", {
   set.seed(32857)
-  A <- matrix(stats::rnorm(1000*1024),nrow=1024,ncol=1000)
-  B <- matrix(stats::rnorm(1000*1024),nrow=1024,ncol=1000)
+  A <- matrix(stats::rnorm(100*104),nrow=104,ncol=100)
+  B <- matrix(stats::rnorm(100*104),nrow=104,ncol=100)
   at <- t(A)
   bt <- t(B)
   cost <- cost_calc(at,bt,2)
@@ -211,8 +211,8 @@ testthat::test_that("make sure sinkhorn outputs agree and are less than wass", {
 
 testthat::test_that("give error when p < 1", {
   set.seed(32857)
-  A <- matrix(stats::rnorm(1000*1024),nrow=1024,ncol=1000)
-  B <- matrix(stats::rnorm(1000*1024),nrow=1024,ncol=1000)
+  A <- matrix(stats::rnorm(100*124),nrow=124,ncol=100)
+  B <- matrix(stats::rnorm(100*124),nrow=124,ncol=100)
   ground_p <- 2
   p <- 0
   

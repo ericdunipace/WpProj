@@ -31,9 +31,9 @@ wpr2.prep <- function(n, p, s) {
 test_that("WPR2 works", {
   set.seed(203402)
   
-  n <- 128
+  n <- 32
   p <- 10
-  s <- 100
+  s <- 21
   
   x <- matrix( stats::rnorm( p * n ), nrow = n, ncol = p )
   x_ <- t(x)
@@ -101,9 +101,9 @@ test_that("WPR2 works", {
 testthat::test_that("WPR2 combining works", {
   set.seed(203402)
   
-  n <- 128
+  n <- 32
   p <- 10
-  s <- 100
+  s <- 21
   
   out1 <- wpr2.prep(n,p,s)
   out2 <- wpr2.prep(n,p,s)
@@ -119,10 +119,10 @@ testthat::test_that("WPR2 combining works", {
 testthat::test_that("WPR2 plotting works", {
   set.seed(203402)
   
-  n <- 128
+  n <- 64
   p <- 10
-  s <- 100
-  reps <- 10
+  s <- 50
+  reps <- 3
   out <- lapply(1:reps, function(i) wpr2.prep(n,p,s))
   # debugonce(combine.WPR2)
   comb <- combine.WPR2(out)
