@@ -28,6 +28,8 @@
 #' 
 #' @return a `WpProj` object with selected covariates and their values
 #' 
+#' @references Hahn, P. Richard and Carlos M. Carvalho. (2014) "Decoupling Shirnkage and Selection in Bayesian Linear Models: A Posterior Summary Perspective." <https://arxiv.org/pdf/1408.0464.pdf>
+#' 
 #' @export
 #' 
 #' @examples

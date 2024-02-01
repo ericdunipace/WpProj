@@ -36,7 +36,7 @@
 #' 
 #' ## Wasserstein distances and powers
 #' The Wasserstein distance is a measure of distance between two probability distributions. It is defined as:
-#' \deqn{W_p(\mu,\nu) = \left(\inf_{\pi \in \Pi(\mu,\nu)} \int_{\mathbb{R}^d \times \mathbb{R}^d} \|x-y\|^p d\pi(x,y)\right)^{1/p}}.
+#' \deqn{W_p(\mu,\nu) = \left(\inf_{\pi \in \Pi(\mu,\nu)} \int_{\mathbb{R}^d \times \mathbb{R}^d} \|x-y\|^p d\pi(x,y)\right)^{1/p},}
 #' where \eqn{\Pi(\mu,\nu)} is the set of all joint distributions with marginals \eqn{\mu} and \eqn{\nu}. The Wasserstein distance is a generalization of the Euclidean distance, which is the case when \eqn{p=2}. In our function we have argument `power` that corresponds to the \eqn{p} of the equation above. The default `power` is `2.0` but any value greater than or equal to `1.0` is allowed. For more information, see the references.
 #' 
 #' The particular implementation of the Wasserstein distance is as follows. If  \eqn{\mu} is the original prediction from the original model, then we seek to find a new prediction \eqn{\nu} that minimizes the Wasserstein distance between the two: \eqn{\text{argmin}_\nu W_p(\mu,\nu)}. 
