@@ -17,8 +17,9 @@ knitr::opts_chunk$set(
 # `WpProj`: Linear p-Wasserstein Projections 
 
 <!-- badges: start -->
-  [![R-CMD-check](https://github.com/ericdunipace/WpProj/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ericdunipace/WpProj/actions/workflows/R-CMD-check.yaml)
-  <!-- badges: end -->
+[![R-CMD-check](https://github.com/ericdunipace/WpProj/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ericdunipace/WpProj/actions/workflows/R-CMD-check.yaml)
+[![CRAN status](https://www.r-pkg.org/badges/version/WpProj)](https://CRAN.R-project.org/package=WpProj)
+<!-- badges: end -->
 
 The goal of `WpProj` is to perform Wasserstein projections from the predictive distributions of any model into the space of predictive distributions of linear models. This package employs the methods as described in [Eric Dunipace and Lorenzo Trippa (2020).](https://arxiv.org/abs/2012.09999) <arXiv:2012.09999>.
 
