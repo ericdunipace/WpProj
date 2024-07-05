@@ -1,7 +1,7 @@
 Package: WpProj
 Type: Package
 Title: Linear p-Wasserstein Projections
-Version: 0.2.1
+Version: 0.2.2
 Date: 2024-01-31
 Authors@R: 
   c(
@@ -91,9 +91,10 @@ Suggests:
   Rmosek,
   spelling,
   ECOSolveR
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/ericdunipace/WpProj
 BugReports: https://github.com/ericdunipace/WpProj/issues
 Encoding: UTF-8
+SystemRequirements: C++17
 Language: en-US
