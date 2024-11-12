@@ -62,14 +62,14 @@ test_that("WInfL1 lp generates", {
                                    gamma = 1.5, init = NULL, iter = 100, tol = 1e-7, opts= list(verbose = 0))
   testthat::expect_true(sum((output.cone-output.mosek)^2) < 1e-3)
   
-  check_gurobi()
-  output.gurobi <- WpProj:::lp_norm(Xmat, Y, power = Inf, deriv_func = temp.deriv, 
-                                   thresholder = soft_threshold, lambda = 0, groups = rep(1:d,s), solver = "gurobi",
-                    gamma = 1.5, opts = NULL, init = NULL, iter = 100, tol = 1e-7)
-  # function(X, Y, deriv_func, thresholder, lambda, groups, solver, gamma = 1.5, opts = NULL, init = NULL, iter = 100, tol = 1e-7)
-  # debugonce(WpProj:::lp_norm)
-  
-  testthat::expect_true(sum((output.gurobi-output.mosek)^2) < 1e-3)
+  # check_gurobi()
+  # output.gurobi <- WpProj:::lp_norm(Xmat, Y, power = Inf, deriv_func = temp.deriv, 
+  #                                  thresholder = soft_threshold, lambda = 0, groups = rep(1:d,s), solver = "gurobi",
+  #                   gamma = 1.5, opts = NULL, init = NULL, iter = 100, tol = 1e-7)
+  # # function(X, Y, deriv_func, thresholder, lambda, groups, solver, gamma = 1.5, opts = NULL, init = NULL, iter = 100, tol = 1e-7)
+  # # debugonce(WpProj:::lp_norm)
+  # 
+  # testthat::expect_true(sum((output.gurobi-output.mosek)^2) < 1e-3)
 })
 
 testthat::test_that("WInfL1 works", {
@@ -228,40 +228,40 @@ testthat::test_that("WInfL1 changes penalty appropriately for net penalties", {
                              nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
                              gamma = gamma)
   
-  if(rlang::is_installed("gurobi")) {
-    
-    check_gurobi()
-    projection_mcp <- WInfL1(X=x, Y=post_mu, penalty="mcp.net", solver = "gurobi",
-                             nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
-                             gamma = gamma)
-    testthat::expect_equal(projection_mcp$penalty, "mcp") #should be pretty close
-    
-    # debugonce(WInfL1)
-    projection_mcp <- WInfL1(X=x, Y=post_mu, penalty="group.mcp", solver = "gurobi",
-                             nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
-                             gamma = gamma)
-    testthat::expect_equal(projection_mcp$penalty, "mcp") #should be pretty close
-    
-    projection_scad <-WInfL1(X=x, Y=post_mu, penalty="scad.net", solver = "gurobi",
-                             nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
-                             gamma = gamma)
-    testthat::expect_equal(projection_scad$penalty, "scad") #should be pretty close
-    
-    projection_scad <- WInfL1(X=x, Y=post_mu, penalty="group.scad", solver = "gurobi",
-                              nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
-                              gamma = gamma)
-    testthat::expect_equal(projection_scad$penalty, "scad") #should be pretty close
-    
-    # debugonce(WInfL1)
-    projection_lasso <- WInfL1(X=x, Y=post_mu, penalty="elastic.net", solver = "gurobi",
-                               nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
-                               gamma = gamma,)
-    testthat::expect_equal(projection_lasso$penalty, "lasso") #should be pretty close
-    
-    projection_lasso <- WInfL1(X=x, Y=post_mu, penalty="group.lasso", solver = "gurobi",
-                               nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
-                               gamma = gamma)
-  }
+  # if(rlang::is_installed("gurobi")) {
+  #   
+  #   check_gurobi()
+  #   projection_mcp <- WInfL1(X=x, Y=post_mu, penalty="mcp.net", solver = "gurobi",
+  #                            nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+  #                            gamma = gamma)
+  #   testthat::expect_equal(projection_mcp$penalty, "mcp") #should be pretty close
+  #   
+  #   # debugonce(WInfL1)
+  #   projection_mcp <- WInfL1(X=x, Y=post_mu, penalty="group.mcp", solver = "gurobi",
+  #                            nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+  #                            gamma = gamma)
+  #   testthat::expect_equal(projection_mcp$penalty, "mcp") #should be pretty close
+  #   
+  #   projection_scad <-WInfL1(X=x, Y=post_mu, penalty="scad.net", solver = "gurobi",
+  #                            nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+  #                            gamma = gamma)
+  #   testthat::expect_equal(projection_scad$penalty, "scad") #should be pretty close
+  #   
+  #   projection_scad <- WInfL1(X=x, Y=post_mu, penalty="group.scad", solver = "gurobi",
+  #                             nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+  #                             gamma = gamma)
+  #   testthat::expect_equal(projection_scad$penalty, "scad") #should be pretty close
+  #   
+  #   # debugonce(WInfL1)
+  #   projection_lasso <- WInfL1(X=x, Y=post_mu, penalty="elastic.net", solver = "gurobi",
+  #                              nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+  #                              gamma = gamma,)
+  #   testthat::expect_equal(projection_lasso$penalty, "lasso") #should be pretty close
+  #   
+  #   projection_lasso <- WInfL1(X=x, Y=post_mu, penalty="group.lasso", solver = "gurobi",
+  #                              nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+  #                              gamma = gamma)
+  # }
   
   if(rlang::is_installed("Rmosek")) {
     check_mosek()

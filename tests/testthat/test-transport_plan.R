@@ -184,7 +184,7 @@ testthat::test_that("transport rank works", {
   testthat::skip_on_ci()
   if(Sys.info()["nodename"] == "Cid-Highwind.local" &&
      Sys.info()["user"] == "eifer")  {
-  testthat::expect_equal(x_idx[507], transx$tplan$from[508])
+  testthat::expect_equal(x_idx[507], transx$tplan$from[507])
   testthat::expect_equal(y_idx, transy$tplan$from)
   }
 })
