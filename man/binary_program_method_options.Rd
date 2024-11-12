@@ -48,7 +48,7 @@ A list with names corresponding to each argument above.
 Options For Use With the Binary Program Method
 }
 \details{
-This function will setup the default arguments used by the binary program method. Of note, for the argument \code{solver.options}, If using the "lasso" solver, you should provide arguments such as "penalty", "nlambda", "lambda.min.ratio", "gamma", and "lambda" in a list. A simple way to do this is to feed the output of the \code{\link[=L1_method_options]{L1_method_options()}} function to the argument \code{solver.options.} This will tell the approximate solver, which uses a lasso method that then will project the parameters back to the \eqn{\{0,1\}} space. For the other solvers, you can see the options in the ECOS solver package, \code{\link[ECOSolveR:ecos.control]{ECOSolveR::ecos.control()}}, and the options for the mosek solver, \code{\link[Rmosek:export]{Rmosek::mosek()}}.
+This function will setup the default arguments used by the binary program method. Of note, for the argument \code{solver.options}, If using the "lasso" solver, you should provide arguments such as "penalty", "nlambda", "lambda.min.ratio", "gamma", and "lambda" in a list. A simple way to do this is to feed the output of the \code{\link[=L1_method_options]{L1_method_options()}} function to the argument \code{solver.options.} This will tell the approximate solver, which uses a lasso method that then will project the parameters back to the \eqn{\{0,1\}} space. For the other solvers, you can see the options in the ECOS solver package, \code{\link[ECOSolveR:ecos.control]{ECOSolveR::ecos.control()}}, and the options for the mosek solver, \code{\link[Rmosek:mosek]{Rmosek::mosek()}}.
 }
 \examples{
 binary_program_method_options()
