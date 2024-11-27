@@ -1,22 +1,3 @@
-#' Available Wasserstein Distance Methods
-#'
-#' @return A character vector of available methods
-#' @export
-#' 
-#' @details
-#' This function features several methods of calculating approximate optimal transport methods in addition to the exact method. The first is the "sinkhorn" method of Cuturi (2013). The second is the "greenkhorn" method of Altschuler et al. (2017). The third is the Hilbert sorting method of Bernton et al (2017). Then there are two novel approximation methods based on the univariate ranks of each covariate to obtain the average rank "rank", and a method based on the univariate distances for each covariate "univariate.approximation.pwr"
-#' 
-#'
-#' @examples
-#' transport_options()
-transport_options <- function() {
-  return(c("exact", "sinkhorn", "greenkhorn",
-           # "randkhorn", "gandkhorn",
-           "hilbert", "rank",
-           "univariate.approximation.pwr"))
-}
-
-
 #' Recognized L1 Penalties
 #'
 #' @return A character vector with the possible penalties for L1 methods
@@ -191,7 +172,6 @@ binary_program_method_options <- function(
   stopifnot(maxit > 0L)
   stopifnot(infimum.maxit > 0L)
   stopifnot(is.numeric(OTmaxit))
-  stopifnot(OTmaxit > 0L )
   if (!is.null(model.size)) {
     stopifnot(is.numeric(model.size))
     stopifnot("model.size must be NULL or > 0" = model.size > 0)
@@ -208,6 +188,14 @@ binary_program_method_options <- function(
   
   # make sure args are of the right data type
   transport.method <- match.arg(transport.method, choices = transport_options(), several.ok = FALSE)
+  if(missing(OTmaxit) || is.null(OTmaxit)) OTmaxit <- switch(transport.method, "exact" = 0L, "networkflow" = 0L, 100L)
+  if (transport.method != "exact" && transport.method != "networkflow") {
+    stopifnot(OTmaxit > 0L )
+  } 
+  else {
+    stopifnot(OTmaxit >= 0L)
+  }
+  
   epsilon <- as.double(epsilon)
   maxit <- as.integer(maxit)
   infimum.maxit <- as.integer(infimum.maxit)
@@ -258,7 +246,7 @@ stepwise_method_options <- function(force = NULL,
                                     direction = c("backward","forward"), 
                                     method= c("binary program","projection"),
                                     transport.method = transport_options(),
-                                    OTmaxit = 100,
+                                    OTmaxit = 0,
                                     epsilon = 0.05,
                                     model.size = NULL,
                                     display.progress = FALSE,
@@ -298,7 +286,6 @@ stepwise_method_options <- function(force = NULL,
   stopifnot(is.numeric(epsilon))
   stopifnot(epsilon > 0.0)
   stopifnot(is.numeric(OTmaxit))
-  stopifnot(OTmaxit > 0L )
   if (!is.null(model.size)) {
     stopifnot(is.numeric(model.size))
     stopifnot("model.size must be NULL or > 0" = model.size > 0)
@@ -308,7 +295,15 @@ stepwise_method_options <- function(force = NULL,
   
   # make sure args are of the right data type
   transport.method <- match.arg(transport.method, choices = transport_options(), several.ok = FALSE)
+  
   epsilon <- as.double(epsilon)
+  if(missing(OTmaxit) || is.null(OTmaxit)) OTmaxit <- switch(transport.method, "exact" = 0L, "networkflow" = 0L, 100L)
+  if (transport.method != "exact" && transport.method != "networkflow") {
+    stopifnot(OTmaxit > 0L )
+  } 
+  else {
+    stopifnot(OTmaxit >= 0L)
+  }
   OTmaxit <- as.integer(OTmaxit)
   
   # check parallel
@@ -359,7 +354,7 @@ simulated_annealing_method_options <- function(
     force = NULL,
     method= c("binary program","projection"),
     transport.method = transport_options(),
-    OTmaxit = 100L,
+    OTmaxit = 0L,
     epsilon = 0.05,
     maxit = 1L,
     temps = 1000L,
@@ -414,8 +409,6 @@ simulated_annealing_method_options <- function(
   stopifnot(epsilon > 0.0)
   stopifnot(is.numeric(maxit))
   stopifnot(maxit > 0L)
-  stopifnot(is.numeric(OTmaxit))
-  stopifnot(OTmaxit > 0L )
   if (!is.null(model.size)) {
     stopifnot(is.numeric(model.size))
     stopifnot("model.size must be NULL or > 0" = model.size > 0)
@@ -427,6 +420,18 @@ simulated_annealing_method_options <- function(
   
   # make sure character args are correct
   transport.method <- match.arg(transport.method, choices = transport_options(), several.ok = FALSE)
+  stopifnot(is.numeric(OTmaxit))
+  if(missing(OTmaxit) || is.null(OTmaxit)) OTmaxit <- switch(transport.method, "exact" = 0L, "networkflow" = 0L, 100L)
+  
+  if (transport.method != "exact" && transport.method != "networkflow") {
+    stopifnot(OTmaxit > 0L )
+  } 
+  else {
+    stopifnot(OTmaxit >= 0L)
+  }
+  
+  
+  
   energy.distribution <- match.arg(energy.distribution)
   cooling.schedule <- match.arg(cooling.schedule)
   proposal.method <- match.arg(proposal.method)
@@ -492,7 +497,7 @@ simulated_annealing_method_options <- function(
 L0_method_options <- function(method = c("binary program", "projection"),
                               transport.method = transport_options(),
                               epsilon = 0.05,
-                              OTmaxit = 100,
+                              OTmaxit = 0,
                               parallel = NULL,
                               ...){
   # WPL0(X, Y = NULL, theta, power = 2,
@@ -507,14 +512,23 @@ L0_method_options <- function(method = c("binary program", "projection"),
                    "projection" = "projection",
                    "selection.variable"
   )
-  
   stopifnot(is.numeric(epsilon))
   stopifnot(epsilon > 0.0)
   stopifnot(is.numeric(OTmaxit))
-  stopifnot(OTmaxit > 0L )
+  
+  transport.method <- match.arg(transport.method, choices = transport_options(), several.ok = FALSE)
+  if(missing(OTmaxit) || is.null(OTmaxit)) OTmaxit <- switch(transport.method, "exact" = 0L, "networkflow" = 0L, 100L)
+  OTmaxit <- as.integer(OTmaxit)
+  if (transport.method != "exact" && transport.method != "networkflow") {
+    stopifnot(OTmaxit > 0L )
+  } 
+  else {
+    stopifnot(OTmaxit >= 0L)
+  }
+  
   
   epsilon <- as.double(epsilon)
-  OTmaxit <- as.integer(OTmaxit)
+  
   
   # check parallel
   if(!is.null(parallel)) {

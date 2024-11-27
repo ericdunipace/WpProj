@@ -132,7 +132,7 @@ test_that("test univariate approximation xtyupdate", {
 })
 
 testthat::test_that("test hilbert xtyupdate", {
-  #check hilbert (assumes transport_plan is correct!!!!)
+  #check hilbert (assumes approxOT::transport_plan is correct!!!!)
   
   set.seed(12431)
   
@@ -181,7 +181,7 @@ testthat::test_that("test hilbert xtyupdate", {
   
   # same mu's
   
-  tplan <- transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2, 
+  tplan <- approxOT::transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2, 
                           observation.orientation = "colwise", 
                           method = transport_method, is.X.sorted = TRUE)
   
@@ -225,7 +225,7 @@ testthat::test_that("test hilbert xtyupdate", {
                      mu = rep(0, n), idx_mu = rep(0, n),
                      sort_y = rep(0, n))
   
-  tplan.sub <- transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2, 
+  tplan.sub <- approxOT::transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2, 
                               observation.orientation = "colwise", 
                               method = transport_method, is.X.sorted = FALSE)
   #cost out of sorts because I'm lying to the program about x being sorted
@@ -268,7 +268,7 @@ testthat::test_that("test hilbert xtyupdate", {
 })
 
 testthat::test_that("test rank xtyupdate", {
-  #check hilbert (assumes transport_plan is correct!!!!)
+  #check hilbert (assumes approxOT::transport_plan is correct!!!!)
   
   set.seed(12431)
   
@@ -317,7 +317,7 @@ testthat::test_that("test rank xtyupdate", {
   
   # same mu's
   
-  tplan <- transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2, 
+  tplan <- approxOT::transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2, 
                           observation.orientation = "colwise", 
                           method = transport_method, is.X.sorted = TRUE)
   
@@ -361,7 +361,7 @@ testthat::test_that("test rank xtyupdate", {
                      mu = rep(0, n), idx_mu = rep(0, n),
                      sort_y = rep(0, n))
   
-  tplan.sub <- transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2, 
+  tplan.sub <- approxOT::transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2, 
                               observation.orientation = "colwise", 
                               method = transport_method, is.X.sorted = FALSE)
   #cost out of sorts because I'm lying to the program about x being sorted
@@ -404,7 +404,7 @@ testthat::test_that("test rank xtyupdate", {
 })
 
 testthat::test_that("test exact xtyupdate", {
-  #check shortsimplex (assumes transport_plan is correct!!!!)
+  #check shortsimplex (assumes approxOT::transport_plan is correct!!!!)
   
   set.seed(12431)
   
@@ -443,17 +443,17 @@ testthat::test_that("test exact xtyupdate", {
                             method = "selection.variable",
                             transport.method = transport_method,
                             epsilon = 0.05,
-                            niter = 100)
+                            niter = 0)
   
   OToptions.proj <- list(same = TRUE,
                          method = "projection",
                          transport.method = transport_method,
                          epsilon = 0.05,
-                         niter = 100)
+                         niter = 0)
   
   # same mu's
   
-  tplan <- transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2, 
+  tplan <- approxOT::transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2, 
                           observation.orientation = "colwise", 
                           method = transport_method, is.X.sorted = TRUE)
   #cost out of sorts because I'm lying to the program about x being sorted
@@ -496,7 +496,7 @@ testthat::test_that("test exact xtyupdate", {
                      mu = rep(0, n), idx_mu = rep(0, n),
                      sort_y = rep(0, n))
   
-  tplan.sub <- transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2, 
+  tplan.sub <- approxOT::transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2, 
                               observation.orientation = "colwise", 
                               method = transport_method, is.X.sorted = FALSE)
   #cost out of sorts because I'm lying to the program about x being sorted
@@ -539,7 +539,7 @@ testthat::test_that("test exact xtyupdate", {
 })
 
 testthat::test_that("test shortsimplex xtyupdate", {
-  #check shortsimplex (assumes transport_plan is correct!!!!)
+  #check shortsimplex (assumes approxOT::transport_plan is correct!!!!)
   
   set.seed(12431)
   
@@ -590,7 +590,7 @@ testthat::test_that("test shortsimplex xtyupdate", {
   
   # same mu's
   
-  tplan <- transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2, 
+  tplan <- approxOT::transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2, 
                           observation.orientation = "colwise", 
                           method = tplan_transport, is.X.sorted = TRUE)
   #cost out of sorts because I'm lying to the program about x being sorted
@@ -625,7 +625,7 @@ testthat::test_that("test shortsimplex xtyupdate", {
                      mu = rep(0, n), idx_mu = rep(0, n),
                      sort_y = rep(0, n))
   
-  tplan.sub <- transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2, 
+  tplan.sub <- approxOT::transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2, 
                               observation.orientation = "colwise", 
                               method = tplan_transport, is.X.sorted = FALSE)
   #cost out of sorts because I'm lying to the program about x being sorted
@@ -705,7 +705,7 @@ testthat::test_that("test sinkhorn xtyupdate", {
   
   # same mu's
   
-  tplan <- transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2, 
+  tplan <- approxOT::transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2, 
                           observation.orientation = "colwise", 
                           method = transport_method, is.X.sorted = TRUE)
   #cost out of sorts because I'm lying to the program about x being sorted
@@ -715,20 +715,20 @@ testthat::test_that("test sinkhorn xtyupdate", {
               sort_y = rep(0, n))
   
   natoms <- length(tplan$tplan$to)
-  theta_sort <- t(theta[,tplan$tplan$to]) * matrix(sqrt(tplan$tplan$mass),nrow=natoms, ncol=p)
-  mu_sort <- post_mu[,tplan$tplan$from] * matrix(sqrt(tplan$tplan$mass),nrow=n, ncol=natoms, byrow=TRUE)
+  theta_sort <- t(theta[,tplan$tplan$to]) * matrix(sqrt(tplan$tplan$mass *( tplan$tplan$mass> 0)),nrow=natoms, ncol=p)
+  mu_sort <- post_mu[,tplan$tplan$from] * matrix(sqrt(tplan$tplan$mass * (tplan$tplan$mass>0)),nrow=n, ncol=natoms, byrow=TRUE)
   
   for(i in 1:n) {
     dat$temp <- theta_sort * matrix(x[i,,drop=FALSE], nrow=natoms, ncol = p, byrow=TRUE)
     dat$sort_y <- mu_sort[i,]
-    dat$xtx = dat$xtx + crossprod(dat$temp)/(n)
-    dat$xty = dat$xty + crossprod(dat$temp, dat$sort_y) /(n)
+    dat$xtx = dat$xtx + crossprod(dat$temp)/(n )
+    dat$xty = dat$xty + crossprod(dat$temp, dat$sort_y) /(n )
   }
   
-  out <- xtyUpdate(X_ = x, Y_ = post_mu, theta_ = t(theta), result_ = res,
+  out <- WpProj:::xtyUpdate(X_ = x, Y_ = post_mu, theta_ = t(theta), result_ = res,
                    OToptions.sel.var)
   
-  out_no_trans <- xtyUpdate(X_ = x, Y_ = post_mu, theta_ = theta, result_=res,
+  out_no_trans <- WpProj:::xtyUpdate(X_ = x, Y_ = post_mu, theta_ = theta, result_=res,
                             OToptions.sel.var)
   testthat::expect_equal(out, dat$xty)
   testthat::expect_equal(out_no_trans, dat$xty)
@@ -749,7 +749,7 @@ testthat::test_that("test sinkhorn xtyupdate", {
   dat.subset <- list(temp=matrix(0, s*s, p), xtx = matrix(0,p,p), xty = rep_len(0, p),
                      sort_y = rep(0, n))
   
-  tplan.sub <- transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2,
+  tplan.sub <- approxOT::transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2,
                               observation.orientation = "colwise",
                               method = transport_method)
   natoms.sub <- length(tplan.sub$tplan$to)
@@ -837,7 +837,7 @@ testthat::test_that("test greenkhorn xtyupdate", {
   
   # same mu's
   
-  tplan <- transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2, 
+  tplan <- approxOT::transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2, 
                           observation.orientation = "colwise", 
                           method = transport_method, is.X.sorted = TRUE)
   #cost out of sorts because I'm lying to the program about x being sorted
@@ -881,7 +881,7 @@ testthat::test_that("test greenkhorn xtyupdate", {
   dat.subset <- list(temp=matrix(0, s*s, p), xtx = matrix(0,p,p), xty = rep_len(0, p),
                      sort_y = rep(0, n))
   
-  tplan.sub <- transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2,
+  tplan.sub <- approxOT::transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2,
                               observation.orientation = "colwise",
                               method = transport_method)
   natoms.sub <- length(tplan.sub$tplan$to)
@@ -969,7 +969,7 @@ testthat::test_that("test greenkhorn xtyupdate", {
 #   
 #   # same mu's
 #   
-#   tplan <- WpProj:::transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2, 
+#   tplan <- approxOT::transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2, 
 #                           observation.orientation = "colwise", 
 #                           method = transport_method, is.X.sorted = TRUE)
 #   #cost out of sorts because I'm lying to the program about x being sorted
@@ -1013,7 +1013,7 @@ testthat::test_that("test greenkhorn xtyupdate", {
 #   dat.subset <- list(temp=matrix(0, s*s, p), xtx = matrix(0,p,p), xty = rep_len(0, p),
 #                      sort_y = rep(0, n))
 #   
-#   tplan.sub <- transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2,
+#   tplan.sub <- approxOT::transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2,
 #                               observation.orientation = "colwise",
 #                               method = transport_method)
 #   natoms.sub <- length(tplan.sub$tplan$to)
@@ -1101,7 +1101,7 @@ testthat::test_that("test greenkhorn xtyupdate", {
 #   
 #   # same mu's
 #   
-#   tplan <- transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2, 
+#   tplan <- approxOT::transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2, 
 #                           observation.orientation = "colwise", 
 #                           method = transport_method, is.X.sorted = TRUE)
 #   #cost out of sorts because I'm lying to the program about x being sorted
@@ -1145,7 +1145,7 @@ testthat::test_that("test greenkhorn xtyupdate", {
 #   dat.subset <- list(temp=matrix(0, s*s, p), xtx = matrix(0,p,p), xty = rep_len(0, p),
 #                      sort_y = rep(0, n))
 #   
-#   tplan.sub <- transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2,
+#   tplan.sub <- approxOT::transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2,
 #                               observation.orientation = "colwise",
 #                               method = transport_method)
 #   natoms.sub <- length(tplan.sub$tplan$to)

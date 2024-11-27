@@ -14,9 +14,9 @@ ranking <- function(fit, full, p = 2, minCoef = 1, maxCoef = 10, quantiles = c(0
     # rankLoss   <- apply(losses, 1, rankFun )
     rankLoss   <- sapply(coarse[whichModel],
                          function(x)
-                           sapply(1:nrow(x), function(y) WpProj::wasserstein(transform(x[y,]), 
-                                                                   full[y,], p, p, "colwise", 
-                                                        "univariate.approximation.pwr")))
+                           sapply(1:nrow(x), function(y) approxOT::wasserstein(X = transform(x[y,]), 
+                                                                   Y = full[y,], ground_p = p, p = p, observation.orientation = "colwise", 
+                                                        method = "univariate.approximation.pwr")))
   } else{
     if(is.list(fit)) stop("fit must be a WpProj output")
     # if(!is.list(fit)) stop("fit must be a sparse-posterior output or a list of outputs from the SparsePosterior package")

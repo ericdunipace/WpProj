@@ -35,7 +35,7 @@
 WPVI <- function(X, eta, theta, pred.fun = NULL, p = 2, ground_p = 2,
                  transport.method = transport_options(),
                  epsilon = 0.05,
-                 OTmaxit = 100,
+                 OTmaxit = 0,
                  display.progress = FALSE,
                  parallel = NULL) {
   this.call <- as.list(match.call()[-1])
@@ -70,6 +70,7 @@ WPVI <- function(X, eta, theta, pred.fun = NULL, p = 2, ground_p = 2,
     if(all(Y_==pred.fun(X, theta))) same <- TRUE
   }
   transport.method <- match.arg(transport.method)
+  if(missing(OTmaxit) ||is.null(OTmaxit)) OTmaxit <- switch(transport.method, "exact" = 0L, 100L)
   
   if(!is.null(parallel)){
     if(!inherits(parallel, "cluster")) {
@@ -86,10 +87,12 @@ WPVI <- function(X, eta, theta, pred.fun = NULL, p = 2, ground_p = 2,
     x_temp[,i] <- 0
     mu <- pred.fun(x_temp, theta)
     return(
-      WpProj::wasserstein(mu, Y_, 
+      approxOT::wasserstein(X = mu, Y = Y_, 
+                            a = NULL, b = NULL,
+                            cost = NULL, tplan = NULL,
                   p = p, ground_p = ground_p, 
-                  observation.orientation = "colwise",
-                transport.method = transport.method, 
+                method = transport.method, 
+                observation.orientation = "colwise",
                 epsilon = epsilon, niter = OTmaxit)
     )
   }

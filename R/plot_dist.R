@@ -2,6 +2,8 @@
 plot.distcompare <- function(x = NULL, models = NULL, ylim = NULL, ylabs = c(NULL,NULL),
                              xlab = NULL, xlim = NULL,
                              linesize = 0.5, pointsize = 1.5, facet.group = NULL, ...) {
+  stopifnot("'ggsci' must be installed to use this function" = rlang::is_installed("ggsci"))
+  stopifnot("'ggplot2' must be installed to use this function" = rlang::is_installed("ggplot2"))
   distance <- x
   mc <- match.call(expand.dots = TRUE)
   if(is.null(distance)) {

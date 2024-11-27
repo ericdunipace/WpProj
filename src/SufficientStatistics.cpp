@@ -6,15 +6,23 @@ using namespace Rcpp;
 void suff_stat_arrange_Y(const refMatConst & mu, const refMatConst & Y,
                        const int S, const int P, const int N,
                        const std::string & transport_method,
-                       matrixI & idx, vector & mass,
+                       matrixI & idx, vectorxd & mass,
                        bool a_sort, double epsilon, int niter) {
-  double ground_p = 2.0;
-  double p_wass = 2.0;
-  // transport(const matrix & A, const matrix & B, const double p, const double ground_p,
-  //           matrixI & idx, vector & mass, const std::string & method, bool & a_sort,
-  //           double epsilon, int niter)
+  const double ground_p = 2.0;
+  const double p_wass = 2.0;
+  bool unbiased = false;
+  int threads = 1;
+  // void transport(const matrix & A, 
+  //                const matrix & B, 
+  //                const double p, 
+  //                const double ground_p,
+  //                matrixI & idx, 
+  //                vectorxd & mass, 
+  //                const std::string & method, bool & a_sort,
+  //                double epsilon = 0.0, int niter = 0,
+  //                bool unbiased = false, int threads = 1);
   transport(Y, mu, p_wass, ground_p, idx, mass, transport_method, a_sort,
-            epsilon, niter);
+            epsilon, niter, unbiased, threads);
 }
 
 void arrange_Y(refMat Y, int S, const std::string & transport_method) {
@@ -23,9 +31,22 @@ void arrange_Y(refMat Y, int S, const std::string & transport_method) {
     double p_wass = 2.0;
     double ground_p = 2.0;
     matrixI idx(S * S,2);
-    vector mass(S * S);
+    vectorxd mass(S * S);
     bool a_sort = true;
-    transport(Y, Y, p_wass, ground_p, idx, mass, transport_method, a_sort, 0.0, 0);
+    double epsilon = 0.0;
+    int niter = 0;
+    bool unbiased = false;
+    int threads = 1;
+    // void transport(const matrix & A, 
+    //                const matrix & B, 
+    //                const double p, 
+    //                const double ground_p,
+    //                matrixI & idx, 
+    //                vectorxd & mass, 
+    //                const std::string & method, bool & a_sort,
+    //                double epsilon = 0.0, int niter = 0,
+    //                bool unbiased = false, int threads = 1);
+    transport(Y, Y, p_wass, ground_p, idx, mass, transport_method, a_sort, epsilon, niter, unbiased, threads);
     vectorI order(idx.rows());
     vecMapI idx_vec( idx.col(0).data(), idx.rows() );
     for(int i = 0; i < idx.rows(); i++ ) order(idx_vec(i)) = i;
@@ -72,7 +93,7 @@ void ot_xtx_xty(const refMatConst & X, const refMatConst & Y,
                 const refMatConst & theta,
                 const int N, const int S, const int P,
                 matrix & xtx, matrix & xty,
-                const matrixI & idx, const vector & mass) 
+                const matrixI & idx, const vectorxd & mass) 
 {//updates xtx xty with OT 
   double dataWt = 1.0/double(N);
   matrix temp(P, N); // dim of X
@@ -107,7 +128,7 @@ void suff_stat_scale_ot(const refMatConst & X, refMat Y,
   matrix xtx = matrix::Zero(P,P);
   bool y_sort = false;
   xty.fill(0.0);
-  vector mass(S);
+  vectorxd mass(S);
   matrixI idx(S,2);
   matrix mu = X.transpose() * theta;
   
@@ -121,7 +142,7 @@ void suff_stat_scale_ot(const refMatConst & X, refMat Y,
     // void suff_stat_arrange_Y(const refMatConst & mu, refMat Y,
     //                          const int S, const int P, const int N,
     //                          const std::string & transport_method,
-    //                          matrixI & idx, vector & mass,
+    //                          matrixI & idx, vectorxd & mass,
     //                          bool a_sort)
     suff_stat_arrange_Y(mu, Y,
                         S, P, N,
@@ -148,7 +169,7 @@ void suff_stat_scale_ot(const refMatConst & X, refMat Y,
     //                 const refMatConst & theta,
     //                 const int N, const int S, const int P,
     //                 matrix & xtx, matrix & xty,
-    //                 const matrixI & idx, const vector & mass) 
+    //                 const matrixI & idx, const vectorxd & mass) 
     ot_xtx_xty(X,Y,theta,N,S,P, xtx,xty, idx, mass);
   }
   xtx_dens = xtx.selfadjointView<Eigen::Lower>();
@@ -208,7 +229,7 @@ void ot_xty(const refMatConst & X, const refMatConst & Y,
   bool y_sort = true;
   double dataWt = 1.0/double(N);
   matrix temp(P, N); // dim of X
-  vector mass(S);
+  vectorxd mass(S);
   
   mass.fill(1.0/double(S));
   xty.fill(0.0);
@@ -245,7 +266,7 @@ void univariate_approximation_xty(const refMatConst & X, const refMatConst & sor
   xty.fill(0.0);
   bool y_sort = true;
   matrix Y = sorted_Y;
-  vector mass(S);
+  vectorxd mass(S);
   matrix temp(P,N); //dim of X
   double dataWt = 1.0/double(S * N);
   std::string transp = "univariate.approximation.pwr";
@@ -444,12 +465,12 @@ matrix xtyUpdate(const NumericMatrix & X_, const NumericMatrix & Y_,
     theta.transposeInPlace();
     if(theta.rows() != P) Rcpp::stop("theta must have same dimension as X");
   }
-  if(theta.cols() != S) {
+  if (theta.cols() != S) {
     Rcpp::stop("theta must have as many samples (S) as Y, where Y is NxS");
   }
   
   matrixI idx_mu(S,2);
-  vector mass(S);
+  vectorxd mass(S);
   matrix xty = matrix::Zero(P,1);
   
   if ( transp == "univariate.approximation.pwr" || transp == "hilbert" || transp == "rank" ) {
@@ -466,19 +487,19 @@ matrix xtyUpdate(const NumericMatrix & X_, const NumericMatrix & Y_,
     Rcpp::stop("location.scale not currently supported");
     // if (result.rows() != 2*P) {
     //   // if(result.rows() == P) {
-    //   //   Rcpp::warning("Doubling input result vector to match method");
-    //   //   vector temp_result = result;
+    //   //   Rcpp::warning("Doubling input result vectorxd to match method");
+    //   //   vectorxd temp_result = result;
     //   //   result.resize(2*P,1);
     //   //   result.block(0,0,P,1) = temp_result;
     //   //   result.block(P,0,P,1) = temp_result;
     //   // } else {
-    //     Rcpp::stop("Result vector must have dimension twice that of theta");
+    //     Rcpp::stop("Result vectorxd must have dimension twice that of theta");
     //   // }
     // }
     // matrix means(P,S);
     // 
     // {
-    //   vector meanvec = theta.rowwise().mean();
+    //   vectorxd meanvec = theta.rowwise().mean();
     //   for (int s = 0; s < S ; s++) means.col(s) = meanvec;
     // }
     // 

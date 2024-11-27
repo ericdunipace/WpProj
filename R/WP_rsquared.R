@@ -62,7 +62,7 @@ WPR2.matrix <- function(predictions, projected_model, p = 2, method = "exact", b
     }
   }
   
-  wp_mod <- WpProj::wasserstein(predictions, projected_model, p = p, ground_p = p,
+  wp_mod <- approxOT::wasserstein(X = predictions, Y = projected_model, p = p, ground_p = p,
                                 method = method, ...)^p
   
   if(is.null(base)) {
@@ -88,12 +88,12 @@ WPR2.matrix <- function(predictions, projected_model, p = 2, method = "exact", b
   # wp_base <- if(method == "exact") {
   #   mean(colSums((predictions - mu)^p))
   # } else {
-  #   WpProj::wasserstein(predictions, mu, p = p, 
+  #   approxOT::wasserstein(predictions, mu, p = p, 
   #                      ground_p = p,
   #                      method = method, 
   #                      ...)^p
   # }
-  wp_base <- WpProj::wasserstein(predictions, mu, p = p, 
+  wp_base <- approxOT::wasserstein(X = predictions, Y = mu, p = p, 
                                  ground_p = p,
                                  method = method, 
                                  ...)^p
@@ -222,6 +222,9 @@ WPR2.WpProj <- function(predictions, projected_model, ...) {
 methods::setMethod("WPR2", signature = c("predictions" = "ANY", projected_model = "WpProj"), definition = WPR2.WpProj)
 
 plot.WPR2 <- function(x, xlim = NULL, ylim = NULL, linesize = 0.5, pointsize = 1.5, facet.group = NULL, ...) {
+  stopifnot("'ggplot2' must be installed to use this function" = rlang::is_installed("ggplot2"))
+  stopifnot("'ggsci' must be installed to use this function" = rlang::is_installed("ggsci"))
+  
   object <- x
   obj <- object
   stopifnot(inherits(obj, "WPR2"))

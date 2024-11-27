@@ -5,7 +5,7 @@
 #include "oem_base.h"
 #include "Spectra/SymEigsSolver.h"
 #include "utils.h"
-#include "sort.h"
+#include <approxOT/sort.h>
 
 using Eigen::MatrixXd;
 using Eigen::MatrixXi;

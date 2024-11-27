@@ -22,3 +22,12 @@ dummy_fun <- function() {
   rqPen::rq.group.pen()
   lifecycle::badge("experimental")
 }
+
+
+#' @importFrom approxOT transport_options
+#' @export
+approxOT::transport_options
+
+#' @importFrom approxOT wasserstein
+#' @export
+approxOT::wasserstein

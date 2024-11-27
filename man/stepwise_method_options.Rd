@@ -9,7 +9,7 @@ stepwise_method_options(
   direction = c("backward", "forward"),
   method = c("binary program", "projection"),
   transport.method = transport_options(),
-  OTmaxit = 100,
+  OTmaxit = 0,
   epsilon = 0.05,
   model.size = NULL,
   display.progress = FALSE,

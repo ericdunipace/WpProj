@@ -67,7 +67,7 @@ W2L1 <- function(X, Y=NULL, theta = NULL,
                  method = c("projection","selection.variable","location.scale","scale"),
                  transport.method = transport_options(),
                  epsilon = 0.05,
-                 OTmaxit = 100,
+                 OTmaxit = 0,
                  model.size = NULL,
                  lambda = numeric(0), 
                  nlambda = 100L, 
@@ -333,8 +333,8 @@ W2L1 <- function(X, Y=NULL, theta = NULL,
   if(is.null(epsilon)) {
     epsilon <- 0.05
   }
-  if(is.null(OTmaxit)) {
-    OTmaxit <- 100
+  if(is.null(OTmaxit)  || missing(OTmaxit)) {
+    OTmaxit <- switch(transport.method, "exact" = 0L, 100)
   }
   # pseudo_observations <- 0.0
   

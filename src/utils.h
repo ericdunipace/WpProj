@@ -11,7 +11,7 @@
 #include <numeric>
 #include <boost/noncopyable.hpp>
 #include "WpProj_types.h"
-#include "sort.h"
+#include <approxOT/sort.h>
 
 using namespace Rcpp;
 using namespace RcppEigen;
@@ -162,15 +162,15 @@ bool nonFiniteDist(const refMatConst & v);
 
 int  compare(const MatrixXi & a, const MatrixXi & b, VectorXi & idx_col);
 
-inline MatrixXd crossprod(const MatrixXd & X) {
-  int P = X.cols();
-  return( MatrixXd(P, P).setZero().selfadjointView<Lower>().rankUpdate(X.adjoint()));
-}
-
-inline MatrixXd tcrossprod(const MatrixXd & X) {
-  int P = X.rows();
-  return( MatrixXd(P, P).setZero().selfadjointView<Lower>().rankUpdate(X));
-}
+// inline MatrixXd crossprod(const MatrixXd & X) {
+//   int P = X.cols();
+//   return( MatrixXd(P, P).setZero().selfadjointView<Lower>().rankUpdate(X.adjoint()));
+// }
+// 
+// inline MatrixXd tcrossprod(const MatrixXd & X) {
+//   int P = X.rows();
+//   return( MatrixXd(P, P).setZero().selfadjointView<Lower>().rankUpdate(X));
+// }
 /*
 template <typename T, typename T2>
 T extract(const T2& full, const T& ind)
@@ -194,24 +194,17 @@ void mu_update(const refMatConst & X,
 matrix covariance(const refMatConst & samples, const refVecConst & mean);
 matrix covariance(const refMatConst & samples);
 
-void which(const matrixI & basis, int N, int M, matrixI & index);
-void which_nonzero(const matrix & basis, int N, int M, matrixI & index);
+// void which(const matrixI & basis, int N, int M, matrixI & index);
+// void which_nonzero(const matrix & basis, int N, int M, matrixI & index);
 // template <typename Derived>
 // double median(const Eigen::EigenBase<Derived>& X);
-double dist_approx_ot(const refVecConst & mass_a, const refVecConst & mass_b,
-                const vector & r, const vector & c, int p);
-double rho_ot(const vector & a, const vector & b);
-vector rho_vec(const vector & a, const vector & b);
-double rho(double a, double b);
 
 void argmin_f(const refVecConst & mass_a, 
               const refVecConst & mass_b, 
               const matrix & exp_cost,
-              vector & u, vector & v, vector & y_u, vector & y_v, vector & u_hat, vector & v_hat);
+              VectorXd & u, VectorXd & v, VectorXd & y_u, VectorXd & y_v, VectorXd & u_hat, VectorXd & v_hat);
 
 // template <class RandAccessIter>
 // double median(RandAccessIter begin, RandAccessIter end);
-
-double median(refMat A);
 
 #endif

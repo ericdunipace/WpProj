@@ -5,7 +5,7 @@ WPRM <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
                                                "univariate.approximation.pwr",
                                                "univariate.approximation"),
                           epsilon = 0.05,
-                          OTmaxit = 100,
+                          OTmaxit = 0,
                           calc.theta = TRUE)
 {
   this.call <- as.list(match.call()[-1])
@@ -32,14 +32,15 @@ WPRM <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
   }
   method <- match.arg(method)
   transport.method <- match.arg(transport.method)
+  if(missing(OTmaxit) ||is.null(OTmaxit)) OTmaxit <- switch(transport.method, "exact" = 0L, 100L)
   if(!is.null(force)) stopifnot(is.numeric(force))
   
   if(length((unique(force)))==d) stop("forcing all variables into the model")
   remove.idx <- 1:d
   remove.idx <- remove.idx[!(remove.idx %in% force)]
   wp <- sapply(remove.idx, function(i) {
-    wasserstein(crossprod(X_[-i,], theta[-i,]), Y_, p = p, ground_p = ground_p, observation.orientation = "colwise",
-                transport.method = transport.method, epsilon = epsilon, niter = OTmaxit)
+    approxOT::wasserstein(crossprod(X_[-i,], theta[-i,]), Y_, p = p, ground_p = ground_p, observation.orientation = "colwise",
+                method = transport.method, epsilon = epsilon, niter = OTmaxit)
   })
   importance <- remove.idx[order(wp, decreasing = TRUE)]
   indices <- lapply(1:length(importance), function(i) sort(c(force, importance[1:i])))

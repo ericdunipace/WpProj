@@ -155,7 +155,7 @@ testthat::test_that("test hilbert suff stat", {
   
   # same mu's
   
-  tplan <- transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2, 
+  tplan <- approxOT::transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2, 
                           observation.orientation = "colwise", 
                           method = transport_method, is.X.sorted = TRUE)
   #cost out of sorts because I'm lying to the program about x being sorted
@@ -175,9 +175,9 @@ testthat::test_that("test hilbert suff stat", {
   }
   dat$xtx = dat$xtx/(n*s)
   dat$xty = dat$xty/(n*s)
-  out <- sufficientStatistics(X_ = x, Y_ = post_mu, theta_ = t(theta), 
+  out <- WpProj:::sufficientStatistics(X_ = x, Y_ = post_mu, theta_ = t(theta), 
                               OTopt)
-  out.trans <- sufficientStatistics(X_ = x, Y_ = post_mu, theta_ = t(theta), 
+  out.trans <- WpProj:::sufficientStatistics(X_ = x, Y_ = post_mu, theta_ = t(theta), 
                                     OTopt)
   
   testthat::expect_equal(out$XtX, dat$xtx)
@@ -187,7 +187,7 @@ testthat::test_that("test hilbert suff stat", {
   
   #check same flag
   OTopt$same <- TRUE
-  out.same <- sufficientStatistics(X_ = x, Y_ = post_mu, theta_ = t(theta), 
+  out.same <- WpProj:::sufficientStatistics(X_ = x, Y_ = post_mu, theta_ = t(theta), 
                                    OTopt)
   OTopt$same <- FALSE
   
@@ -200,7 +200,7 @@ testthat::test_that("test hilbert suff stat", {
                      mu = rep(0, n), idx_mu = rep(0, n),
                      sort_y = rep(0, n))
   
-  tplan.sub <- transport_plan(X = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], 
+  tplan.sub <- approxOT::transport_plan(X = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], 
                               Y = post_mu, ground_p = 2, p = 2, 
                               observation.orientation = "colwise", 
                               method = transport_method, is.X.sorted = FALSE)
@@ -217,7 +217,7 @@ testthat::test_that("test hilbert suff stat", {
   # dat.subset$xtx = dat.subset$xtx
   # dat.subset$xty = dat.subset$xty/(n*s)
   
-  out.subset <- sufficientStatistics(X_ = x[,active.idx], Y_ = post_mu, theta_ = t(theta[active.idx,]), 
+  out.subset <- WpProj:::sufficientStatistics(X_ = x[,active.idx], Y_ = post_mu, theta_ = t(theta[active.idx,]), 
                                      OTopt)
   
   testthat::expect_equal(out.subset$XtX, dat.subset$xtx)
@@ -226,10 +226,10 @@ testthat::test_that("test hilbert suff stat", {
   # check projection is just normal crossprods
   otoptproj <- OTopt
   otoptproj$method <- "projection"
-  proj <- sufficientStatistics(X_ = x, Y_ = post_mu, theta_ = t(theta), 
+  proj <- WpProj:::sufficientStatistics(X_ = x, Y_ = post_mu, theta_ = t(theta), 
                                otoptproj)
   otoptproj$same <- TRUE
-  proj.same <- sufficientStatistics(X_ = x, Y_ = post_mu, theta_ = t(theta), 
+  proj.same <- WpProj:::sufficientStatistics(X_ = x, Y_ = post_mu, theta_ = t(theta), 
                                     otoptproj)
   testthat::expect_equal(proj$XtX, xtx)
   testthat::expect_equal(proj$XtY, xty)
@@ -281,7 +281,7 @@ testthat::test_that("test rank suff stat", {
   OToptproj$same <- FALSE
   # same mu's
   
-  tplan <- transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2, 
+  tplan <- approxOT::transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2, 
                           observation.orientation = "colwise", 
                           method = transport_method, is.X.sorted = FALSE)
   # rank_idx <- tplan$tplan$to
@@ -322,7 +322,7 @@ testthat::test_that("test rank suff stat", {
                      mu = rep(0, n), idx_mu = rep(0, n),
                      sort_y = rep(0, n))
   
-  tplan.sub <- transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2, 
+  tplan.sub <- approxOT::transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2, 
                               observation.orientation = "colwise", 
                               method = transport_method, is.X.sorted = FALSE)
   # rank_idx.sub <- tplan.sub$tplan$to
@@ -394,14 +394,14 @@ testthat::test_that("test shortsimplex suff stat", {
                 method = "selection.variable",
                 transport.method = transport_method,
                 epsilon = 0.05,
-                niter = 100)
+                niter = 0)
   otoptproj <- OTopt
   otoptproj$method <- "projection"
   otoptproj$same <- FALSE
   
   # same mu's
   
-  tplan <- transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2, 
+  tplan <- approxOT::transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2, 
                           observation.orientation = "colwise", 
                           method = transport_method, is.X.sorted = FALSE)
   exact_idx <- tplan$tplan$to
@@ -442,7 +442,7 @@ testthat::test_that("test shortsimplex suff stat", {
                      mu = rep(0, n), idx_mu = rep(0, n),
                      sort_y = rep(0, n))
   
-  tplan.sub <- transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2, 
+  tplan.sub <- approxOT::transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2, 
                               observation.orientation = "colwise", 
                               method = transport_method, is.X.sorted = FALSE)
   exact_idx.sub <- tplan.sub$tplan$to
@@ -519,7 +519,7 @@ testthat::test_that("test sinkhorn suff stat", {
 
   # same mu's
 
-  tplan <- transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2,
+  tplan <- approxOT::transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2,
                           observation.orientation = "colwise",
                           method = transport_method, is.X.sorted = FALSE)
 
@@ -528,8 +528,8 @@ testthat::test_that("test sinkhorn suff stat", {
               sort_y = rep(0, n))
 
   natoms <- length(tplan$tplan$to)
-  theta_sort <- t(theta[,tplan$tplan$to]) * matrix(sqrt(tplan$tplan$mass),nrow=natoms, ncol=p)
-  mu_sort <- post_mu[,tplan$tplan$from] * matrix(sqrt(tplan$tplan$mass),nrow=n, ncol=natoms, byrow=TRUE)
+  theta_sort <- t(theta[,tplan$tplan$to]) * matrix(sqrt(tplan$tplan$mass * (tplan$tplan$mass>0)),nrow=natoms, ncol=p)
+  mu_sort <- post_mu[,tplan$tplan$from] * matrix(sqrt(tplan$tplan$mass* (tplan$tplan$mass>0)),nrow=n, ncol=natoms, byrow=TRUE)
   
   for(i in 1:n) {
     dat$temp <- theta_sort * matrix(x[i,,drop=FALSE], nrow=natoms, ncol = p, byrow=TRUE)
@@ -537,9 +537,11 @@ testthat::test_that("test sinkhorn suff stat", {
     dat$xtx = dat$xtx + crossprod(dat$temp)/(n)
     dat$xty = dat$xty + crossprod(dat$temp, dat$sort_y) /(n)
   }
-  out <- sufficientStatistics(X_ = x, Y_ = post_mu, theta_ = t(theta),
+  out <- WpProj:::sufficientStatistics(X_ = x, Y_ = post_mu, theta_ = t(theta),
                               OTopt)
-  out.trans <- sufficientStatistics(X_ = x, Y_ = post_mu, theta_ = t(theta),
+  out.trans <- WpProj:::sufficientStatistics(X_ = x, 
+                                             Y_ = post_mu, 
+                                             theta_ = t(theta),
                                     OTopt)
 
   testthat::expect_equal(out$XtX, dat$xtx)
@@ -580,7 +582,7 @@ testthat::test_that("test sinkhorn suff stat", {
   dat.subset <- list(temp=matrix(0, s*s, p_act), xtx = matrix(0,p_act,p_act), xty = rep_len(0, p_act),
                      sort_y = rep(0, n))
 
-  tplan.sub <- transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2,
+  tplan.sub <- approxOT::transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2,
                               observation.orientation = "colwise",
                               method = transport_method)
   natoms.sub <- length(tplan.sub$tplan$to)
@@ -658,7 +660,7 @@ testthat::test_that("test greenkhorn suff stat", {
   
   # same mu's
   
-  tplan <- transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2,
+  tplan <- approxOT::transport_plan(X = post_mu, Y = post_mu, ground_p = 2, p = 2,
                           observation.orientation = "colwise",
                           method = transport_method, is.X.sorted = FALSE)
   
@@ -719,7 +721,7 @@ testthat::test_that("test greenkhorn suff stat", {
   dat.subset <- list(temp=matrix(0, s*s, p_act), xtx = matrix(0,p_act,p_act), xty = rep_len(0, p_act),
                      sort_y = rep(0, n))
   
-  tplan.sub <- transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2,
+  tplan.sub <- approxOT::transport_plan(X = post_mu, Y = x[,active.idx,drop=FALSE] %*% theta[active.idx,,drop=FALSE], ground_p = 2, p = 2,
                               observation.orientation = "colwise",
                               method = transport_method)
   natoms.sub <- length(tplan.sub$tplan$to)

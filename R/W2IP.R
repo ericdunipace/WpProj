@@ -168,7 +168,7 @@ W2IP <- function(X, Y=NULL, theta,
   epsilon <- dots$epsilon
   if(is.null(epsilon)) epsilon <- 0.05
   OTmaxit <- dots$OTmaxit
-  if(is.null(OTmaxit)) OTmaxit <- 100
+  if(is.null(OTmaxit) || missing(OTmaxit)) OTmaxit <- switch(transport.method, "exact" = 0L, 100L)
   # else if (solution.method == "lp") {
   #   if(!is.null(control$verbose)) control$verbose <- as.logical(control$verbose)
   #   if(!is.null(control$presolve)) control$presolve <- as.logical(control$presolve)

@@ -14,7 +14,7 @@ W2L1(
   method = c("projection", "selection.variable", "location.scale", "scale"),
   transport.method = transport_options(),
   epsilon = 0.05,
-  OTmaxit = 100,
+  OTmaxit = 0,
   model.size = NULL,
   lambda = numeric(0),
   nlambda = 100L,

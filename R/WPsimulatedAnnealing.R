@@ -58,7 +58,7 @@ WPSA <- function(X, Y=NULL, theta,
                                 cooling.schedule = "Geman-Geman",
                                 proposal.method = "covariance",
                                 epsilon = 0.05,
-                                OTmaxit = 100),
+                                OTmaxit = 0),
                  display.progress = FALSE,
                  parallel = NULL,
                  calc.theta = TRUE,
@@ -103,6 +103,7 @@ WPSA <- function(X, Y=NULL, theta,
   prop.meth <- match.arg(options$proposal.method, c("covariance","random"))
   epsilon <- options$epsilon
   OTmaxit <- options$OTmaxit
+  if(missing(OTmaxit) ||is.null(OTmaxit)) OTmaxit <- switch(transmeth, "exact" = 0L, 100L)
   
   if(is.null(epsilon)) epsilon <- 0.05
   if(is.null(OTmaxit)) OTmaxit <- 100
@@ -167,9 +168,9 @@ WPSA <- function(X, Y=NULL, theta,
     } else {
       temp_mu <- crossprod(X_, beta_temp)
     }
-    const <- WpProj::wasserstein(temp_mu, 
-                                          Y_, p, ground_p, 
-                                          obs.direction, transmeth)
+    const <- approxOT::wasserstein(X = temp_mu, 
+                                          Y = Y_, p = p, ground_p = ground_p, 
+                                          observation.orientation = obs.direction, method = transmeth)
   } else if (is.null(const)) {
     if (meth == "projection") {
       mu_calc <- function(X, theta, beta) {
@@ -184,7 +185,7 @@ WPSA <- function(X, Y=NULL, theta,
       {
         beta_temp <- calc.beta(xtx=xtx, xty=xty, i, meth, OToptions = OToptions, x=X_, theta_, Y_, niter=500)
         temp_mu <- mu_calc(X_, theta_, beta_temp)
-        return(WpProj::wasserstein(temp_mu, Y_, p, ground_p, obs.direction, transmeth) )
+        return(approxOT::wasserstein(X = temp_mu, Y = Y_, p = p, gorund_p = ground_p, observation.orientation = obs.direction, method = transmeth) )
       }
     const <- max(w2s)
   }
@@ -480,7 +481,7 @@ dist.fun <- function(X=NULL, active.idx=NULL, theta = NULL, Y = NULL, xtx=NULL, 
   if(OToptions$method == "projection") {
     mu <- crossprod(X, beta)
     # } else if (method == "selection.variable") {
-    #   # wp <- WpProj::wasserstein(mu, Y, p = p, ground_p = p, "colwise", "exact")
+    #   # wp <- approxOT::wasserstein(mu, Y, p = p, ground_p = p, observation.orientation = "colwise",method = "exact")
     #   mu <- crossprod(X[active.idx, , drop = FALSE], theta[active.idx,, drop = FALSE])
   } else {
     mu <- selVarMeanGen(X,theta,beta)
@@ -489,7 +490,7 @@ dist.fun <- function(X=NULL, active.idx=NULL, theta = NULL, Y = NULL, xtx=NULL, 
   wp <- if(shortcut){
       (((sum((mu - Y)^ground_p)^(1/ground_p))^p)^(1/p))/ncol(Y)
     } else {
-      WpProj::wasserstein(mu, Y, p = p, ground_p = ground_p, obs.direction, OToptions$transport.method)
+      approxOT::wasserstein(X  = mu, Y = Y, p = p, ground_p = ground_p, observation.orientation = obs.direction, method = OToptions$transport.method)
     }
   return(wp)
 }
