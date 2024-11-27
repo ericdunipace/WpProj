@@ -5,7 +5,7 @@ double threshold(double num)
   return num > 0 ? num : 0;
 }
 
-// computes cumulative sum of vector x
+// computes cumulative sum of VectorXd x
 VectorXd cumsum(const VectorXd& x) {
   const int n(x.size());
   VectorXd cmsm(n);
@@ -18,7 +18,7 @@ VectorXd cumsum(const VectorXd& x) {
   return (cmsm);
 }
 
-// computes reverse cumulative sum of vector x
+// computes reverse cumulative sum of VectorXd x
 VectorXd cumsumrev(const VectorXd& x) {
   const int n(x.size());
   VectorXd cmsm(n);
@@ -657,8 +657,8 @@ void mu_update(const refMatConst & X,
     //pull data from theta in to centered and mean matrix
     int P = theta.rows()/2;
     int S = theta.cols();
-    vector c_res = result.block(0,0,P,1);
-    vector m_res = result.block(P,0,P,1);
+    VectorXd c_res = result.block(0,0,P,1);
+    VectorXd m_res = result.block(P,0,P,1);
     matrix c_theta = theta.block(0,0,P,S);
     matrix theta_mean = theta.block(P,0,P,S);
     
@@ -697,7 +697,7 @@ matrix covariance(const refMatConst & samples) {
   int S = samples.cols();
   int d = samples.rows();
   matrix c_samples(d, S);
-  vector mean = samples.colwise().mean();
+  VectorXd mean = samples.colwise().mean();
   
   if(d != mean.rows()) Rcpp::stop("Dimension of mean vector not match dimension of samples vector!");
   for(int i = 0 ; i < S; i++){
@@ -706,47 +706,47 @@ matrix covariance(const refMatConst & samples) {
   return matrix(d, d).setZero().selfadjointView<Eigen::Lower>().rankUpdate(c_samples);
 }
 
-void which(const matrixI & basis, int N, int M, matrixI & index) { //check which function is working
-  if ( (N*M) != index.rows() ) Rcpp::stop("Index matrix rows don't match number of possible assignments");
-  int count = 0;
-  // Rcpp::Rcout << index(0,0) << std::endl;
-  // Rcpp::Rcout << index(0,1) << std::endl;
-  if (basis.rows() != (N) ) Rcpp::stop("Basis matrix rows don't match cost matrix rows");
-  if (basis.cols() != (M) ) Rcpp::stop("Basis matrix columns don't match cost matrix cols");
-  
-  for (int j = 0; j < M; j++) {
-    for (int i = 0; i < N; i ++) {
-      if(basis(i,j) == 1 ) { 
-        index(count, 0) = i;
-        index(count, 1) = j;
-        count++;
-      }
-    }
-  }
-  if(count == 0) Rcpp::stop("No matchings found!");
-  index.conservativeResize( count,	Eigen::NoChange );
-}
-
-void which_nonzero(const matrix & basis, int N, int M, matrixI & index) { //check which function is working
-  if ( (N*M) != index.rows() ) Rcpp::stop("Index matrix rows don't match number of possible assignments");
-  int count = 0;
-  // Rcpp::Rcout << index(0,0) << std::endl;
-  // Rcpp::Rcout << index(0,1) << std::endl;
-  if (basis.rows() != (N) ) Rcpp::stop("Assignment matrix rows don't match cost matrix rows");
-  if (basis.cols() != (M) ) Rcpp::stop("Assignment matrix columns don't match cost matrix cols");
-  
-  for (int j = 0; j < M; j++) {
-    for (int i = 0; i < N; i ++) {
-      if(basis(i,j) != 0.0 ) { 
-        index(count, 0) = i;
-        index(count, 1) = j;
-        count++;
-      }
-    }
-  }
-  if(count == 0) Rcpp::stop("No matchings found!");
-  index.conservativeResize( count,	Eigen::NoChange );
-}
+// void which(const matrixI & basis, int N, int M, matrixI & index) { //check which function is working
+//   if ( (N*M) != index.rows() ) Rcpp::stop("Index matrix rows don't match number of possible assignments");
+//   int count = 0;
+//   // Rcpp::Rcout << index(0,0) << std::endl;
+//   // Rcpp::Rcout << index(0,1) << std::endl;
+//   if (basis.rows() != (N) ) Rcpp::stop("Basis matrix rows don't match cost matrix rows");
+//   if (basis.cols() != (M) ) Rcpp::stop("Basis matrix columns don't match cost matrix cols");
+//   
+//   for (int j = 0; j < M; j++) {
+//     for (int i = 0; i < N; i ++) {
+//       if(basis(i,j) == 1 ) { 
+//         index(count, 0) = i;
+//         index(count, 1) = j;
+//         count++;
+//       }
+//     }
+//   }
+//   if(count == 0) Rcpp::stop("No matchings found!");
+//   index.conservativeResize( count,	Eigen::NoChange );
+// }
+// 
+// void which_nonzero(const matrix & basis, int N, int M, matrixI & index) { //check which function is working
+//   if ( (N*M) != index.rows() ) Rcpp::stop("Index matrix rows don't match number of possible assignments");
+//   int count = 0;
+//   // Rcpp::Rcout << index(0,0) << std::endl;
+//   // Rcpp::Rcout << index(0,1) << std::endl;
+//   if (basis.rows() != (N) ) Rcpp::stop("Assignment matrix rows don't match cost matrix rows");
+//   if (basis.cols() != (M) ) Rcpp::stop("Assignment matrix columns don't match cost matrix cols");
+//   
+//   for (int j = 0; j < M; j++) {
+//     for (int i = 0; i < N; i ++) {
+//       if(basis(i,j) != 0.0 ) { 
+//         index(count, 0) = i;
+//         index(count, 1) = j;
+//         count++;
+//       }
+//     }
+//   }
+//   if(count == 0) Rcpp::stop("No matchings found!");
+//   index.conservativeResize( count,	Eigen::NoChange );
+// }
 // template <typename Derived>
 // double median(const Eigen::EigenBase<Derived>& X) {
 //   vecMapConst x(X.data());
@@ -758,50 +758,23 @@ void which_nonzero(const matrix & basis, int N, int M, matrixI & index) { //chec
 //   }
 //   int half = (N + 1)/2;
 //   if (N % 2 == 1){
-//     vector x_sort = sort_partial(x, half-1);
+//     VectorXd x_sort = sort_partial(x, half-1);
 //     med = x_sort;
 //   } else {
-//     vector x_sort = sort_partial(x, half);
+//     VectorXd x_sort = sort_partial(x, half);
 //     med = 0.5 * ( x_sort(half) + x_sort(half - 1) );
 //   }
 //   return(med);
 // }
 
-double dist_approx_ot(const refVecConst & mass_a, const refVecConst & mass_b,
-                const vector & r, const vector & c, int p) {
-  vector rdiff = r - mass_a;
-  vector cdiff = c - mass_b;
-  double out = 0.0;
-  if(p == 2) {
-    out = rdiff.norm() + cdiff.norm();
-  } else if ( p == 1) {
-    out = rdiff.lpNorm<1>() + cdiff.lpNorm<1>();
-  } else {
-    Rcpp::stop("Other norms not supported");
-  }
-  return (out);
-}
-
-double rho_ot(const vector & a, const vector & b) {
-  return ( (b  - a).sum() +  (a.array() *( a.array().log() - b.array().log() )).sum());
-}
-
-vector rho_vec(const vector & a, const vector & b) {
-  return ( b.array()  - a.array() +  a.array() * ( a.array().log() - b.array().log() ) );
-}
-
-double rho(double a, double b) {
-  return(b  - a + a * (std::log(a) - std::log(b)));
-}
-
 double f_randk(const refVecConst & mass_a, const refVecConst & mass_b, const matrix & exp_cost,
-         vector & u, vector & v) {
+         VectorXd & u, VectorXd & v) {
   return ( ((u.array().exp()).matrix().asDiagonal() * exp_cost * (v.array().exp()).matrix().asDiagonal() ).sum() - 
            u.dot(mass_a) - v.dot(mass_b) );
 }
 
 void argmin_f(const refVecConst & mass_a, const refVecConst & mass_b, const matrix & exp_cost,
-              vector & u, vector & v, vector & y_u, vector & y_v, vector & u_hat, vector & v_hat) 
+              VectorXd & u, VectorXd & v, VectorXd & y_u, VectorXd & y_v, VectorXd & u_hat, VectorXd & v_hat) 
 {
   double f_hat = f_randk(mass_a, mass_b, exp_cost, u_hat, v_hat);
   double f_y = f_randk(mass_a, mass_b, exp_cost, y_u, y_v);
@@ -838,28 +811,28 @@ void argmin_f(const refVecConst & mass_a, const refVecConst & mass_b, const matr
 //   }
 //   return(0.0);
 // }
-
-double median(refMat A) {
-  if ( A.size() == 0) {
-    Rcpp::stop("Can't take the median of an empty matrix.");
-  }
-  int size = A.size();
-  int middleIdx = size/2;
-  matrix A_copy = A;
-  double * begin = A_copy.data();
-  double * end = begin + size;
-  double * target = begin + middleIdx;
-  std::nth_element( begin, target, end);
-  double a = *target;
-  //
-  if (size % 2 != 0) { //Odd number of elements
-    return (a);
-  } else {            //Even number of elements
-    double * targetNeighbor = target-1;
-    std::nth_element(begin, targetNeighbor, end);
-    double an = *targetNeighbor;
-    return ( (a + an)/2.0);
-  }
-  // return(0.0);
-}
+// 
+// double median(refMat A) {
+//   if ( A.size() == 0) {
+//     Rcpp::stop("Can't take the median of an empty matrix.");
+//   }
+//   int size = A.size();
+//   int middleIdx = size/2;
+//   matrix A_copy = A;
+//   double * begin = A_copy.data();
+//   double * end = begin + size;
+//   double * target = begin + middleIdx;
+//   std::nth_element( begin, target, end);
+//   double a = *target;
+//   //
+//   if (size % 2 != 0) { //Odd number of elements
+//     return (a);
+//   } else {            //Even number of elements
+//     double * targetNeighbor = target-1;
+//     std::nth_element(begin, targetNeighbor, end);
+//     double an = *targetNeighbor;
+//     return ( (a + an)/2.0);
+//   }
+//   // return(0.0);
+// }
 

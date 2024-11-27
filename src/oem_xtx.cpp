@@ -63,7 +63,7 @@ void oemXTX_gen::compute_XtX_d_update_A()
   // Rcpp::Rcout << "what's happening??\n";
   eigs.init();
   eigs.compute(10000, 1e-10); // values are iterations and tolerance
-  Vector eigenvals = eigs.eigenvalues();
+  vectorxd eigenvals = eigs.eigenvalues();
   d = eigenvals[0] * 1.005; // multiply by an increasing factor to be safe
   
   Eigen::MatrixXd temp_A = -XXmat;
@@ -190,15 +190,15 @@ void oemXTX_gen::next_beta(MatrixXd &res)
     soft_threshold(beta, u, lam, penalty_factor, denom);
   } else if (is_projection) {
     int P = beta.rows();
-    vector norms = u.rowwise().norm();
-    vector thresh(P);
+    vectorxd norms = u.rowwise().norm();
+    vectorxd thresh(P);
     double denom = d;
     if ( penalty == "projection.elastic.net" || penalty == "projection.scad.net"  || penalty == "projection.mcp.net") {
       denom += (1.0 - alpha) * lambda;
     }
     if (found_grp_idx) {
       P = ngroups;
-      vector gnorm_vec(P);
+      vectorxd gnorm_vec(P);
       for (int g = 0; g < ngroups; g++) {
         double gnorm = 0.0;
         std::vector<int> grp_tmp = grp_idx[g];
@@ -246,7 +246,7 @@ void oemXTX_gen::next_beta(MatrixXd &res)
       
     }
     if (found_grp_idx) {
-      vector thresh_temp(P);
+      vectorxd thresh_temp(P);
       for(int i = 0; i <P ; i++) thresh_temp(i) = thresh(i);
       for(int g = 0; g < ngroups; g++){
         double tt_copy = thresh_temp(g);
@@ -291,7 +291,7 @@ double oemXTX_gen::compute_lambda_zero(std::string penalty_)
 { //maybe change this
   // lambda0 = XY.cwiseAbs().maxCoeff();
   int temp_size = XY.rows();
-  vector temp(temp_size);
+  vectorxd temp(temp_size);
   
   if (!found_grp_idx) {
     penalty = penalty_;
@@ -299,7 +299,7 @@ double oemXTX_gen::compute_lambda_zero(std::string penalty_)
   }
   
   if (XY.cols() > 1 && found_grp_idx) {
-    vector xy_temp = XY.rowwise().squaredNorm();
+    vectorxd xy_temp = XY.rowwise().squaredNorm();
     temp.resize(ngroups);
     temp.fill(0.0);
     

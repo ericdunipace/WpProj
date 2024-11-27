@@ -8,7 +8,7 @@ L0_method_options(
   method = c("binary program", "projection"),
   transport.method = transport_options(),
   epsilon = 0.05,
-  OTmaxit = 100,
+  OTmaxit = 0,
   parallel = NULL,
   ...
 )

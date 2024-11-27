@@ -155,7 +155,7 @@ dist_fun <- function(mulist, mu, p, ground_p, method, observation.orientation, p
           denom <- max(ncol(mu), ncol(m))
           sqrt(sum((c(m) - c(mu))^2)/denom)
         } else {
-          WpProj::wasserstein(X = m, Y = mu, p = p, 
+          approxOT::wasserstein(X = m, Y = mu, p = p, 
                                        ground_p = ground_p, 
                                        observation.orientation = observation.orientation, 
                                        method = method, ...)

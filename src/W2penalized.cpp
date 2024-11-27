@@ -7,7 +7,7 @@
 #include <progress_bar.hpp>
 #include "eta_progress_bar.h"
 // #include "updateLambda.h"
-#include "transport.h"
+#include <approxOT/transport.h>
 // #include <thread>
 // #include <chrono>
 // 
@@ -55,7 +55,7 @@ SEXP W2penalized(SEXP X_,
   matrix xtx = matrix::Zero(p, p);
   matrix xty = matrix::Zero(p, 1); //may be resized in suff stat function
   
-  vector scale_factor(as<vector>(scale_factor_));
+  vectorxd scale_factor(as<vectorxd>(scale_factor_));
   const vectorI groups(as<vectorI>(groups_));
   const vectorI unique_groups(as<vectorI>(unique_groups_));
   
@@ -64,16 +64,16 @@ SEXP W2penalized(SEXP X_,
   //   1/(2n) * ||y - X * beta||^2 + lambda * ||beta||_1
   // which is equivalent to minimizing
   //   1/2 * ||y - X * beta||^2 + n * lambda * ||beta||_1
-  vector group_weights(as<vector>(group_weights_));
+  vectorxd group_weights(as<vectorxd>(group_weights_));
   
   
-  std::vector<vector> lambda(as< std::vector<vector> >(lambda_));
+  std::vector<vectorxd> lambda(as< std::vector<vectorxd> >(lambda_));
   
-  vector lambda_tmp;
+  vectorxd lambda_tmp;
   lambda_tmp = lambda[0];
   
   int nl = as<int>(nlambda_);
-  vector lambda_base(nl);
+  vectorxd lambda_base(nl);
   
   int nlambda = lambda_tmp.size();
   
@@ -102,7 +102,7 @@ SEXP W2penalized(SEXP X_,
   
   CharacterVector family(as<CharacterVector>(family_));
   std::string penalty(as< std::string >(penalty_));
-  vector penalty_factor(as<vector>(penalty_factor_));
+  vectorxd penalty_factor(as<vectorxd>(penalty_factor_));
   
   // matrix xty_temp = matrix::Zero(p,N);
   // const double pseudo_obs = as<double>(pseudo_obs_);
@@ -182,7 +182,7 @@ SEXP W2penalized(SEXP X_,
   double lmax = 0.0;
   lmax = solver->compute_lambda_zero(penalty); //
   
-  bool provided_lambda = false;
+  // bool provided_lambda = false;
   std::string elasticnettxt(".net");
   bool is_net_pen = penalty.find(elasticnettxt) != std::string::npos;
   
@@ -207,7 +207,7 @@ SEXP W2penalized(SEXP X_,
     }
     
   } else {
-    provided_lambda = true;
+    // provided_lambda = true;
     lambda_tmp = lambda[0];
   }
   
@@ -226,7 +226,7 @@ SEXP W2penalized(SEXP X_,
   double ilambda = 0.0;
   // double num_tol = Eigen::NumTraits<double>::dummy_precision();
   
-  vector loss(nlambda);
+  vectorxd loss(nlambda);
   loss.fill(1e99);
   innerIter.fill(0);
   
@@ -243,7 +243,7 @@ SEXP W2penalized(SEXP X_,
   // }
   
   // const matrix xty_original = xty;
-  // vector best_lambda(p);
+  // vectorxd best_lambda(p);
   
   
   for (int i = 0; i < nlambda; i++)

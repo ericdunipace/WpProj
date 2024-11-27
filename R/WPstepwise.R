@@ -39,7 +39,7 @@ WPSW <- function(X, Y, theta, power = 2,
                  direction = c("backward","forward"), 
                  method=c("selection.variable","scale","projection"),
                  transport.method = transport_options(),
-                 OTmaxit = 100,
+                 OTmaxit = 0,
                  epsilon = 0.05,
                  calc.theta = TRUE,
                  model.size = NULL,
@@ -72,9 +72,9 @@ WPSW <- function(X, Y, theta, power = 2,
   }
   method <- match.arg(method)
   transport.method <- match.arg(transport.method, transport_options())
+  if(missing(OTmaxit) ||is.null(OTmaxit)) OTmaxit <- switch(transport.method, "exact" = 0L, 100L)
   if(!is.null(force)) stopifnot(is.numeric(force))
   if(is.null(epsilon)) epsilon <- 0.05
-  if(is.null(OTmaxit)) OTmaxit <- 100
   
   if(!is.null(parallel)){
     if(!inherits(parallel, "cluster")) {
@@ -122,7 +122,7 @@ WPSW <- function(X, Y, theta, power = 2,
                         OToptions, obs.direction, ...) {
       idx <- c(which(in.idx),j)
       temp_mu <- crossprod(X[idx,, drop=FALSE], theta[idx,, drop=FALSE])
-      wp <- WpProj::wasserstein(X = sort_mu, Y = temp_mu, 
+      wp <- approxOT::wasserstein(X = sort_mu, Y = temp_mu, 
                                          p = p, ground_p = ground_p, 
                                          observation.orientation = obs.direction, 
                                          method = OToptions$transport.method, 
@@ -137,7 +137,7 @@ WPSW <- function(X, Y, theta, power = 2,
       temp.in.idx[ j ] <- FALSE
       idx <- which( temp.in.idx )
       temp_mu <- crossprod(X[idx,, drop=FALSE], theta[idx,, drop=FALSE])
-      wp <- WpProj::wasserstein(X = sort_mu, Y = temp_mu, 
+      wp <- approxOT::wasserstein(X = sort_mu, Y = temp_mu, 
                                          p = p, ground_p = ground_p, 
                                          observation.orientation = obs.direction, 
                                          method = OToptions$transport.method, 
@@ -162,14 +162,13 @@ WPSW <- function(X, Y, theta, power = 2,
       # tsortmu <- t(sort_mu)
       # if(method == "projection") {
         # transp <- transport_plan(sortmu, temp_mu, p, p, "colwise", "exact")
-      wp <- WpProj::wasserstein(X = sort_mu, Y = temp_mu, 
+      wp <- approxOT::wasserstein(X = sort_mu, Y = temp_mu, 
                                          p = p, ground_p = ground_p, 
                                          observation.orientation = obs.direction, 
                                          method = OToptions$transport.method, 
                                          epsilon = OToptions$epsilon, niter = OToptions$niter)
       # } else {
-      #   wp <- WpProj::wasserstein(sort_mu, temp_mu, p = p, ground_p = p, "colwise", 
-      #                                      method=transport.method)
+      #   wp <- approxOT::wasserstein(sort_mu, temp_mu, p = p, ground_p = p, observation.orientation = "colwise",method = transport.method)
       # }
       return(list(wp = wp, beta = beta))
     }
@@ -190,13 +189,13 @@ WPSW <- function(X, Y, theta, power = 2,
       # tsortmu <- t(sort_mu)
       # if(method == "projection") {
         # transp <- transport_plan(tsortmu, temp_mu, p, p, "colwise", "exact")
-      wp <- WpProj::wasserstein(X = sort_mu, Y = temp_mu, 
+      wp <- approxOT::wasserstein(X = sort_mu, Y = temp_mu, 
                                          p = p, ground_p = ground_p, 
                                          observation.orientation = obs.direction, 
                                          method = OToptions$transport.method, 
                                          epsilon = OToptions$epsilon, niter = OToptions$niter)
       # } else {
-      #   wp <- WpProj::wasserstein(sort_mu, temp_mu, p = p, ground_p = p, "colwise", 
+      #   wp <- approxOT::wasserstein(sort_mu, temp_mu, p = p, ground_p = p, observation.orientation = "colwise", 
       #                                      method=transport.method)
       # }
       return (list(wp = wp, beta = beta))
@@ -232,7 +231,7 @@ WPSW <- function(X, Y, theta, power = 2,
     wP <- rep(Inf,d)
     temp_idx <- which(in.idx)
     temp_mu <- crossprod(X_[temp_idx, , drop=FALSE], theta[temp_idx, ,drop=FALSE])
-    wP_traj[1] <- WpProj::wasserstein(temp_mu, Y_, p, ground_p, obs.direction, transport.method, epsilon = epsilon, niter = OTmaxit)
+    wP_traj[1] <- approxOT::wasserstein(X = temp_mu, Y = Y_, p = p, ground_p = ground_p, observation.orientation = obs.direction, method = transport.method, epsilon = epsilon, niter = OTmaxit)
     # wP_traj[1] <- mean((Y_ - temp_mu)^2)
      
     cand <- NULL

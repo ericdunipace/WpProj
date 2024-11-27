@@ -49,3 +49,7 @@ register_solver <- function(solution.method) {
          cplex = ROI::ROI_require_solver("cplex")
   )
 }
+
+is_inst <- function(pkg) {
+  nzchar(find.package(pkg, quiet=TRUE))
+}

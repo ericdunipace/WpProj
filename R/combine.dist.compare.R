@@ -118,6 +118,8 @@ combine_and_augment_distcompare <- function(...) {
 
 setOldClass("combine_distcompare")
 plot.combine_distcompare <- function (x, ylim = NULL, ylabs = c(NULL,NULL), facet.group = NULL, ...) {
+  stopifnot("'ggplot2' must be installed to use this function" = rlang::is_installed("ggplot2"))
+  stopifnot("'ggsci' must be installed to use this function" = rlang::is_installed("ggsci"))
   distances <- x
   stopifnot(inherits(distances, "combine_distcompare"))
   dots <- list(...)

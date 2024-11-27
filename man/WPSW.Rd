@@ -13,7 +13,7 @@ WPSW(
   direction = c("backward", "forward"),
   method = c("selection.variable", "scale", "projection"),
   transport.method = transport_options(),
-  OTmaxit = 100,
+  OTmaxit = 0,
   epsilon = 0.05,
   calc.theta = TRUE,
   model.size = NULL,

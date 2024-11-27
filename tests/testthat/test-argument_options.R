@@ -1,9 +1,3 @@
-test_that("transport_options returns the correct methods", {
-  expected_methods <- c("exact", "sinkhorn", "greenkhorn", "hilbert", "rank", "univariate.approximation.pwr")
-  expect_equal(transport_options(), expected_methods)
-})
-
-
 test_that("L1_penalty_options returns the correct penalties", {
   expected_penalties <- c("lasso", "ols", "mcp", "elastic.net", 
                           "scad", "mcp.net", "scad.net", "grp.lasso", 
@@ -92,7 +86,7 @@ test_that("binary_program_method_options with default arguments", {
   expect_equal(result$infimum.maxit, 100L)
   expect_equal(result$transport.method, transport_options()[1])
   expect_equal(result$epsilon, 0.05)
-  expect_equal(result$OTmaxit, 100L)
+  expect_equal(result$OTmaxit, 0L)
   expect_null(result$model.size)
   expect_equal(result$tol, 1e-7)
   expect_false(result$display.progress)
@@ -149,7 +143,7 @@ test_that("stepwise_method_options with default arguments", {
   expect_equal(result$direction, c("backward"))
   expect_equal(result$method, c("selection.variable"))
   expect_equal(result$transport.method, transport_options()[1])
-  expect_equal(result$OTmaxit, 100)
+  expect_equal(result$OTmaxit, 0)
   expect_equal(result$epsilon, 0.05)
   expect_null(result$model.size)
   expect_false(result$display.progress)
@@ -204,7 +198,7 @@ test_that("stepwise_method_options with method argument", {
 test_that("stepwise_method_options with transport.method argument", {
   valid_methods <- transport_options()
   for (method in valid_methods) {
-    expect_true(is.list(stepwise_method_options(transport.method = method)))
+    testthat::expect_true(is.list(stepwise_method_options(transport.method = method)))
   }
   expect_error(stepwise_method_options(transport.method = "invalid_transport"))
 })
@@ -305,16 +299,16 @@ test_that("simulated_annealing_method_options with method argument", {
 
 # Tests for the 'transport.method' argument
 test_that("simulated_annealing_method_options with transport.method argument", {
-  valid_methods <- transport_options()
+  valid_methods <- WpProj::transport_options()
   for (method in valid_methods) {
-    expect_true(is.list(simulated_annealing_method_options(transport.method = method)))
+    testthat::expect_true(is.list(simulated_annealing_method_options(transport.method = method)))
   }
   expect_error(simulated_annealing_method_options(transport.method = "invalid_transport"))
 })
 
 # Tests for the 'OTmaxit' argument
 test_that("simulated_annealing_method_options with OTmaxit argument", {
-  expect_true(is.list(simulated_annealing_method_options(OTmaxit = 100L)))
+  expect_true(is.list(simulated_annealing_method_options(OTmaxit = 0L)))
   expect_error(simulated_annealing_method_options(OTmaxit = -1))
 })
 
@@ -415,7 +409,7 @@ test_that("edge cases for method argument in simulated_annealing_method_options"
 # Edge case tests for the 'OTmaxit' argument
 test_that("edge cases for OTmaxit argument in simulated_annealing_method_options", {
   # Test with zero (if valid)
-  expect_error(is.list(simulated_annealing_method_options(OTmaxit = 0L)))
+  expect_error(is.list(simulated_annealing_method_options(OTmaxit = -1L)))
   # Test with a very large number
   expect_true(is.list(simulated_annealing_method_options(OTmaxit = 100000L)))
 })
@@ -459,7 +453,7 @@ test_that("default arguments work correctly", {
   expect_equal(result$method, "selection.variable")
   expect_is(result$transport.method, "character") # or appropriate type
   expect_equal(result$epsilon, 0.05)
-  expect_equal(result$OTmaxit, 100L)
+  expect_equal(result$OTmaxit, 0L)
   expect_null(result$parallel)
 })
 

@@ -20,7 +20,7 @@ WPSA(
   options = list(method = c("selection.variable", "scale", "projection"),
     transport.method = transport_options(), energy.distribution = "boltzman",
     cooling.schedule = "Geman-Geman", proposal.method = "covariance", epsilon = 0.05,
-    OTmaxit = 100),
+    OTmaxit = 0),
   display.progress = FALSE,
   parallel = NULL,
   calc.theta = TRUE,

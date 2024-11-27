@@ -32,7 +32,7 @@
 WPL0 <- function(X, Y = NULL, theta, power = 2,
                  method = c("selection.variable", "projection"),
                  transport.method = transport_options(),
-                 epsilon = 0.05, OTmaxit = 100,
+                 epsilon = 0.05, OTmaxit = 0,
                  parallel = NULL, ...) {
   this.call <- as.list(match.call()[-1])
   d <- ncol(X)
@@ -41,6 +41,7 @@ WPL0 <- function(X, Y = NULL, theta, power = 2,
   transport.method <- match.arg(transport.method, transport_options())
   obs.direction <- "colwise"
   p <- ground_p <- power
+  if(missing(OTmaxit) ||is.null(OTmaxit)) OTmaxit <- switch(transport.method, "exact" = 0L, 100L)
   
   # if (grepl("univariate", transport.method) ) {
   #   obs.direction <- "rowwise"

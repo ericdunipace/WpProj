@@ -8,7 +8,7 @@ simulated_annealing_method_options(
   force = NULL,
   method = c("binary program", "projection"),
   transport.method = transport_options(),
-  OTmaxit = 100L,
+  OTmaxit = 0L,
   epsilon = 0.05,
   maxit = 1L,
   temps = 1000L,

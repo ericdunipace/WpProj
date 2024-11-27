@@ -13,7 +13,7 @@ WPVI(
   ground_p = 2,
   transport.method = transport_options(),
   epsilon = 0.05,
-  OTmaxit = 100,
+  OTmaxit = 0,
   display.progress = FALSE,
   parallel = NULL
 )

@@ -62,12 +62,12 @@ test_that("WPR2 works", {
   r2_check <- 1 - dist$predictions$dist^2/maxes[as.numeric(dist$predictions$groups)]^2
     
   r2_mat <- WpProj:::WPR2.matrix(post_mu, test$fitted.values[[1]], p = 2, method  ="exact")
-  r2_mat_check <- 1 - (WpProj::wasserstein(t(post_mu), t(test$fitted.values[[1]]),
+  r2_mat_check <- 1 - (approxOT::wasserstein(X = t(post_mu), Y =  t(test$fitted.values[[1]]),
                                          p = 2, ground_p = 2,
                                          method = "exact", 
                                          observation.orientation = "colwise")^2/
-    WpProj::wasserstein(t(post_mu), 
-                       t(matrix(colMeans(post_mu), nrow(post_mu),
+    approxOT::wasserstein(X = t(post_mu), 
+                       Y = t(matrix(colMeans(post_mu), nrow(post_mu),
                           ncol(post_mu), byrow=TRUE)),
                        p = 2, ground_p = 2,
                        method = "exact", 
@@ -82,12 +82,12 @@ test_that("WPR2 works", {
   out$`relaxed bp`$fitted.values <- out$`relaxed bp`$fitted.values
   
   r2_wpproj <- WpProj:::WPR2(post_mu, out, p = 2, method  ="exact")
-  r2_wpproj_check <- 1 - (WpProj::wasserstein(post_mu, proj$fitted.values[[1]],
+  r2_wpproj_check <- 1 - (approxOT::wasserstein(X = post_mu, Y = proj$fitted.values[[1]],
                                             p = 2, ground_p = 2,
                                             method = "exact", 
                                             observation.orientation = "colwise")^2/
-                           WpProj::wasserstein(post_mu, 
-                                              matrix(colMeans(post_mu), nrow(post_mu),
+                           approxOT::wasserstein(X = post_mu, 
+                                              Y = matrix(colMeans(post_mu), nrow(post_mu),
                                                      ncol(post_mu), byrow=TRUE),
                                               p = 2, ground_p = 2,
                                               method = "exact", 

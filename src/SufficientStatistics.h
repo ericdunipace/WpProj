@@ -3,9 +3,9 @@
 
 #include "WpProj_types.h"
 #include <vector>
-#include "sort.h"
+#include <approxOT/sort.h>
 #include "utils.h"
-#include "transport.h"
+#include <approxOT/transport.h>
 
 using namespace Rcpp;
 

@@ -426,16 +426,16 @@ testthat::test_that("W2L1 matches oem, exact",{
   transp <- "exact"
   
   otopt <- list(same = TRUE, method = "selection.variable",
-                transport.method = transp, epsilon = 0.05, niter = 100)
+                transport.method = transp, epsilon = 0.05, niter = 0)
   otoptdiff <- list(same = FALSE, method = "selection.variable",
-                    transport.method = transp, epsilon = 0.05, niter = 100)
-  suffstat <- sufficientStatistics(x,post_mu, t(theta), otopt)
-  suffstatd <- sufficientStatistics(x,post_diff, t(theta), otoptdiff)
-  suffstatdd <- sufficientStatistics(x,post_vdiff, t(theta), otoptdiff)
+                    transport.method = transp, epsilon = 0.05, niter = 0)
+  suffstat <- WpProj:::sufficientStatistics(x,post_mu, t(theta), otopt)
+  suffstatd <- WpProj:::sufficientStatistics(x,post_diff, t(theta), otoptdiff)
+  suffstatdd <- WpProj:::sufficientStatistics(x,post_vdiff, t(theta), otoptdiff)
   
   #compare to oem
   check <- oem::oem.xtx(xtx=suffstat$XtX, xty=suffstat$XtY, family="gaussian",penalty="ols", lambda=0,maxit=10000, scale.factor = sqrt(diag(suffstat$XtX)))
-  w2 <- W2L1(X=x, Y=NULL, 
+  w2 <- WpProj:::W2L1(X=x, Y=NULL, 
              theta=theta, penalty="ols",
              nlambda = 1, lambda.min.ratio = lambda.min.ratio,
              infimum.maxit=1, maxit = 1e3, gamma = gamma, 
@@ -450,7 +450,7 @@ testthat::test_that("W2L1 matches oem, exact",{
   testthat::expect_equal(c(w2$xty), c(suffstat$XtY)) #xty same!
   
   check2 <- oem::oem.xtx(xtx=suffstatd$XtX, xty=suffstatd$XtY, family="gaussian",penalty="ols", lambda=0,maxit=10000, scale.factor = sqrt(diag(suffstatd$XtX)))
-  w22 <- W2L1(X=x, Y=post_diff, 
+  w22 <- WpProj:::W2L1(X=x, Y=post_diff, 
               theta=theta, penalty="ols",
               nlambda = 1, lambda.min.ratio = lambda.min.ratio,
               infimum.maxit=1, maxit = 1e3, gamma = gamma, 
@@ -463,7 +463,7 @@ testthat::test_that("W2L1 matches oem, exact",{
   testthat::expect_equal(c(w22$xty), c(suffstatd$XtY)) #xty same!
   
   check3 <- oem::oem.xtx(xtx=suffstatdd$XtX, xty=suffstatdd$XtY, family="gaussian",penalty="ols", lambda=0,maxit=10000, scale.factor = sqrt(diag(suffstatdd$XtX)))
-  w23 <- W2L1(X=x, Y=post_vdiff, 
+  w23 <- WpProj:::W2L1(X=x, Y=post_vdiff, 
               theta=theta, penalty="ols",
               nlambda = 1, lambda.min.ratio = lambda.min.ratio,
               infimum.maxit=1, maxit = 1e3, gamma = gamma, 

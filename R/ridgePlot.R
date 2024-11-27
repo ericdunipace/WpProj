@@ -37,7 +37,9 @@ ridgePlot <- function(fit, index = 1, minCoef = 1,maxCoef = 10,
                       scale = 1, alpha = 0.5, full = NULL, 
                       transform = function(x){x}, xlab = "Predictions",
                       bandwidth = NULL) {
-  
+  stopifnot("'ggplot2' must be installed to use this function" = rlang::is_installed("ggplot2"))
+  stopifnot("'ggridges' must be installed to use this function" = rlang::is_installed("ggridges"))
+  stopifnot("'ggsci' must be installed to use this function" = rlang::is_installed("ggsci"))
   idx <- index
   conditions <- list(idx = idx,
                      maxCoef = maxCoef,

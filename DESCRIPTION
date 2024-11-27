@@ -1,8 +1,8 @@
 Package: WpProj
 Type: Package
 Title: Linear p-Wasserstein Projections
-Version: 0.2.2
-Date: 2024-01-31
+Version: 0.2.3
+Date: 2024-11-13
 Authors@R: 
   c(
   person(given = "Eric", 
@@ -56,9 +56,7 @@ Description: Performs Wasserstein projections from the predictive distributions 
 License: GPL (==3.0)
 Depends: R (>= 4.0)
 Imports: 
-  ggplot2,
-  ggsci,
-  ggridges,
+  approxOT (>= 1.2),
   glmnet,
   oem,
   Rcpp,
@@ -79,13 +77,17 @@ Imports:
   slam,
   lifecycle
 LinkingTo: 
+  approxOT (>= 1.2),
   BH,
   Rcpp (>= 1.0.0), 
+  RcppCGAL (>= 6.0.1),
   RcppEigen (>= 0.3.3.4.0), 
   RcppProgress,
-  RcppCGAL,
   RSpectra
 Suggests: 
+  ggplot2,
+  ggsci,
+  ggridges,
   testthat (>= 2.1.0),
   transport,
   Rmosek,
@@ -95,6 +97,6 @@ RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/ericdunipace/WpProj
 BugReports: https://github.com/ericdunipace/WpProj/issues
-Encoding: UTF-8
 SystemRequirements: C++17
+Encoding: UTF-8
 Language: en-US
