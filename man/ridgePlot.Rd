@@ -60,6 +60,8 @@ post_mu <- x \%*\% post_beta
 fit <-  WpProj(X=x, eta=post_mu, 
              power = 2
 )
+if(rlang::is_installed(c("ggplot2","ggsci","ggridges"))) {
 ridgePlot(fit)
+}
 }
 }

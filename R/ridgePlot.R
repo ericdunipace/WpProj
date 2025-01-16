@@ -31,7 +31,9 @@
 #' fit <-  WpProj(X=x, eta=post_mu, 
 #'              power = 2
 #' )
+#' if(rlang::is_installed(c("ggplot2","ggsci","ggridges"))) {
 #' ridgePlot(fit)
+#' }
 #' }
 ridgePlot <- function(fit, index = 1, minCoef = 1,maxCoef = 10, 
                       scale = 1, alpha = 0.5, full = NULL, 

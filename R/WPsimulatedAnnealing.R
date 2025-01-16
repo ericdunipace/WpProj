@@ -46,7 +46,7 @@
 # }
 WPSA <- function(X, Y=NULL, theta, 
                  power = 2, force = NULL, 
-                 model.size = 3,
+                 model.size = NULL,
                  nvars = NULL,
                  # groups = NULL,
                  maxit=1, temps = 1000,

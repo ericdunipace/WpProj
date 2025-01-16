@@ -48,7 +48,7 @@ WPL1 <- function(X, Y=NULL, theta = NULL, power = 2.0,
                  lambda = numeric(0),
                  nlambda = 100L,
                  lambda.min.ratio = 1e-4,
-                 gamma = 1, maxit = 500L,
+                 gamma = 1, alpha = 1, maxit = 500L,
                  tol = 1e-07, ...)
 {
   pot.args <- c(as.list(environment()), list(...))
@@ -91,11 +91,11 @@ WPL1 <- function(X, Y=NULL, theta = NULL, power = 2.0,
     # f.call <- as.call(c(list(as.name("lp_reg")), argn))
     # output <- eval(f.call, envir = lp.args)
     dots <- list(...)
-    if(is.null(dots$alpha)) dots$alpha <- 1
+    # if(is.null(dots$alpha)) dots$alpha <- 1
     if(is.null(dots$tau)) dots$tau <- 0.5
     if(is.null(dots$display.progress)) dots$display.progress <- FALSE
     output <- lp_reg(x = X, y = Y, theta = theta, power = power, gamma = gamma,
-                     alpha = dots$alpha,
+                     alpha = alpha,
                      tau = dots$tau,
                      penalty = penalty,
                      penalty.factor = dots$penalty.factor,

@@ -221,6 +221,7 @@ W2IP <- function(X, Y=NULL, theta,
   QP <- QP_orig <- qp_w2(ss$XtX,ss$XtY,1)
   # LP <- ROI::ROI_reformulate(QP,"lp",method = "bqp_to_lp" )
   alpha <- alpha_save <- rep(0,p)
+  obj <- obj_save <- Inf
   beta <- matrix(0, nrow = p, ncol = p_star)
   iter.seq <- rep(0, p_star)
   comb <- function(x, ...) {
@@ -241,6 +242,7 @@ W2IP <- function(X, Y=NULL, theta,
        QP <- QP_orig
        QP$constraints$rhs[1L] <- m
        results <- list(NULL, NULL)
+       obj_save <- Inf
        for(inf in 1:options$infm_maxit) {
          TP <- translate(QP, solution.method)
          # sol.meth <- if ( solution.method == "cone" && !("cone" %in% names(TP)) ) {
@@ -257,16 +259,21 @@ W2IP <- function(X, Y=NULL, theta,
                          "gurobi" = sol,
                          "mosek" = sol,
                          ROI::solution(sol)[1:p])
+         obj <- c(0.5 * t(alpha) %*% (QP$objective$Q) %*% alpha - QP$objective$L %*% alpha)
          if(all(is.na(alpha))) {
            warning("Likely terminated early")
            break
          }
-         if(not.converged(alpha, alpha_save, tol)){
+         if(not.converged(alpha, alpha_save, tol) || 
+            not.converged(obj, obj_save, tol)){
            alpha_save <- alpha
+           obj_save <- obj
+           
            Ytemp <- selVarMeanGen(X_, theta_, as.double(alpha))
-           xty <- xtyUpdate(X, Ytemp, theta_, result_ = alpha, 
+           xty   <- xtyUpdate(X, Ytemp, theta_, result_ = alpha, 
                                              OToptions)
-           QP <- qp_w2(xtx,xty,m)
+           QP$objective$L$v <- c(-2*xty)
+           
          } else {
            break
          }
@@ -324,6 +331,9 @@ qp_w2 <- function(xtx, xty, K) {
   LC1 <- ROI::L_constraint(A1, ROI::eq(1), K)
   ROI::constraints(op) <- LC1
   ROI::types(op) <- rep.int("B", d)
+  
+  op$Upper <- chol(Q0)
+  
   return(op)
 }
 
@@ -364,30 +374,42 @@ qp_w2 <- function(xtx, xty, K) {
 
 mosek_solver <- function(problem, opts = NULL, start) {
   
-  num_param <- length(problem$objective$L$v)
-  # qobj <- Matrix::sparseMatrix(i = problem$objective$Q$i,
+  cc        <- as.numeric(problem$objective$L$v)
+  num_param <- length(cc)
+  # Q <- Matrix::sparseMatrix(i = problem$objective$Q$i,
   #                              j = problem$objective$Q$j,
-  #                              x = problem$objective$Q$v/2)
-  lower.tri <- which(problem$objective$Q$j <= problem$objective$Q$i)
+  #                              x = problem$objective$Q$v )
+  Upper<- problem$Upper
+  prob <- Rmosek::mosek_qptoprob(F = Upper, f = cc, 
+                                 Aeq = Matrix::sparseMatrix(i=problem$constraints$L$i,
+                                                          j = problem$constraints$L$j,
+                                                          x = problem$constraints$L$v),
+                                 beq = problem$constraints$rhs,
+                                 lb = rep(0,num_param),
+                                 ub = rep(1, num_param))
+  
+  # lower.tri <- which(problem$objective$Q$j <= problem$objective$Q$i)
   # trimat <- Matrix::tril(qobj)
-  prob <-  list(sense = "min",
-                c = problem$objective$L$v,
-                A = Matrix::sparseMatrix(i=problem$constraints$L$i,
-                                         j = problem$constraints$L$j,
-                                         x = problem$constraints$L$v),
-                bc = rbind(problem$constraints$rhs, problem$constraints$rhs),
-                bx = rbind(rep(0,num_param), rep(1, num_param)),
-                qobj = list(i =  problem$objective$Q$i[lower.tri], 
-                             j =  problem$objective$Q$j[lower.tri], 
-                             v =  problem$objective$Q$v[lower.tri]/2),
-                sol = list(int = list(xx = start)),
-                intsub = 1:num_param)
+  # prob$sol = list(int = list(xx = start))
+  prob$intsub = 1:num_param
+  # prob <-  list(sense = "min",
+  #               c = cc,
+  #               A = Matrix::sparseMatrix(i=problem$constraints$L$i,
+  #                                        j = problem$constraints$L$j,
+  #                                        x = problem$constraints$L$v),
+  #               bc = rbind(problem$constraints$rhs, problem$constraints$rhs),
+  #               bx = rbind(rep(0,num_param), rep(1, num_param)),
+  #               qobj = list(i =  problem$objective$Q$i[lower.tri],
+  #                            j =  problem$objective$Q$j[lower.tri],
+  #                            v =  problem$objective$Q$v[lower.tri]/2),
+  #               sol = list(int = list(xx = start)),
+  #               intsub = 1:num_param)
   
   if(is.null(opts) | length(opts) == 0) opts <- list(verbose = 0)
   
   res <- Rmosek::mosek(prob, opts)
   
-  sol <- as.integer(res$sol$int$xx)
+  sol <- round(res$sol$int$xx[1:num_param])
   
   return(sol)
 }

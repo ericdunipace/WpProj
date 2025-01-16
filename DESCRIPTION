@@ -80,8 +80,8 @@ LinkingTo:
   approxOT (>= 1.2),
   BH,
   Rcpp (>= 1.0.0), 
-  RcppCGAL (>= 6.0.1),
-  RcppEigen (>= 0.3.3.4.0), 
+  RcppCGAL,
+  RcppEigen, 
   RcppProgress,
   RSpectra
 Suggests: 

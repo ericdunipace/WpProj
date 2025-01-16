@@ -80,7 +80,9 @@ fit.p2     <-  WpProj(X=x, eta=post_mu, power = 2.0,
 ## approximate binary program
 fit.p2.bp <-  WpProj(X=x, eta=post_mu, theta = post_beta, power = 2.0,
                    method = "binary program",
-                   solver = "lasso" #default because approximate algorithm is faster
+                   solver = "lasso" 
+                   # this is the default because 
+                   # the approximate algorithm is faster
 )
 ```
 
@@ -97,9 +99,11 @@ p$predictions + ggplot2::ggtitle("Predictions")
 dc <- distCompare(models = list("L1" = fit.p2, "Binary Program" = fit.p2.bp),
                   target = list(parameters = post_beta,
                                   predictions = post_mu))
+if(rlang::is_installed(c("ggplot2","ggsci"))) {
 p <- plot(dc, ylabs = c("2-Wasserstein Distance", "2-Wasserstein Distance"))
 p$parameters + ggplot2::ggtitle("Parameters")
 p$predictions + ggplot2::ggtitle("Predictions")
+}
 ```
 
 We can also compare performacne by measure the relative distance between a null model and the predictions of interest as a pseudo $R^2$
@@ -117,9 +121,22 @@ We can also examine how the predictions change in the models as more covariates 
 ridgePlot(fit.p2, index = 21, minCoef = 0, maxCoef = 10)
 ```
 ```{r ridgeplots_noecho, echo = FALSE, results = 'hide', out.width="70%"}
-ridgePlot(fit.p2, index = 21, minCoef = 0, maxCoef = 10)
+if(rlang::is_installed(c("ggplot2","ggsci","ggridges"))) {
+  ridgePlot(fit.p2, index = 21, minCoef = 0, maxCoef = 10)
+}
 ```
+
 Note how the predictions get better the more coefficients are added and the distribution looks closer to the full posterior predictive.
+
+We can also compare the two models like so:
+```{r ridgeplots2, eval = FALSE}
+ridgePlot(list("L1" = fit.p2, "Binary Program" = fit.p2.bp), index = 21, minCoef = 0, maxCoef = 10, full = post_mu[21,])
+```
+```{r ridgeplots2_noecho, echo = FALSE, results = 'hide', out.width="70%"}
+if(rlang::is_installed(c("ggplot2","ggsci","ggridges"))) {
+  ridgePlot(list("L1" = fit.p2, "Binary Program" = fit.p2.bp), index = 21, minCoef = 0, maxCoef = 10, full = post_mu[21,])
+}
+```
 
 # References
 [Eric Dunipace and Lorenzo Trippa (2020).](https://arxiv.org/abs/2012.09999)

@@ -17,6 +17,7 @@ simulated_annealing_method_options(
   energy.distribution = c("boltzman", "bose-einstein"),
   cooling.schedule = c("Geman-Geman", "exponential"),
   model.size = NULL,
+  nvars = NULL,
   display.progress = FALSE,
   parallel = NULL,
   calc.theta = TRUE,
@@ -46,9 +47,11 @@ simulated_annealing_method_options(
 
 \item{cooling.schedule}{The schedule to use for cooling temperatures. One of "Geman-Geman" or "exponential". Default is "Geman-Geman".}
 
-\item{model.size}{How many coefficients should the maximum final model have?}
+\item{model.size}{How many coefficients should the maximum final model have? Ignored if \code{nvars} set.}
 
-\item{display.progress}{Logical. Should intermediate progress be displayed? TRUE or FALSE. Default is FALSE.}
+\item{nvars}{What model sizes should one check? Should be a numeric vector with maximum less than number of variables or \code{NULL.} Default is NULL. Overrides \code{model.size} if is not \code{NULL}}
+
+\item{display.progress}{Logical. Should intermediate progress be displayed? TRUE or FALSE. Default is \code{FALSE.}}
 
 \item{parallel}{A cluster backend to be used by \code{\link[foreach:foreach]{foreach::foreach()}}. See \code{\link[foreach:foreach]{foreach::foreach()}} for details about how to set them up. The \code{WpProj} functions will register the cluster with the \code{\link[doParallel:registerDoParallel]{doParallel::registerDoParallel()}} function internally.}
 

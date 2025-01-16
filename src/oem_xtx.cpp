@@ -266,6 +266,16 @@ void oemXTX_gen::next_beta(MatrixXd &res)
   } else {
     Rcpp::stop("Penalty factor not found!");
   }
+  // add constraints to [0,1]^n
+  if (selection) {
+    if (scale_len) {
+      beta.array().colwise() *= scale_factor_inv.array();
+    }
+    clipping(beta);
+    if (scale_len) {
+      beta.array().colwise() *= scale_factor.array();
+    }
+  }
 }
 
 void oemXTX_gen::init_oem()

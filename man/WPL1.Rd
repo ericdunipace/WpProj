@@ -17,6 +17,7 @@ WPL1(
   nlambda = 100L,
   lambda.min.ratio = 1e-04,
   gamma = 1,
+  alpha = 1,
   maxit = 500L,
   tol = 1e-07,
   ...

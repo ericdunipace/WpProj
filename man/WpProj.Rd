@@ -101,16 +101,22 @@ fit.p2.bp <-  WpProj(X=x, eta=post_mu, theta = post_beta, power = 2.0,
 
 ## compare performance by measuring distance from full model
 dc <- distCompare(models = list("L1" = fit.p2, "BP" = fit.p2.bp))
+if(rlang::is_installed(c("ggplot2","ggsci"))) {
 plot(dc)
+}
 
 ## compare performance by measuring the relative distance between a null model 
 ## and the predictions of interest as a pseudo R^2
 r2.expect <- WPR2(predictions = post_mu, projected_model = dc) # can have negative values
 r2.null  <- WPR2(projected_model = dc) # should be between 0 and 1
+if(rlang::is_installed(c("ggplot2","ggsci"))) {
 plot(r2.null)
+}
 
 ## we can also examine how predictions change in the models for individual observations
+if(rlang::is_installed(c("ggplot2","ggsci","ggridges"))) {
 ridgePlot(fit.p2, index = 21, minCoef = 0, maxCoef = 10)
+}
 }
 }
 \references{

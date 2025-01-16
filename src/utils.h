@@ -207,4 +207,8 @@ void argmin_f(const refVecConst & mass_a,
 // template <class RandAccessIter>
 // double median(RandAccessIter begin, RandAccessIter end);
 
+void round_Sel(MatrixXd & v);
+void clipping(MatrixXd & v);
+
+
 #endif

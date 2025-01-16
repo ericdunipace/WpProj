@@ -64,6 +64,8 @@ fit2 <-  WpProj(X=x, eta=post_mu, theta = post_beta, power = 2.0,
 )
 dc <- distCompare(models = list("L1" = fit1, "BP" = fit2),
                  target = list(parameters = post_beta, predictions = post_mu))
+if(rlang::is_installed(c("ggplot2","ggsci"))) {
 plot(dc)
+}
 }
 }

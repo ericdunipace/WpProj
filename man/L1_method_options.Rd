@@ -10,6 +10,7 @@ L1_method_options(
   nlambda = 500L,
   lambda.min.ratio = 1e-04,
   gamma = 1,
+  alpha = 1,
   maxit = 500L,
   model.size = NULL,
   tol = 1e-07,
@@ -26,7 +27,9 @@ L1_method_options(
 
 \item{lambda.min.ratio}{The minimum ratio of max to min lambda for "L1" method. Default 1e-4.}
 
-\item{gamma}{Tuning parameter for SCAD and MCP penalties if method = "L1".}
+\item{gamma}{Tuning parameter for SCAD and MCP penalties if method = "L1". \verb{>=1}}
+
+\item{alpha}{Tuning parameter for elastic net penalties \code{alpha} should be in \verb{[0,1]}.}
 
 \item{maxit}{The maximum iterations for optimization. Default is 500.}
 

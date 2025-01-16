@@ -80,7 +80,9 @@ fit.p2     <-  WpProj(X=x, eta=post_mu, power = 2.0,
 ## approximate binary program
 fit.p2.bp <-  WpProj(X=x, eta=post_mu, theta = post_beta, power = 2.0,
                    method = "binary program",
-                   solver = "lasso" #default because approximate algorithm is faster
+                   solver = "lasso" 
+                   # this is the default because 
+                   # the approximate algorithm is faster
 )
 ```
 
@@ -97,7 +99,7 @@ p$parameters + ggplot2::ggtitle("Parameters")
 p$predictions + ggplot2::ggtitle("Predictions")
 ```
 
-<img src="man/figures/README-example_continued_plot_noecho-1.png" width="70%" /><img src="man/figures/README-example_continued_plot_noecho-2.png" width="70%" />
+<img src="man/figures/README-example_continued_plot_noecho-1.png" width="70%" />
 
 We can also compare performacne by measure the relative distance between
 a null model and the predictions of interest as a pseudo $R^2$
@@ -117,8 +119,17 @@ ridgePlot(fit.p2, index = 21, minCoef = 0, maxCoef = 10)
 ```
 
 <img src="man/figures/README-ridgeplots_noecho-1.png" width="70%" />
+
 Note how the predictions get better the more coefficients are added and
 the distribution looks closer to the full posterior predictive.
+
+We can also compare the two models like so:
+
+``` r
+ridgePlot(list("L1" = fit.p2, "Binary Program" = fit.p2.bp), index = 21, minCoef = 0, maxCoef = 10, full = post_mu[21,])
+```
+
+<img src="man/figures/README-ridgeplots2_noecho-1.png" width="70%" />
 
 # References
 

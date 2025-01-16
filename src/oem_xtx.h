@@ -523,28 +523,18 @@ protected:
         res.array().colwise() *= scale_factor_inv.array();
       }
       
-      if (selection) {
-        // for( int i = 0; i < beta.size(); i ++) {
-        //   if(beta(i) != 0) {
-        //     res(i) = 1.0;
-        //   } else {
-        //     res(i) = 0.0;
-        //   }
-        // }
-        // Rcpp::Rcout << "\nProject\n";
-        // Rcpp::Rcout << "beta.size(): " << beta.size() << "\n";
-        for( int i = 0; i < beta.size(); i ++) {
-          // Rcpp::Rcout << res(i) << ", ";
-          if(res(i) >= 0.5) {
-            res(i) = 1.0;
-          } else {
-            res(i) = 0.0;
-          }
-        }
-        beta = res.array().colwise() * scale_factor.array();
-        u = beta.array() * d;
-      }
-      // Rcpp::Rcout << beta << "\n";
+      // if (selection) {
+      //   for( int i = 0; i < beta.size(); i ++) {
+      //     if(res(i) >= 0.5) {
+      //       res(i) = 1.0;
+      //     } else {
+      //       res(i) = 0.0;
+      //     }
+      //   }
+      //   beta = res.array().colwise() * scale_factor.array();
+      //   u = beta.array() * d;
+      // }
+      // Rcpp::Rcout << res << "\n";
       
       
       return res;

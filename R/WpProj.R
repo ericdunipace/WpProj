@@ -79,16 +79,22 @@
 #' 
 #' ## compare performance by measuring distance from full model
 #' dc <- distCompare(models = list("L1" = fit.p2, "BP" = fit.p2.bp))
+#' if(rlang::is_installed(c("ggplot2","ggsci"))) {
 #' plot(dc)
+#' }
 #' 
 #' ## compare performance by measuring the relative distance between a null model 
 #' ## and the predictions of interest as a pseudo R^2
 #' r2.expect <- WPR2(predictions = post_mu, projected_model = dc) # can have negative values
 #' r2.null  <- WPR2(projected_model = dc) # should be between 0 and 1
+#' if(rlang::is_installed(c("ggplot2","ggsci"))) {
 #' plot(r2.null)
+#' }
 #' 
 #' ## we can also examine how predictions change in the models for individual observations
+#' if(rlang::is_installed(c("ggplot2","ggsci","ggridges"))) {
 #' ridgePlot(fit.p2, index = 21, minCoef = 0, maxCoef = 10)
+#' }
 #' }
 WpProj <- function(X, eta=NULL, theta = NULL, power = 2.0,
                  method = c("L1", "binary program", "stepwise","simulated annealing","L0"),
@@ -99,8 +105,8 @@ WpProj <- function(X, eta=NULL, theta = NULL, power = 2.0,
   this.call <- as.list(match.call()[-1])
   
   # make sure specific combo choen makes sense
-  args    <- method_lookup(power, this.call$method, 
-                           this.call$solver, options) # makes sure combo makes sense
+  args    <- method_lookup(power, eval(this.call$method), 
+                           eval(this.call$solver), options) # makes sure combo makes sense
   
   # setup function args
   model_args  <- arrange_args(model_function = args$fun, 
@@ -165,6 +171,8 @@ method_lookup <- function(power, method, solver, options) {
     if ( nrow(sol) == 0 ) {
       sol <- meth %>% dplyr::filter(solver == meth$solver[1L] | is.na(solver))
       warning(sprintf("Using solver %s with Wasserstein power %s and method %s is not allowed. Switching to solver %s.", solver, power, method, meth$solver[1L]))
+    } else if (nrow(sol) > 1) {
+      stop(sprintf("Returning multiple rows with solver '%s'", solver))
     }
     
   } else {
@@ -270,27 +278,42 @@ arrange_args <- function(model_function,
   
   stopifnot(is.list(options))
   
-  #special checks for binary program
-  if (solver == "lasso" && method == "binary program") {
-    # needs lasso params and special handling for approximate method
-    if(!is.list(options$solver.options)) options$solver.options <- as.list(options$solver.options)
-    options$solver.options <- do.call(L1_method_options, options$solver.options)
-    options$solver.options$method <- "selection.variable"
-  }
-  
   # must supply theta for binary program
   if (method == "binary program") {
     theta_problem <- !(missing(theta) || is.null(theta))
     stopifnot('Argument `theta` must be provided for method = "binary program"'=theta_problem)
   }
+  if(!("wpproj_options_list" %in% class(options)  )) {
+    #special checks for binary program
+    if (solver == "lasso" && method == "binary program") {
+      # needs lasso params and special handling for approximate method
+      if(!is.list(options$solver.options)) options$solver.options <- as.list(options$solver.options)
+      options$solver.options <- do.call(L1_method_options, options$solver.options)
+      options$solver.options$method <- "selection.variable"
+    }
+    if (solver == "lasso" && method == "L1") {
+      # needs lasso params and special handling for approximate method
+      if(!is.list(options$solver.options)) options$solver.options <- as.list(options$solver.options)
+      options$solver.options$method <- "projection"
+    }
+    options <- switch(method,
+                      "L1" = do.call(L1_method_options, options),
+                      "binary program" = do.call(binary_program_method_options, options),
+                      "stepwise" = do.call(stepwise_method_options, options),
+                      "simulated annealing" = do.call(simulated_annealing_method_options, options),
+                      "L0" = do.call(L0_method_options, options))
+  } else {
+    if (solver == "lasso" && method == "binary program") {
+      
+      options$method <- "selection.variable"
+    }
+    
+    if (solver == "lasso" && method == "L1") {
+      options$method <- "projection"
+    }
+  }
   
-  options <- switch(method,
-                       "L1" = do.call(L1_method_options, options),
-                       "binary program" = do.call(binary_program_method_options, options),
-                       "stepwise" = do.call(stepwise_method_options, options),
-                       "simulated annealing" = do.call(simulated_annealing_method_options, options),
-                       "L0" = do.call(L0_method_options, options)
-                    )
+  
   
   args <- c(list(X = X, Y = Y, theta = theta, power = power,
                # method = method,

@@ -307,6 +307,9 @@ SEXP W2penalized(SEXP X_,
       } // fi sorting
     } // end loop alternating ordering and optimization
     
+    if (selection) {
+      round_Sel(res);
+    }
     
     // save coefficient otherwise
       beta.col(i)  = res;

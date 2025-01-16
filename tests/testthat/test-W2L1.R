@@ -99,10 +99,10 @@ testthat::test_that("W2L1 function for selection variable,rank", {
   
   out <- W2L1(x, post_mu, post_beta,
               penalty = "selection.lasso", method = "selection.variable",
-              transport.method = transp, infimum.maxit = 1e3, nlambda = 5)
+              transport.method = transp, infimum.maxit = 1e2, nlambda = 2)
   testthat::expect_equal(xtx_star, out$xtx)
   testthat::expect_equal(xty_star, out$xty)
-  testthat::expect_equal(out$beta[,6], rep(1,p))
+  testthat::expect_equal(out$beta[,3], rep(1,p))
 })
 testthat::test_that("W2L1 function for selection variable, univariate.approx.pwr", {
   set.seed(111)

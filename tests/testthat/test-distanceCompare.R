@@ -15,7 +15,8 @@ test_that("distance compare gives correct values for wass", {
   transp <- "exact"
   model.size <- c(2,4,8)
   
-  test <- WpProj(X = x, eta = post_mu, theta = post_beta, method = "binary program",
+  test <- WpProj(X = x, eta = post_mu, 
+                 theta = post_beta, method = "binary program",
                  solver = "ecos")
   
   proj <- WpProj(x, post_mu, post_beta)

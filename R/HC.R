@@ -75,6 +75,7 @@ HC <- function(X, Y=NULL, theta, family="gaussian",
       penalty <- "lasso"
     }
   }
+  this.call <- as.list(match.call()[-1])
   method <- match.arg(method)
   intercept <- FALSE
   
@@ -190,6 +191,12 @@ HC <- function(X, Y=NULL, theta, family="gaussian",
     } else {
       output$eta <- lapply(output$theta, function(tt) x %*% tt)
     }
+  output <- standardize_output(output, list(power = 2, 
+                                            method = "HC",
+                                            solver = "lasso",
+                                            niter = NA_integer_,
+                                            nzero = output$nzero),
+                               call = this.call)
   class(output) <- c("WpProj", "HC")
   
   return(output)

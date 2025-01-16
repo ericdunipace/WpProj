@@ -836,3 +836,26 @@ void argmin_f(const refVecConst & mass_a, const refVecConst & mass_b, const matr
 //   // return(0.0);
 // }
 
+
+void round_Sel(MatrixXd & v){
+  const int n(v.size());
+  
+  for( int i = 0; i < n; i ++) {
+    double val = v(i);
+    if(val >= 0.5) {
+      v(i) = 1.0;
+    } else {
+      v(i) = 0.0;
+    }
+  }
+}
+
+void clipping(MatrixXd & v){
+  const int n(v.size());
+  
+  for(int i = 0; i < n; i++) {
+    double val = v(i);
+    v(i) = std::max(0.0, std::min(1.0, val));
+  }
+}
+
