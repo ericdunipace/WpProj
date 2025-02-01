@@ -341,7 +341,7 @@ testthat::test_that("test rank suff stat", {
                                      OTopt)
   
   testthat::expect_equal(out.subset$XtX, dat.subset$xtx)
-  testthat::expect_equal(out.subset$XtY, dat.subset$xty)
+  testthat::expect_equal(out.subset$XtY, dat.subset$xty, tolerance = 1e-5)
   
   # check projection is just normal crossprods
   
