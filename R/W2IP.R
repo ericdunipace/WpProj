@@ -382,7 +382,7 @@ mosek_solver <- function(problem, opts = NULL, start) {
   #                              j = problem$objective$Q$j,
   #                              x = problem$objective$Q$v )
   Upper<- problem$Upper
-  prob <- Rmosek::mosek_qptoprob(F = Upper, f = cc, 
+  prob <- WpProj::mosek_qptoprob(F = Upper, f = cc, 
                                  Aeq = Matrix::sparseMatrix(i=problem$constraints$L$i,
                                                           j = problem$constraints$L$j,
                                                           x = problem$constraints$L$v),
@@ -414,5 +414,59 @@ mosek_solver <- function(problem, opts = NULL, start) {
   sol <- round(res$sol$int$xx[1:num_param])
   
   return(sol)
+}
+
+mosek_qptoprob <- function (F = NA, f = NA, A = NA, b = NA, Aeq = NA, beq = NA, 
+                            lb = NA, ub = NA) 
+{
+  # code directly from Rmosek::mosek_qptoprob
+  stopifnot(all(!is.na(F)))
+  stopifnot(all(!is.na(f)))
+  stopifnot(length(f) == ncol(F))
+  if (all(!is.na(A)) || all(!is.na(b))) {
+    stopifnot(all(!is.na(A)) && all(!is.na(b)))
+    if (!is(A, "TsparseMatrix")) {
+      A <- as(A, "CsparseMatrix")
+    }
+    stopifnot(nrow(A) == length(b))
+    stopifnot(ncol(A) == length(f))
+  }
+  else {
+    A <- Matrix::Matrix(0, nrow = 0, ncol = length(f), sparse = TRUE)
+    b <- numeric(0)
+  }
+  if (all(!is.na(Aeq)) || all(!is.na(beq))) {
+    stopifnot(all(!is.na(Aeq)) && all(!is.na(beq)))
+    if (!is(Aeq, "TsparseMatrix")) {
+      Aeq <- as(Aeq, "CsparseMatrix")
+    }
+    stopifnot(nrow(Aeq) == length(beq))
+    stopifnot(ncol(Aeq) == length(f))
+  }
+  else {
+    Aeq <- Matrix::Matrix(0, nrow = 0, ncol = length(f), sparse = TRUE)
+    beq <- numeric(0)
+  }
+  stopifnot(all(!is.na(lb)))
+  stopifnot(length(lb) == length(f))
+  stopifnot(all(!is.na(ub)))
+  stopifnot(length(ub) == length(f))
+  prob <- list(sense = "min")
+  nt <- nrow(F)
+  nx <- ncol(F)
+  nrA <- nrow(A)
+  nrEQ <- nrow(Aeq)
+  prob$c <- c(f, 1, 0, rep(0, nt))
+  prob$A <- rbind(cbind(A, Matrix::Matrix(0, nrA, 1), Matrix::Matrix(0, nrA, 
+                                                     1), Matrix::Matrix(0, nrA, nt)), cbind(Aeq, Matrix::Matrix(0, nrEQ, 
+                                                                                                1), Matrix::Matrix(0, nrEQ, 1), Matrix::Matrix(0, nrEQ, nt)), cbind(F, 
+                                                                                                                                                    Matrix::Matrix(0, nt, 1), Matrix::Matrix(0, nt, 1), -1 * Diagonal(nt)))
+  prob$bc <- rbind(blc = c(rep(-Inf, nrA), beq, rep(0, nt)), 
+                   buc = c(b, beq, rep(0, nt)))
+  prob$bx <- rbind(blx = c(lb, 0, 1, rep(-Inf, nt)), bux = c(ub, 
+                                                             Inf, 1, rep(Inf, nt)))
+  prob$cones <- matrix(nrow = 2, dimnames = list(c("type", 
+                                                   "sub"), c()), list("RQUAD", nx + (1:(2 + nt))), )
+  return(prob)
 }
 
