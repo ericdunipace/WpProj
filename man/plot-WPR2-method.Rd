@@ -49,5 +49,7 @@ fit <-  WpProj(X=x, eta=post_mu, power = 2.0,
                options = list(penalty = "lasso")
 )
 obj <- WPR2(predictions = post_mu, projected_model = fit)
+if (rlang::is_installed("ggplot2")) {
 p <- plot(obj)
+}
 }
