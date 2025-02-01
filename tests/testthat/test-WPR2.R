@@ -118,7 +118,7 @@ testthat::test_that("WPR2 combining works", {
 
 testthat::test_that("WPR2 plotting works", {
   set.seed(203402)
-  
+  testthat::skip_if_not_installed("ggplot2")
   n <- 64
   p <- 10
   s <- 50

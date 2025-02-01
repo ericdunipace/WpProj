@@ -430,7 +430,9 @@ combine.WPR2 <- function(...) {
 #'                options = list(penalty = "lasso")
 #' )
 #' obj <- WPR2(predictions = post_mu, projected_model = fit)
+#' if (rlang::is_installed("ggplot2")) {
 #' p <- plot(obj)
+#' }
 setMethod("plot", c("x" = "WPR2"), plot.WPR2)
 
 set_y_limits_gen <- function(vals, ylim){
