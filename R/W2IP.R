@@ -425,8 +425,8 @@ mosek_qptoprob <- function (F = NA, f = NA, A = NA, b = NA, Aeq = NA, beq = NA,
   stopifnot(length(f) == ncol(F))
   if (all(!is.na(A)) || all(!is.na(b))) {
     stopifnot(all(!is.na(A)) && all(!is.na(b)))
-    if (!is(A, "TsparseMatrix")) {
-      A <- as(A, "CsparseMatrix")
+    if (!methods::is(A, "TsparseMatrix")) {
+      A <- methods::as(A, "CsparseMatrix")
     }
     stopifnot(nrow(A) == length(b))
     stopifnot(ncol(A) == length(f))
@@ -437,8 +437,8 @@ mosek_qptoprob <- function (F = NA, f = NA, A = NA, b = NA, Aeq = NA, beq = NA,
   }
   if (all(!is.na(Aeq)) || all(!is.na(beq))) {
     stopifnot(all(!is.na(Aeq)) && all(!is.na(beq)))
-    if (!is(Aeq, "TsparseMatrix")) {
-      Aeq <- as(Aeq, "CsparseMatrix")
+    if (!methods::is(Aeq, "TsparseMatrix")) {
+      Aeq <- methods::as(Aeq, "CsparseMatrix")
     }
     stopifnot(nrow(Aeq) == length(beq))
     stopifnot(ncol(Aeq) == length(f))
@@ -460,7 +460,7 @@ mosek_qptoprob <- function (F = NA, f = NA, A = NA, b = NA, Aeq = NA, beq = NA,
   prob$A <- rbind(cbind(A, Matrix::Matrix(0, nrA, 1), Matrix::Matrix(0, nrA, 
                                                      1), Matrix::Matrix(0, nrA, nt)), cbind(Aeq, Matrix::Matrix(0, nrEQ, 
                                                                                                 1), Matrix::Matrix(0, nrEQ, 1), Matrix::Matrix(0, nrEQ, nt)), cbind(F, 
-                                                                                                                                                    Matrix::Matrix(0, nt, 1), Matrix::Matrix(0, nt, 1), -1 * Diagonal(nt)))
+                                                                                                                                                    Matrix::Matrix(0, nt, 1), Matrix::Matrix(0, nt, 1), -1 * Matrix::Diagonal(nt)))
   prob$bc <- rbind(blc = c(rep(-Inf, nrA), beq, rep(0, nt)), 
                    buc = c(b, beq, rep(0, nt)))
   prob$bx <- rbind(blx = c(lb, 0, 1, rep(-Inf, nt)), bux = c(ub, 
