@@ -382,7 +382,7 @@ mosek_solver <- function(problem, opts = NULL, start) {
   #                              j = problem$objective$Q$j,
   #                              x = problem$objective$Q$v )
   Upper<- problem$Upper
-  prob <- WpProj::mosek_qptoprob(F = Upper, f = cc, 
+  prob <- mosek_qptoprob(F = Upper, f = cc, 
                                  Aeq = Matrix::sparseMatrix(i=problem$constraints$L$i,
                                                           j = problem$constraints$L$j,
                                                           x = problem$constraints$L$v),
