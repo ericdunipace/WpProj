@@ -54,6 +54,8 @@ W2IP <- function(X, Y=NULL, theta,
   
   dots <- list(...)
   if(!is.matrix(X)) X <- as.matrix(X)
+  if(dim(X)[2] == 1) X <- t(X)
+  if(!is.matrix(Y)) Y <- as.matrix(Y)  
   if(!is.matrix(theta)) theta <- as.matrix(theta)
   dims <- dim(X)
   p <- dims[2]
@@ -126,7 +128,7 @@ W2IP <- function(X, Y=NULL, theta,
   } else {
     theta_ <- theta
   }
-  if(nrow(theta) != p) stop("dimensions of theta must match X")
+  if(nrow(theta_) != p) stop("dimensions of theta must match X")
   theta_save <- theta_
   
   #transpose X

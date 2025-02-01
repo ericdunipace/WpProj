@@ -51,6 +51,8 @@ WPR2.matrix <- function(predictions, projected_model, p = 2, method = "exact", b
   
   stopifnot(p >= 1)
   
+  if(is.null(dim(predictions))) predictions <- t(as.matrix(predictions))
+  
   n <- nrow(predictions)
   d <- ncol(predictions)
   
