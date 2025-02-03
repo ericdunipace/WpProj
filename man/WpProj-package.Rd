@@ -5,7 +5,7 @@
 \alias{WpProj-package}
 \title{WpProj: Linear p-Wasserstein Projections}
 \description{
-Performs Wasserstein projections from the predictive distributions of any model into the space of predictive distributions of linear models. We utilize L1 penalties to also reduce the complexity of the model space. This package employs the methods as described in Dunipace, Eric and Lorenzo Trippa (2020) \href{https://arxiv.org/abs/2012.09999}{arXiv:2012.09999}.
+Performs Wasserstein projections from the predictive distributions of any model into the space of predictive distributions of linear models. We utilize L1 penalties to also reduce the complexity of the model space. This package employs the methods as described in Dunipace, Eric and Lorenzo Trippa (2020) \doi{10.48550/arXiv.2012.09999}.
 }
 \seealso{
 Useful links:
