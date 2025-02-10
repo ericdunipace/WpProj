@@ -1,4 +1,12 @@
+# WpProj (development version)
+
 # WpProj 
+
+## Version 0.2.3
+
+### Minor Improvements and Bug Fixes
+* Adding support for `approxOT` header files directly
+* Fixing some bugs
 
 ## Version 0.2.1
 

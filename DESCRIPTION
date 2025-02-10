@@ -1,7 +1,7 @@
 Package: WpProj
 Type: Package
 Title: Linear p-Wasserstein Projections
-Version: 0.2.3
+Version: 0.2.3.9000
 Date: 2025-02-03
 Authors@R: 
   c(
