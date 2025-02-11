@@ -32,7 +32,7 @@ plot.distcompare <- function(x = NULL, models = NULL, ylim = NULL, ylabs = c(NUL
       ggplot2::scale_x_continuous(expand = c(0, 0), limits = xlim_post) +
       ggplot2::scale_y_continuous(expand = c(0, 0), limits = ylim_post )
     if(!is.null(facet.group)) {
-      ppost <- ppost + ggplot2::facet_grid(facet.group)
+      ppost <- ppost + ggplot2::facet_grid(stats::reformulate(facet.group))
     }
   }
   
@@ -50,7 +50,7 @@ plot.distcompare <- function(x = NULL, models = NULL, ylim = NULL, ylabs = c(NUL
       ggplot2::scale_x_continuous(expand = c(0, 0), limits = xlim_mean) +
       ggplot2::scale_y_continuous(expand = c(0, 0), limits = ylim_mean )
     if(!is.null(facet.group)) {
-      pmean <- pmean + ggplot2::facet_grid(facet.group)
+      pmean <- pmean + ggplot2::facet_grid(stats::reformulate(facet.group))
     }
   }
   
