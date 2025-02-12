@@ -415,6 +415,7 @@ W2L1 <- function(X, Y=NULL, theta = NULL,
     if (not_same)  {
       options_ols <- options
       options_ols$display_progress <- FALSE
+      
       if(method == "selection.variable"){
         penalty_ols <- penalty
       } else {
@@ -422,10 +423,26 @@ W2L1 <- function(X, Y=NULL, theta = NULL,
       }
       options_ols$infm_maxit <- 1
       options_ols$model_size <- p
-      ols.out <- W2penalized(X_,Y_, theta_, family, 
-                          penalty_ols, groups, unique.groups, group.weights,
-                          list(as.double(0)), as.integer(1), lambda.min.ratio, alpha, gamma, tau, 
-                          scale.factor, penalty.factor, options_ols)[c("beta","niter")]
+      
+      ols.out <- tryCatch({
+        # attempt ols
+        # get qr
+        qr_result <- qr(t(X_))
+        
+        # get coefficient
+        beta <- qr.coef(qr_result, Y_)
+        
+        if (any(is.na(beta))) stop("Not invertible coefficients")
+        # return values
+        list(beta = c(beta), niter = 0L)
+      },
+        error = function(e) {
+          return(W2penalized(X_,Y_, theta_, family, 
+                                 penalty_ols, groups, unique.groups, group.weights,
+                                 list(as.double(0)), as.integer(1), lambda.min.ratio, alpha, gamma, tau, 
+                                 scale.factor, penalty.factor, options_ols)[c("beta","niter")])
+        })
+      
       output$niter <- cbind(output$niter, 0)
       output$niter[1,ncol(output$niter)] <- ols.out$niter[1]
       output$innerIter <- c(output$innerIter,1)

@@ -1,6 +1,11 @@
-# WpProj (development version)
-
 # WpProj 
+
+## Version 0.2.9000 (development version)
+
+### Minor Improvements and Bug Fixes
+* Making sure that final step of projection method will try to use an OLS regression rather than SVD iterations if possible
+* Fixing some bugs
+* Adding some more tests
 
 ## Version 0.2.3
 

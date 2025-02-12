@@ -29,7 +29,12 @@ extractCoef <- function(fit, drop=FALSE) {
         hitMax <- ifelse(iters[nrow(iters),last.idx]>=maxit,1,0)
         cummulative <- cumsum(hitMax)
         diffs <- diff(c(0,cummulative))
-        rep.idx <- max(last.idx[diffs == 0])
+        if(sum(diffs == 0) > 0 ) {
+          rep.idx <- max(last.idx[diffs == 0])
+        } else {
+          rep.idx <- max(last.idx)
+        }
+        
         extractCoefVar[length(extractCoefVar)] <- lambda[rep.idx]
       }
       # hitInf <- is.infinite(colSums(fit$beta))
