@@ -185,7 +185,7 @@ WPSA <- function(X, Y=NULL, theta,
       {
         beta_temp <- calc.beta(xtx=xtx, xty=xty, i, meth, OToptions = OToptions, x=X_, theta_, Y_, niter=500)
         temp_mu <- mu_calc(X_, theta_, beta_temp)
-        return(approxOT::wasserstein(X = temp_mu, Y = Y_, p = p, gorund_p = ground_p, observation.orientation = obs.direction, method = transmeth) )
+        return(approxOT::wasserstein(X = temp_mu, Y = Y_, p = p, ground_p = ground_p, observation.orientation = obs.direction, method = transmeth) )
       }
     const <- max(w2s)
   }
