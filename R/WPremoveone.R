@@ -52,7 +52,7 @@ WPRM <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
   if(calc.theta){
     output$theta  <- lapply(indices, function(i) {
       theta_temp <- matrix(0, d, S)
-      theta_temp[i,] <- theta_temp[i,,drop=FALSE] 
+      theta_temp[i, ] <- theta[i, , drop = FALSE]
       return(theta_temp)
     })
     output$eta <- lapply(output$theta, function(tt) X %*% tt)
