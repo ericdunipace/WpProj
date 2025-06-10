@@ -107,7 +107,7 @@ p$predictions + ggplot2::ggtitle("Predictions")
 
 <img src="man/figures/README-example_continued_plot_noecho-1.png" width="70%" />
 
-We can also compare performacne by measure the relative distance between
+We can also compare performance by measure the relative distance between
 a null model and the predictions of interest as a pseudo $R^2$
 
 ``` r

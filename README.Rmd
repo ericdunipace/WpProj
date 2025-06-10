@@ -112,7 +112,7 @@ p$predictions + ggplot2::ggtitle("Predictions")
 }
 ```
 
-We can also compare performacne by measure the relative distance between a null model and the predictions of interest as a pseudo $R^2$
+We can also compare performance by measure the relative distance between a null model and the predictions of interest as a pseudo $R^2$
 ```{r r2_plotsl, eval = FALSE}
 r2.null  <- WPR2(projected_model = dc) # should be between 0 and 1
 plot(r2.null)
