@@ -137,11 +137,6 @@ ridgePlot(list("L1" = fit.p2, "Binary Program" = fit.p2.bp), index = 21, minCoef
 
 <img src="man/figures/README-ridgeplots2_noecho-1.png" width="70%" />
 
-# References
-
-[Eric Dunipace and Lorenzo Trippa
-(2020).](https://arxiv.org/abs/2012.09999)
-
 ## Repository Overview
 
 The package is structured like a typical R project with the following
@@ -158,3 +153,8 @@ Supporting files such as `DESCRIPTION` and `NAMESPACE` define package
 metadata and exported functions. New contributors may find it helpful
 to start by exploring the R functions in `R/` and the corresponding C++
 implementations in `src/`.
+
+# References
+
+[Eric Dunipace and Lorenzo Trippa
+(2020).](https://arxiv.org/abs/2012.09999)
