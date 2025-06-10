@@ -141,3 +141,20 @@ ridgePlot(list("L1" = fit.p2, "Binary Program" = fit.p2.bp), index = 21, minCoef
 
 [Eric Dunipace and Lorenzo Trippa
 (2020).](https://arxiv.org/abs/2012.09999)
+
+## Repository Overview
+
+The package is structured like a typical R project with the following
+key directories:
+
+* `R/` – user-facing R functions and helper utilities
+* `src/` – C++ source code accessed through Rcpp for performance
+  critical computations
+* `man/` – generated documentation for each exported function
+* `tests/` – automated tests written with `testthat`
+* `inst/` – package extras such as the spell checking word list
+
+Supporting files such as `DESCRIPTION` and `NAMESPACE` define package
+metadata and exported functions. New contributors may find it helpful
+to start by exploring the R functions in `R/` and the corresponding C++
+implementations in `src/`.
