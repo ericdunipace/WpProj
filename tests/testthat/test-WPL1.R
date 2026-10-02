@@ -85,22 +85,16 @@ test_that("WPL1 refers to W2L1 appropriately", {
 
   
   testthat::skip_on_cran()
-  #should warn about infimum
-  if(Sys.info()['machine'] == "arm64") {
-    testthat::expect_silent(WpProj:::WPL1(X=x, Y=NULL, power = 2.0,
-                                          theta=theta, penalty="lasso",
-                                          nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
-                                          infimum.maxit=1, maxit = 1, gamma = gamma,
-                                          display.progress = FALSE,
-                                          penalty.factor = penalty.factor, method="projection"))
-  } else {
-    testthat::expect_warning(WpProj:::WPL1(X=x, Y=NULL, power = 2.0,
-                                          theta=theta, penalty="lasso",
-                                          nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
-                                          infimum.maxit=1, maxit = 1, gamma = gamma,
-                                          display.progress = FALSE,
-                                          penalty.factor = penalty.factor, method="projection"))
-  }
+  # A single parameter iteration should hit the iteration limit.
+  testthat::expect_warning(
+    WpProj:::WPL1(X=x, Y=NULL, power = 2.0,
+                 theta=theta, penalty="lasso",
+                 nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                 infimum.maxit=1, maxit = 1, gamma = gamma,
+                 display.progress = FALSE,
+                 penalty.factor = penalty.factor, method="projection"),
+    regexp = "Maximum iterations hit when optimizing parameters"
+  )
   
 })
 

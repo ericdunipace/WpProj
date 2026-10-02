@@ -128,5 +128,5 @@ testthat::test_that("WPR2 plotting works", {
   comb <- combine.WPR2(out)
   # debugonce(plot.WPR2)
   p <- plot(comb)
-  testthat::expect_true(ggplot2::is.ggplot(p))
+  testthat::expect_s3_class(p, "ggplot")
 })
