@@ -23,6 +23,7 @@ methods::setClass("distcompare",
 #' 
 #' @description 
 #' `r lifecycle::badge("experimental")`
+#' 
 #' Will compare the Wasserstein distance between the original model and the `WpProj` model.
 #' 
 #' @examples

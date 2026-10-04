@@ -45,7 +45,8 @@ a \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} plot
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-This function will plot the distribution of predictions for a range of active coefficients
+
+This function will plot the distribution of predictions for a range of active coefficients. This function requires the \code{ggpridges} package to run and uses colors from \code{ggsci}.
 }
 \examples{
 if(rlang::is_installed("stats")) {

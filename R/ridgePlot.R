@@ -16,7 +16,8 @@
 #' 
 #' @description 
 #' `r lifecycle::badge("experimental")`
-#' This function will plot the distribution of predictions for a range of active coefficients
+#' 
+#' This function will plot the distribution of predictions for a range of active coefficients. This function requires the `ggpridges` package to run and uses colors from `ggsci`.
 #' 
 #' @examples
 #' if(rlang::is_installed("stats")) {

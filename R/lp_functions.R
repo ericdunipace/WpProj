@@ -7,12 +7,14 @@ GroupLambda <- function(X, Y, groups, lambda, penalty = "lasso", power = 1,
                                             iter = 100), 
                              display.progress=FALSE, ...) 
 { 
-  register_solver(solver) #register lpSolve
   
   nlambda <- length(lambda)
   stopifnot(nlambda >= 1)
   return_val <- vector("list", nlambda)
   if(is.null(solver)) solver <- "ecos"
+  
+  if (solver == "ecos") solver <- "cone"
+  register_solver(solver) #register ecos or gurobi or cplex
   
   if(is.null(options$init)) options$init <- rep(0, ncol(X))
   
@@ -95,7 +97,7 @@ lp_norm <- function(X, Y, power = 1, problem = NULL, model = NULL, deriv_func, t
   beta <- beta_old <- list(rep(0.0,d))
   group_deriv <- list()
   
-  for(i in 1:iter) {
+  for (i in 1:iter) {
     beta[[1L]] <- lp_solve(model, problem$beta_idx, lambda_update[[1L]], gamma, opts, solver, thresholder, problem$group_idx)
     
     if(!not.converged(beta[[1L]], beta_old[[1L]], tol)) {

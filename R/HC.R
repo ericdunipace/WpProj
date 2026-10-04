@@ -4,6 +4,7 @@
 #' 
 #' @description 
 #' `r lifecycle::badge("experimental")` 
+#' 
 #' Runs the Hahn-Carvalho method but adapted to return full distributions.
 #' 
 #' @param X Covariates

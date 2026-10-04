@@ -31,6 +31,13 @@ plot.distcompare <- function(x = NULL, models = NULL, ylim = NULL, ylabs = c(NUL
       ggplot2::ylab(ylabs[1]) + ggplot2::theme_bw() +
       ggplot2::scale_x_continuous(expand = c(0, 0), limits = xlim_post) +
       ggplot2::scale_y_continuous(expand = c(0, 0), limits = ylim_post )
+    if(!is.null(list(...)$CI)) {
+      CI <- list(...)$CI
+      if(CI == "ribbon" ) {
+        ppost <- ppost + ggplot2::geom_ribbon(ggplot2::aes(ymin=lwr, ymax=upr, fill = groups, color = NULL), alpha = 0.2) + ggsci::scale_fill_jama()
+      }
+      
+    }
     if(!is.null(facet.group)) {
       ppost <- ppost + ggplot2::facet_grid(stats::reformulate(facet.group))
     }
@@ -49,6 +56,13 @@ plot.distcompare <- function(x = NULL, models = NULL, ylim = NULL, ylabs = c(NUL
       ggplot2::ylab(ylabs[length(ylabs)]) + ggplot2::theme_bw() +
       ggplot2::scale_x_continuous(expand = c(0, 0), limits = xlim_mean) +
       ggplot2::scale_y_continuous(expand = c(0, 0), limits = ylim_mean )
+    if(!is.null(list(...)$CI)) {
+      CI <- list(...)$CI
+      if(CI == "ribbon" ) {
+        pmean <- pmean + ggplot2::geom_ribbon(ggplot2::aes(ymin=lwr, ymax=upr, fill = groups, color = NULL), alpha = 0.2) + ggsci::scale_fill_jama()
+      }
+      
+    }
     if(!is.null(facet.group)) {
       pmean <- pmean + ggplot2::facet_grid(stats::reformulate(facet.group))
     }
@@ -158,7 +172,7 @@ set_equal_y_limits.plotcompare <- function(x){
 #' @param linesize How big to make the lines?
 #' @param pointsize How big to make the points?
 #' @param facet.group Should the plots be turned into a \link[ggplot2]{facet_grid}?
-#' @param ... Additional options for the wasserstein distance if just inputing raw `WpProj` models
+#' @param ... Additional options for the Wasserstein distance if just inputing raw `WpProj` models
 #'
 #' @return A `ggplot2` object
 #' @keywords internal
