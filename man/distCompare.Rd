@@ -28,7 +28,7 @@ distCompare(
 
 \item{quantity}{Should the function target the "parameters" or the "predictions". Can choose both.}
 
-\item{parallel}{Parallel backend to use for the \code{foreach} package. See \verb{foreach::registerDoParallel(} for more details.}
+\item{parallel}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{\link[future:plan]{future::plan()}} to run the computations in parallel instead. A cluster from \code{\link[parallel:makeCluster]{parallel::makeCluster()}} or a number of workers is still accepted for now and is used as the plan for the duration of the call.}
 
 \item{transform}{Transformation function for the predictions.}
 
@@ -39,6 +39,7 @@ an object of class \code{distcompare} with slots \code{parameters}, \code{predic
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+
 Will compare the Wasserstein distance between the original model and the \code{WpProj} model.
 }
 \details{
@@ -64,7 +65,7 @@ fit2 <-  WpProj(X=x, eta=post_mu, theta = post_beta, power = 2.0,
 )
 dc <- distCompare(models = list("L1" = fit1, "BP" = fit2),
                  target = list(parameters = post_beta, predictions = post_mu))
-if(rlang::is_installed(c("ggplot2","ggsci"))) {
+if(rlang::is_installed("ggplot2")) {
 plot(dc)
 }
 }

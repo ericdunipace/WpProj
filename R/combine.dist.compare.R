@@ -119,7 +119,6 @@ combine_and_augment_distcompare <- function(...) {
 setOldClass("combine_distcompare")
 plot.combine_distcompare <- function (x, ylim = NULL, ylabs = c(NULL,NULL), facet.group = NULL, ...) {
   stopifnot("'ggplot2' must be installed to use this function" = rlang::is_installed("ggplot2"))
-  stopifnot("'ggsci' must be installed to use this function" = rlang::is_installed("ggsci"))
   distances <- x
   stopifnot(inherits(distances, "combine_distcompare"))
   dots <- list(...)
@@ -186,8 +185,8 @@ plot.combine_distcompare <- function (x, ylim = NULL, ylabs = c(NULL,NULL), face
     }
     ppost <- ppost + ggplot2::geom_line(position = ggplot2::position_dodge(width=0.25)) +
       ggplot2::geom_point(position = ggplot2::position_dodge(width=0.25)) +
-      ggsci::scale_color_jama() + 
-      ggsci::scale_fill_jama() +
+      scale_color_jama() + 
+      scale_fill_jama() +
       ggplot2::labs(fill ="Method", color="Method") +
       ggplot2::xlab(xlab) + 
       ggplot2::ylab(ylabs[1]) + ggplot2::theme_bw(base_size) +
@@ -237,8 +236,8 @@ plot.combine_distcompare <- function (x, ylim = NULL, ylabs = c(NULL,NULL), face
     }
     pmean <- pmean + ggplot2::geom_line(position = ggplot2::position_dodge(width=0.25)) +
       ggplot2::geom_point(position = ggplot2::position_dodge(width=0.25)) +
-      ggsci::scale_color_jama() + 
-      ggsci::scale_fill_jama() +
+      scale_color_jama() + 
+      scale_fill_jama() +
       ggplot2::labs(fill ="Method", color="Method") +
       ggplot2::xlab(xlab) + 
       ggplot2::ylab(ylabs[1]) + ggplot2::theme_bw(base_size) +
@@ -339,8 +338,8 @@ plot_ranks <- function(distances, ylim = NULL, ylabs = c(NULL,NULL), ...) {
                                            group=groups )) +
       ggplot2::geom_line() + 
       ggplot2::geom_ribbon(ggplot2::aes(ymin = low, ymax = hi), alpha = alpha, linetype=0) + 
-      ggsci::scale_color_jama() + 
-      ggsci::scale_fill_jama() +
+      scale_color_jama() + 
+      scale_fill_jama() +
       ggplot2::labs(fill ="Method", color="Method") +
       ggplot2::xlab("Num. Coef.") + 
       ggplot2::ylab(ylabs[1]) + ggplot2::theme_bw() +
@@ -368,8 +367,8 @@ plot_ranks <- function(distances, ylim = NULL, ylabs = c(NULL,NULL), ...) {
                                            group=groups )) +
       ggplot2::geom_line() + 
       ggplot2::geom_ribbon(ggplot2::aes(ymin = low, ymax = hi), alpha = alpha, linetype=0) + 
-      ggsci::scale_color_jama() + 
-      ggsci::scale_fill_jama() +
+      scale_color_jama() + 
+      scale_fill_jama() +
       ggplot2::labs(fill ="Method", color="Method") +
       ggplot2::xlab("Num. Coef.") + 
       ggplot2::ylab(ylabs[1]) + ggplot2::theme_bw() +

@@ -39,7 +39,7 @@ L1_method_options(
 
 \item{display.progress}{Logical. Should intermediate progress be displayed? TRUE or FALSE. Default is FALSE.}
 
-\item{solver.options}{Options to be passed on to the solver. Only used for "ecos" and "mosek" solvers.}
+\item{solver.options}{Options to be passed on to the solver. Only used for "clarabel", "ecos", and "mosek" solvers.}
 }
 \value{
 A list with names corresponding to each argument above.

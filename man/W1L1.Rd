@@ -15,7 +15,7 @@ W1L1(
   nlambda = 10,
   gamma = 1,
   display.progress = FALSE,
-  solver = c("cone", "rqPen", "gurobi", "mosek"),
+  solver = c("clarabel", "cone", "rqPen", "gurobi", "mosek"),
   ...
 )
 }
@@ -40,7 +40,7 @@ W1L1(
 
 \item{display.progress}{Print intermediate output?}
 
-\item{solver}{Solver to use. Must be one of "rqPen", "gurobi", "mosek", though "mosek" is preferred.}
+\item{solver}{Solver to use. Must be one of "clarabel", "cone", "rqPen", "gurobi", "mosek". "clarabel" (default) uses the free Clarabel solver (requires package \code{ROI.plugin.clarabel}; "cone" is used by default if it is not installed) and "cone" the free ECOS solver.}
 
 \item{...}{options to pass to solvers}
 }

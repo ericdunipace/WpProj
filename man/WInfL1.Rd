@@ -13,7 +13,7 @@ WInfL1(
   lambda.min.ratio = 1e-04,
   gamma = 1.5,
   nlambda = 10,
-  solver = c("cone", "mosek", "gurobi"),
+  solver = c("clarabel", "cone", "mosek", "gurobi"),
   options = list(solver_opts = NULL, init = NULL, tol = 1e-07, iter = 100),
   model.size = NULL,
   display.progress = FALSE,
@@ -37,7 +37,7 @@ WInfL1(
 
 \item{nlambda}{Number of lambda values.}
 
-\item{solver}{Which solver to use. One of "cone","mosek", or "gurobi". Note "mosek" and "gurobi" are commercial installers.}
+\item{solver}{Which solver to use. One of "clarabel", "cone", "mosek", or "gurobi". "clarabel" (default) uses the free Clarabel solver (requires package \code{ROI.plugin.clarabel}; "cone" is used by default if it is not installed) and "cone" the free ECOS solver. Note "mosek" and "gurobi" are commercial installers.}
 
 \item{options}{A list containing slots \code{solver_opts}, options for each solver, \code{init}, initial conditions fed into each solver, \code{tol}, tolerance for convergence, and \code{iter}, the maximum number of iterations}
 

@@ -21,12 +21,16 @@ exportMethods(plot)
 import(ROI.plugin.ecos)
 import(ROI.plugin.lpsolve)
 importFrom(Rcpp,sourceCpp)
-importFrom(approxOT,transport_options)
-importFrom(approxOT,wasserstein)
-importFrom(doRNG,"%dorng%")
-importFrom(foreach,"%:%")
-importFrom(foreach,"%do%")
-importFrom(foreach,"%dopar%")
+importFrom(approxOT,
+  transport_options,
+  wasserstein
+)
+importFrom(doFuture,"%dofuture%")
+importFrom(foreach,
+  "%:%",
+  "%do%"
+)
 importFrom(lifecycle,deprecated)
 importFrom(magrittr,"%>%")
+importFrom(rlang,.data)
 useDynLib(WpProj, .registration = TRUE)

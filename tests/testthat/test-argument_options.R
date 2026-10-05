@@ -1,8 +1,20 @@
 test_that("L1_penalty_options returns the correct penalties", {
-  expected_penalties <- c("lasso", "ols", "mcp", "elastic.net", 
-                          "scad", "mcp.net", "scad.net", "grp.lasso", 
-                          "grp.lasso.net", "grp.mcp", "grp.scad", 
-                          "grp.mcp.net", "grp.scad.net", "sparse.grp.lasso")
+  expected_penalties <- c(
+    "lasso",
+    "ols",
+    "mcp",
+    "elastic.net",
+    "scad",
+    "mcp.net",
+    "scad.net",
+    "grp.lasso",
+    "grp.lasso.net",
+    "grp.mcp",
+    "grp.scad",
+    "grp.mcp.net",
+    "grp.scad.net",
+    "sparse.grp.lasso"
+  )
   expect_equal(L1_penalty_options(), expected_penalties)
 })
 
@@ -42,7 +54,11 @@ test_that("L1_method_options with lambda and nlambda", {
 
 # Test for lambda.min.ratio, gamma, and maxit
 test_that("L1_method_options with lambda.min.ratio, gamma, and maxit", {
-  result <- L1_method_options(lambda.min.ratio = 0.001, gamma = 2, maxit = 1000L)
+  result <- L1_method_options(
+    lambda.min.ratio = 0.001,
+    gamma = 2,
+    maxit = 1000L
+  )
   expect_equal(result$lambda.min.ratio, 0.001)
   expect_equal(result$gamma, 2)
   expect_equal(result$maxit, 1000L)
@@ -95,12 +111,30 @@ test_that("binary_program_method_options with default arguments", {
 
 # Test for error handling for each argument
 test_that("binary_program_method_options with invalid inputs", {
-  expect_error(binary_program_method_options(maxit = -1L, solver.options = list()))
-  expect_error(binary_program_method_options(infimum.maxit = -1L, solver.options = list()))
-  expect_error(binary_program_method_options(epsilon = -0.01, solver.options = list()))
-  expect_error(binary_program_method_options(OTmaxit = -1L, solver.options = list()))
-  expect_error(binary_program_method_options(model.size = -5L, solver.options = list()))
-  expect_error(binary_program_method_options(tol = -1e-6, solver.options = list()))
+  expect_error(binary_program_method_options(
+    maxit = -1L,
+    solver.options = list()
+  ))
+  expect_error(binary_program_method_options(
+    infimum.maxit = -1L,
+    solver.options = list()
+  ))
+  expect_error(binary_program_method_options(
+    epsilon = -0.01,
+    solver.options = list()
+  ))
+  expect_error(binary_program_method_options(
+    OTmaxit = -1L,
+    solver.options = list()
+  ))
+  expect_error(binary_program_method_options(
+    model.size = -5L,
+    solver.options = list()
+  ))
+  expect_error(binary_program_method_options(
+    tol = -1e-6,
+    solver.options = list()
+  ))
 })
 
 
@@ -108,29 +142,46 @@ test_that("binary_program_method_options with invalid inputs", {
 test_that("binary_program_method_options with different transport methods", {
   valid_methods <- transport_options()
   for (method in valid_methods) {
-    result <- binary_program_method_options(transport.method = method, solver.options = list())
+    result <- binary_program_method_options(
+      transport.method = method,
+      solver.options = list()
+    )
     expect_equal(result$transport.method, method)
   }
   # Test for an invalid transport method
-  expect_error(binary_program_method_options(transport.method = "invalid_method", solver.options = list()))
+  expect_error(binary_program_method_options(
+    transport.method = "invalid_method",
+    solver.options = list()
+  ))
 })
 
 # Test for parallel
 test_that("binary_program_method_options with parallel options", {
   # Assuming parallel can be either NULL, TRUE, or FALSE (adjust as per your function's implementation)
-  result <- binary_program_method_options(parallel = NULL, solver.options = list())
+  result <- binary_program_method_options(
+    parallel = NULL,
+    solver.options = list()
+  )
   expect_null(result$parallel)
-  result <- binary_program_method_options(parallel = 5L, solver.options = list())
+  lifecycle::expect_deprecated(
+    result <- binary_program_method_options(
+      parallel = 5L,
+      solver.options = list()
+    )
+  )
   expect_equal(result$parallel, 5L)
   # Test for an invalid parallel setting
-  expect_error(binary_program_method_options(parallel = "invalid_setting", solver.options = list()))
+  expect_error(binary_program_method_options(
+    parallel = "invalid_setting",
+    solver.options = list()
+  ))
 })
 
 # Test for solver.options
 test_that("binary_program_method_options with solver options", {
   custom_options <- list(option1 = "value1", option2 = "value2")
   result <- binary_program_method_options(solver.options = custom_options)
-  expect_equal(result[c("option1","option2")], custom_options)
+  expect_equal(result[c("option1", "option2")], custom_options)
   # Test for missing solver.options
   expect_silent(binary_program_method_options())
 })
@@ -198,7 +249,9 @@ test_that("stepwise_method_options with method argument", {
 test_that("stepwise_method_options with transport.method argument", {
   valid_methods <- transport_options()
   for (method in valid_methods) {
-    testthat::expect_true(is.list(stepwise_method_options(transport.method = method)))
+    testthat::expect_true(is.list(stepwise_method_options(
+      transport.method = method
+    )))
   }
   expect_error(stepwise_method_options(transport.method = "invalid_transport"))
 })
@@ -238,7 +291,7 @@ test_that("stepwise_method_options with parallel argument", {
   expect_error(is.list(stepwise_method_options(parallel = TRUE)))
   expect_error(is.list(stepwise_method_options(parallel = FALSE)))
   expect_true(is.list(stepwise_method_options(parallel = NULL)))
-  expect_true(is.list(stepwise_method_options(parallel = 5L)))
+  lifecycle::expect_deprecated(expect_true(is.list(stepwise_method_options(parallel = 5L))))
   expect_error(stepwise_method_options(parallel = "invalid"))
 })
 
@@ -260,15 +313,23 @@ test_that("simulated_annealing_method_options with default arguments", {
 test_that("simulated_annealing_method_options with invalid inputs", {
   expect_error(simulated_annealing_method_options(force = "invalid"))
   expect_error(simulated_annealing_method_options(method = "invalid_method"))
-  expect_error(simulated_annealing_method_options(transport.method = "invalid_transport"))
+  expect_error(simulated_annealing_method_options(
+    transport.method = "invalid_transport"
+  ))
   expect_error(simulated_annealing_method_options(OTmaxit = -1))
   expect_error(simulated_annealing_method_options(epsilon = -0.01))
   expect_error(simulated_annealing_method_options(maxit = -1))
   expect_error(simulated_annealing_method_options(temps = -1))
   expect_error(simulated_annealing_method_options(max.time = -1))
-  expect_error(simulated_annealing_method_options(proposal.method = "invalid_proposal"))
-  expect_error(simulated_annealing_method_options(energy.distribution = "invalid_distribution"))
-  expect_error(simulated_annealing_method_options(cooling.schedule = "invalid_schedule"))
+  expect_error(simulated_annealing_method_options(
+    proposal.method = "invalid_proposal"
+  ))
+  expect_error(simulated_annealing_method_options(
+    energy.distribution = "invalid_distribution"
+  ))
+  expect_error(simulated_annealing_method_options(
+    cooling.schedule = "invalid_schedule"
+  ))
   expect_error(simulated_annealing_method_options(model.size = -1))
   expect_error(simulated_annealing_method_options(display.progress = "invalid"))
   expect_error(simulated_annealing_method_options(parallel = "invalid"))
@@ -292,8 +353,12 @@ test_that("simulated_annealing_method_options with force argument", {
 
 # Tests for the 'method' argument
 test_that("simulated_annealing_method_options with method argument", {
-  expect_true(is.list(simulated_annealing_method_options(method = "binary program")))
-  expect_true(is.list(simulated_annealing_method_options(method = "projection")))
+  expect_true(is.list(simulated_annealing_method_options(
+    method = "binary program"
+  )))
+  expect_true(is.list(simulated_annealing_method_options(
+    method = "projection"
+  )))
   expect_error(simulated_annealing_method_options(method = "invalid_method"))
 })
 
@@ -301,9 +366,13 @@ test_that("simulated_annealing_method_options with method argument", {
 test_that("simulated_annealing_method_options with transport.method argument", {
   valid_methods <- WpProj::transport_options()
   for (method in valid_methods) {
-    testthat::expect_true(is.list(simulated_annealing_method_options(transport.method = method)))
+    testthat::expect_true(is.list(simulated_annealing_method_options(
+      transport.method = method
+    )))
   }
-  expect_error(simulated_annealing_method_options(transport.method = "invalid_transport"))
+  expect_error(simulated_annealing_method_options(
+    transport.method = "invalid_transport"
+  ))
 })
 
 # Tests for the 'OTmaxit' argument
@@ -338,23 +407,41 @@ test_that("simulated_annealing_method_options with max.time argument", {
 
 # Tests for the 'proposal.method' argument
 test_that("simulated_annealing_method_options with proposal.method argument", {
-  expect_true(is.list(simulated_annealing_method_options(proposal.method = "covariance")))
-  expect_true(is.list(simulated_annealing_method_options(proposal.method = "uniform")))
-  expect_error(simulated_annealing_method_options(proposal.method = "invalid_proposal"))
+  expect_true(is.list(simulated_annealing_method_options(
+    proposal.method = "covariance"
+  )))
+  expect_true(is.list(simulated_annealing_method_options(
+    proposal.method = "uniform"
+  )))
+  expect_error(simulated_annealing_method_options(
+    proposal.method = "invalid_proposal"
+  ))
 })
 
 # Tests for the 'energy.distribution' argument
 test_that("simulated_annealing_method_options with energy.distribution argument", {
-  expect_true(is.list(simulated_annealing_method_options(energy.distribution = "boltzman")))
-  expect_true(is.list(simulated_annealing_method_options(energy.distribution = "bose-einstein")))
-  expect_error(simulated_annealing_method_options(energy.distribution = "invalid_distribution"))
+  expect_true(is.list(simulated_annealing_method_options(
+    energy.distribution = "boltzman"
+  )))
+  expect_true(is.list(simulated_annealing_method_options(
+    energy.distribution = "bose-einstein"
+  )))
+  expect_error(simulated_annealing_method_options(
+    energy.distribution = "invalid_distribution"
+  ))
 })
 
 # Tests for the 'cooling.schedule' argument
 test_that("simulated_annealing_method_options with cooling.schedule argument", {
-  expect_true(is.list(simulated_annealing_method_options(cooling.schedule = "Geman-Geman")))
-  expect_true(is.list(simulated_annealing_method_options(cooling.schedule = "exponential")))
-  expect_error(simulated_annealing_method_options(cooling.schedule = "invalid_schedule"))
+  expect_true(is.list(simulated_annealing_method_options(
+    cooling.schedule = "Geman-Geman"
+  )))
+  expect_true(is.list(simulated_annealing_method_options(
+    cooling.schedule = "exponential"
+  )))
+  expect_error(simulated_annealing_method_options(
+    cooling.schedule = "invalid_schedule"
+  ))
 })
 
 # Tests for the 'model.size' argument
@@ -366,8 +453,12 @@ test_that("simulated_annealing_method_options with model.size argument", {
 
 # Tests for the 'display.progress' argument
 test_that("simulated_annealing_method_options with display.progress argument", {
-  expect_true(is.list(simulated_annealing_method_options(display.progress = TRUE)))
-  expect_true(is.list(simulated_annealing_method_options(display.progress = FALSE)))
+  expect_true(is.list(simulated_annealing_method_options(
+    display.progress = TRUE
+  )))
+  expect_true(is.list(simulated_annealing_method_options(
+    display.progress = FALSE
+  )))
   expect_error(simulated_annealing_method_options(display.progress = "invalid"))
 })
 
@@ -377,9 +468,9 @@ test_that("simulated_annealing_method_options with parallel argument", {
   expect_error(is.list(simulated_annealing_method_options(parallel = TRUE)))
   expect_error(is.list(simulated_annealing_method_options(parallel = FALSE)))
   expect_true(is.list(simulated_annealing_method_options(parallel = NULL)))
-  expect_true(is.list(simulated_annealing_method_options(parallel = 5L)))
+  lifecycle::expect_deprecated(expect_true(is.list(simulated_annealing_method_options(parallel = 5L))))
   cl <- parallel::makeCluster(1)
-  expect_true(is.list(simulated_annealing_method_options(parallel = cl)))
+  lifecycle::expect_deprecated(expect_true(is.list(simulated_annealing_method_options(parallel = cl))))
   parallel::stopCluster(cl)
   expect_error(simulated_annealing_method_options(parallel = "invalid"))
 })
@@ -403,7 +494,9 @@ test_that("edge cases for force argument in simulated_annealing_method_options",
 # Edge case tests for the 'method' argument
 test_that("edge cases for method argument in simulated_annealing_method_options", {
   # Test with multiple methods specified
-  expect_true(is.list(simulated_annealing_method_options(method = c("binary program", "projection"))))
+  expect_true(is.list(simulated_annealing_method_options(
+    method = c("binary program", "projection")
+  )))
 })
 
 # Edge case tests for the 'OTmaxit' argument
@@ -417,7 +510,9 @@ test_that("edge cases for OTmaxit argument in simulated_annealing_method_options
 # Edge case tests for the 'epsilon' argument
 test_that("edge cases for epsilon argument in simulated_annealing_method_options", {
   # Test with a very small positive number
-  expect_true(is.list(simulated_annealing_method_options(epsilon = .Machine$double.eps)))
+  expect_true(is.list(simulated_annealing_method_options(
+    epsilon = .Machine$double.eps
+  )))
   # Test with a larger number
   expect_true(is.list(simulated_annealing_method_options(epsilon = 1)))
 })
@@ -462,11 +557,11 @@ test_that("invalid inputs are handled correctly", {
   # Testing epsilon
   expect_error(L0_method_options(epsilon = -1))
   expect_error(L0_method_options(epsilon = "not a number"))
-  
+
   # Testing OTmaxit
   expect_error(L0_method_options(OTmaxit = -1))
   expect_error(L0_method_options(OTmaxit = "not a number"))
-  
+
   # Testing parallel
   expect_error(L0_method_options(parallel = "not a number or cluster"))
   expect_error(L0_method_options(parallel = -1))
@@ -476,31 +571,30 @@ test_that("invalid inputs are handled correctly", {
 test_that("output structure is correct", {
   result <- L0_method_options()
   expect_true(is.list(result))
-  expect_true(all(names(result) == c("method", "transport.method", "epsilon", "OTmaxit", "parallel")))
+  expect_true(all(
+    names(result) ==
+      c("method", "transport.method", "epsilon", "OTmaxit", "parallel")
+  ))
   expect_type(result$method, "character")
   expect_type(result$transport.method, "character") # or appropriate type
   expect_type(result$epsilon, "double")
   expect_type(result$OTmaxit, "integer")
-  
-  
+
   expect_error(is.list(L0_method_options(parallel = TRUE)))
   expect_error(is.list(L0_method_options(parallel = FALSE)))
   expect_true(is.list(L0_method_options(parallel = NULL)))
-  expect_true(is.list(L0_method_options(parallel = 5L)))
+  lifecycle::expect_deprecated(expect_true(is.list(L0_method_options(parallel = 5L))))
   cl <- parallel::makeCluster(1)
-  expect_true(is.list(L0_method_options(parallel = cl)))
+  lifecycle::expect_deprecated(expect_true(is.list(L0_method_options(parallel = cl))))
   parallel::stopCluster(cl)
   expect_error(L0_method_options(parallel = "invalid"))
-  
 })
 
 # Additional tests for specific method input
 test_that("method input is handled correctly", {
   result_binary <- L0_method_options(method = "binary program")
   expect_equal(result_binary$method, "selection.variable")
-  
+
   result_projection <- L0_method_options(method = "projection")
   expect_equal(result_projection$method, "projection")
-  
 })
-

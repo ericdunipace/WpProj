@@ -35,7 +35,7 @@ stepwise_method_options(
 
 \item{display.progress}{Logical. Should intermediate progress be displayed? TRUE or FALSE. Default is FALSE.}
 
-\item{parallel}{A cluster backend to be used by \code{\link[foreach:foreach]{foreach::foreach()}}. See \code{\link[foreach:foreach]{foreach::foreach()}} for details about how to set them up. The \code{WpProj} functions will register the cluster with the \code{\link[doParallel:registerDoParallel]{doParallel::registerDoParallel()}} function internally.}
+\item{parallel}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{\link[future:plan]{future::plan()}} to run the computations in parallel instead. A cluster from \code{\link[parallel:makeCluster]{parallel::makeCluster()}} or a number of workers is still accepted for now and is used as the plan for the duration of the call.}
 
 \item{calc.theta}{Return the linear coefficients? Default is TRUE.}
 

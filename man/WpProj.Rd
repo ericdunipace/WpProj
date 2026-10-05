@@ -10,7 +10,7 @@ WpProj(
   theta = NULL,
   power = 2,
   method = c("L1", "binary program", "stepwise", "simulated annealing", "L0"),
-  solver = c("lasso", "ecos", "lpsolve", "mosek"),
+  solver = c("lasso", "clarabel", "ecos", "scip", "lpsolve", "highs", "mosek"),
   options = NULL
 )
 }
@@ -25,7 +25,7 @@ WpProj(
 
 \item{method}{The algorithm to calculate the Wasserstein projections. One of "L1", "binary program", "IP", "stepwise","simulated annealing", or "L0". Will default to "L1" if not provided. See details for more information.}
 
-\item{solver}{Which solver to use? One of "lasso", "ecos", "lpsolve", or "mosek". See details for more information}
+\item{solver}{Which solver to use? One of "lasso", "clarabel", "ecos", "scip", "lpsolve", "highs", or "mosek". See details for more information}
 
 \item{options}{Options passed to the particular method and desired solver. See details for more information.}
 }
@@ -44,6 +44,7 @@ object of class \code{WpProj}, which is a list with the following slots:
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+
 This function will calculate linear projections from a set of predictions into the space of the covariates in terms of the p-Wasserstein distance.
 }
 \details{
@@ -54,6 +55,11 @@ The \code{WpProj} function is a wrapper for the various Wasserstein projection m
 For the L1 methods, see \code{\link[=L1_method_options]{L1_method_options()}} for more information. For the binary program methods, see \code{\link[=binary_program_method_options]{binary_program_method_options()}} for more information. For the stepwise methods, see \code{\link[=stepwise_method_options]{stepwise_method_options()}} for more information. For the simulated annealing methods, see \code{\link[=simulated_annealing_method_options]{simulated_annealing_method_options()}} for more information.
 
 In most cases, we recommend using the L1 methods or binary program methods. The L1 methods are the fastest and applicable to Wasserstein powers of any value greater than 1 and function as direct linear projections into the space of the covariates. The binary program methods instead preserve the coefficients of the original model if this is of interest, such as when the original model was already a linear model. The binary program will instead function as a way of turning on and off certain coefficients in a way that minimizes the Wasserstein distance between reduced and original models. Of note, we also have available an approximate binary program method using a lasso solver. This method is faster than the exact binary program method but is not guaranteed to find the optimal solution. It is recommended to use the exact binary program method if possible. See \code{\link[=binary_program_method_options]{binary_program_method_options()}} for more information on how to set up the approximate method as some arguments for the lasso solver should be specified. For more information on how this works, please also see the referenced paper.
+}
+
+\subsection{Solvers}{
+
+The "lasso" solver uses approximate, free penalized regression routines. For \code{power = 1} and \code{power = Inf} with \code{method = "L1"}, the projections are second-order cone programs that can be solved with the free solvers "clarabel" (default) or "ecos", or the commercial solver "mosek". For \code{method = "binary program"}, the default "lasso" solver gives a fast approximate solution. The exact solution can be found with the free solvers "scip" (recommended), "lpsolve", "highs", or "ecos", or the commercial solver "mosek". The "scip" solver works on the binary quadratic program directly rather than a linearized version and accepts a time limit, e.g. \code{options = list(solver.options = list(control = list(time_limit = 60)))}, after which it returns the best solution found. Any exact solver can also use the augmented Lagrangian binary program by setting \code{algorithm = "augmented.lagrangian"} in \code{\link[=binary_program_method_options]{binary_program_method_options()}}. The "clarabel", "scip", and "highs" solvers require the packages \code{ROI.plugin.clarabel}, \code{scip}, and \code{ROI.plugin.highs}, respectively. If "clarabel" or "scip" would be used by default but is not installed, "ecos" or "lpsolve" is used instead.
 
 The stepwise, simulated annealing, and L0 methods also select covariates like the binary program methods but they can be slower. They are presented merely for comparison purposes given they were used in the original paper.
 }
@@ -101,7 +107,7 @@ fit.p2.bp <-  WpProj(X=x, eta=post_mu, theta = post_beta, power = 2.0,
 
 ## compare performance by measuring distance from full model
 dc <- distCompare(models = list("L1" = fit.p2, "BP" = fit.p2.bp))
-if(rlang::is_installed(c("ggplot2","ggsci"))) {
+if(rlang::is_installed("ggplot2")) {
 plot(dc)
 }
 
@@ -109,12 +115,12 @@ plot(dc)
 ## and the predictions of interest as a pseudo R^2
 r2.expect <- WPR2(predictions = post_mu, projected_model = dc) # can have negative values
 r2.null  <- WPR2(projected_model = dc) # should be between 0 and 1
-if(rlang::is_installed(c("ggplot2","ggsci"))) {
+if(rlang::is_installed("ggplot2")) {
 plot(r2.null)
 }
 
 ## we can also examine how predictions change in the models for individual observations
-if(rlang::is_installed(c("ggplot2","ggsci","ggridges"))) {
+if(rlang::is_installed(c("ggplot2","ggridges"))) {
 ridgePlot(fit.p2, index = 21, minCoef = 0, maxCoef = 10)
 }
 }

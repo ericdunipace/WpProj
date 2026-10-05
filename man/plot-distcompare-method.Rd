@@ -36,7 +36,7 @@
 
 \item{facet.group}{Should the plots be turned into a \link[ggplot2]{facet_grid}?}
 
-\item{...}{Additional options for the wasserstein distance if just inputing raw \code{WpProj} models}
+\item{...}{Additional options for the Wasserstein distance if just inputing raw \code{WpProj} models}
 }
 \value{
 A \code{ggplot2} object

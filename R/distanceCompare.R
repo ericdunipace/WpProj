@@ -10,7 +10,7 @@ methods::setClass("distcompare",
 #' @param power The power parameter of the Wasserstein distance.
 #' @param method Which approximation to the Wasserstein distance to use. Should be one of the outputs of [transport_options()].
 #' @param quantity Should the function target the "parameters" or the "predictions". Can choose both.
-#' @param parallel Parallel backend to use for the `foreach` package. See `foreach::registerDoParallel(` for more details.
+#' @param parallel `r lifecycle::badge("deprecated")` Use [future::plan()] to run the computations in parallel instead. A cluster from [parallel::makeCluster()] or a number of workers is still accepted for now and is used as the plan for the duration of the call.
 #' @param transform Transformation function for the predictions.
 #' @param ... other options passed to the [wasserstein()] distance function
 #'
@@ -23,6 +23,7 @@ methods::setClass("distcompare",
 #' 
 #' @description 
 #' `r lifecycle::badge("experimental")`
+#' 
 #' Will compare the Wasserstein distance between the original model and the `WpProj` model.
 #' 
 #' @examples
@@ -45,7 +46,7 @@ methods::setClass("distcompare",
 #' )
 #' dc <- distCompare(models = list("L1" = fit1, "BP" = fit2),
 #'                  target = list(parameters = post_beta, predictions = post_mu))
-#' if(rlang::is_installed(c("ggplot2","ggsci"))) {
+#' if(rlang::is_installed("ggplot2")) {
 #' plot(dc)
 #' }
 #' }
@@ -58,15 +59,11 @@ distCompare <- function(models, target = list(parameters = NULL, predictions = N
                       several.ok = TRUE)
   quantity <- match.arg(quantity, several.ok = TRUE)
   
-  if ( !is.null(parallel) ) {
-      if ( !inherits(parallel, "cluster") ) {
-        stop("parallel must be a registered cluster backend or null")
-      }
-      doParallel::registerDoParallel(parallel)
-    
+  oplan <- set_parallel_plan(parallel)
+  if (!is.null(oplan)) {
+    on.exit(future::plan(oplan), add = TRUE)
+    deprecate_parallel("distCompare")
     # display.progress <- FALSE
-  } else {
-    foreach::registerDoSEQ()
   }
   
   if (inherits(models, "WpProj") ) {
@@ -152,7 +149,7 @@ is.distcompare <- function(x) inherits(x, "distcompare")
 dist_fun <- function(mulist, mu, p, ground_p, method, observation.orientation, projection, ...) {
   m <- NULL
   dist <-
-    foreach::foreach(m=mulist, .combine = c) %dopar% {
+    foreach::foreach(m=mulist, .combine = c) %dofuture% {
         wp <- if(projection & method == "exact" & p == 2) {
           denom <- max(ncol(mu), ncol(m))
           sqrt(sum((c(m) - c(mu))^2)/denom)

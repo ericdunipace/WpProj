@@ -9,13 +9,16 @@
 #' @param maxit Maximum number of solver iterations
 #' @param infimum.maxit Maximum iterations to alternate binary program and Wasserstein distance calculation
 #' @param tol Tolerance for convergence of coefficients
-#' @param solver The solver to use. Must be one of "cone","lp", "cplex", "gurobi","mosek". 
+#' @param solver The solver to use. Must be one of "scip", "cone","lp", "highs", "cplex", "gurobi","mosek". 
+#' @param algorithm How the cardinality constraint is handled. "exact" (default) enforces it directly. "augmented.lagrangian" is the augmented Lagrangian binary program of Gu, Ahmed, and Dey (2020) <doi:10.1137/19M1271695>: the constraint is softened with an augmented Lagrangian penalty from the continuous relaxation that is large enough to give the same solution. Works with any solver. See details.
 #' @param display.progress Should progress be printed?
-#' @param parallel foreach back end. See [foreach::foreach()] for more details.
+#' @param parallel `r lifecycle::badge("deprecated")` Use [future::plan()] to run the computations in parallel instead. A cluster from [parallel::makeCluster()] or a number of workers is still accepted for now and is used as the plan for the duration of the call.
 #' @param ... Extra args to Wasserstein distance methods
 #' 
 #' @details
-#' For argument `solution.method`, options "cone" and "lp" use the free solvers "ECOS" and "lpSolver", respectively. "cplex", "gurobi" and "mosek" require installing the corresponding commercial solvers.
+#' For argument `solver`, the default "scip" solves the binary quadratic program directly with the free SCIP solver (requires package `scip`; "lp" is used by default if it is not installed). Pass `control = list(time_limit = <seconds>)` to return the best solution found within a time limit. Options "cone" and "lp" use the free solvers "ECOS" and "lpSolver", respectively. Option "highs" uses the free HiGHS mixed-integer solver on the same linear reformulation as "lp" and requires package `ROI.plugin.highs`. "cplex", "gurobi" and "mosek" require installing the corresponding commercial solvers.
+#' 
+#' For `algorithm = "augmented.lagrangian"`, the constraint \eqn{\sum_j \alpha_j = k} is replaced by \eqn{\sum_j \alpha_j + t = k} with penalty \eqn{-\nu t + \rho |t|} in the objective, where \eqn{\nu} is the Lagrange multiplier of the continuous relaxation and \eqn{\rho} is the gap between a feasible solution and the relaxation's objective. Following Gu, Ahmed, and Dey (2020) <doi:10.1137/19M1271695>, a finite \eqn{\rho} closes the duality gap: by Lagrangian duality any \eqn{\alpha} with \eqn{t \neq 0} has penalized objective no better than that feasible solution, so the solution is the same as for `algorithm = "exact"`; how fast it is found depends on the solver. If the penalized problem ever returns a solution of the wrong size, the hard constrained problem is solved instead.
 #' 
 #' @keywords internal
 # @examples
@@ -43,14 +46,13 @@ W2IP <- function(X, Y=NULL, theta,
                  maxit = 100L,
                  infimum.maxit = 100L,
                  tol = 1e-7,
-                 solver = c("cone","lp", "mosek", "cplex", "gurobi"),
+                 solver = c("scip", "cone","lp", "highs", "mosek", "cplex", "gurobi"),
+                 algorithm = c("exact", "augmented.lagrangian"),
                  display.progress=FALSE, parallel = NULL, ...) 
 {
   this.call <- as.list(match.call()[-1])
   
-  solution.method <- solver
-  
-  # `%doRNG%`` <- doRNG::`%dorng%`
+  solution.method <- if (missing(solver)) NULL else solver
   
   dots <- list(...)
   if(!is.matrix(X)) X <- as.matrix(X)
@@ -82,41 +84,43 @@ W2IP <- function(X, Y=NULL, theta,
   }
   
   if(is.null(solution.method)) {
-    solution.method <- "cone"
+    solution.method <- resolve_default_solver("scip", internal = TRUE)
   } else {
-    solution.method <- match.arg(solution.method, choices = c("cone","lp", "mosek", "cplex", "gurobi"))
+    solution.method <- match.arg(solution.method, choices = c("scip", "cone","lp", "highs", "mosek", "cplex", "gurobi"))
   }
+  algorithm <- match.arg(algorithm)
   
   
-  translate <- function(QP, solution.method) {
-    switch(solution.method, 
-           cone = ROI::ROI_reformulate(QP,to = "socp"),
-           lp = ROI::ROI_reformulate(QP,"lp",method = "bqp_to_lp" ),
-           cplex = QP,
-           gurobi = QP,
-           mosek = QP
+  # solves the binary program, optionally with the cardinality constraint
+  # softened by `penalty` (see augmented_lagrangian_penalty()), and returns the binary vector
+  solve_binary_program <- function(QP, control, solution.method, start, penalty = NULL) {
+    soften <- function(op) {
+      if (is.null(penalty)) return(op)
+      add_cardinality_penalty(op, penalty$nu, penalty$rho)
+    }
+    TP <- switch(solution.method, 
+                 # these reformulations need all binary variables so soften after.
+                 # for a binary QP "socp" gives a linearization similar to bqp_to_lp
+                 cone = soften(ROI::ROI_reformulate(QP, to = "socp")),
+                 lp = soften(ROI::ROI_reformulate(QP, "lp", method = "bqp_to_lp")),
+                 highs = soften(ROI::ROI_reformulate(QP, "lp", method = "bqp_to_lp")),
+                 soften(QP))
+    sol <- switch(solution.method, 
+                  cone = ROI::ROI_solve(TP, solver = "ecos", control),
+                  lp =  ROI::ROI_solve(TP, solver = "lpsolve", control),
+                  highs = ROI::ROI_solve(TP, solver = "highs", control),
+                  scip = scip_solver(TP, control),
+                  cplex = ROI::ROI_solve(TP, solver = "cplex", control),
+                  # gurobi = gurobi_solver(TP, control, start),
+                  mosek = mosek_solver(TP, control, start)
     )
-  }
-  
-  # using internal functions likely faster but not OK for being on CRAN
-  # solver <- function(obj, control, solution.method, start) {
-  #   switch(solution.method, 
-  #          cone = ROI.plugin.ecos:::solve_OP(obj, control),
-  #          lp =  ROI.plugin.lpsolve:::solve_OP(obj, control),
-  #          cplex = ROI.plugin.cplex:::solve_OP(obj, control),
-  #          gurobi = gurobi_solver(obj, control, start),
-  #          mosek = mosek_solver(obj, control,start)
-  #   )
-  # }
-  
-  solver <- function(obj, control, solution.method, start) {
-    switch(solution.method, 
-           cone = ROI::ROI_solve(obj, solver = "ecos", control),
-           lp =  ROI::ROI_solve(obj, solver = "lpsolve", control),
-           cplex = ROI::ROI_solve(obj, solver = "cplex", control),
-           # gurobi = gurobi_solver(obj, control, start),
-           mosek = mosek_solver(obj, control,start)
-    )
+    switch(solution.method,
+           "gurobi" = sol[1:p],
+           "mosek" = sol[1:p],
+           "scip" = sol[1:p],
+           # HiGHS can return binaries off by ~1e-15
+           "highs" = round(ROI::solution(sol)[1:p]),
+           ROI::solution(sol)[1:p])
   }
   
   register_solver(solution.method) # registers ROI solver if needed
@@ -191,14 +195,10 @@ W2IP <- function(X, Y=NULL, theta,
     stop("infimum.maxit should be greater than 0")
   }
   
-  if(!is.null(parallel)){
-    if(!inherits(parallel, "cluster") && !is.numeric(parallel)) {
-      stop("parallel must be a registered cluster backend or the number of cores desired")
-    }
-    doParallel::registerDoParallel(parallel)
+  oplan <- set_parallel_plan(parallel)
+  if (!is.null(oplan)) {
+    on.exit(future::plan(oplan), add = TRUE)
     display.progress <- FALSE
-  } else{
-    foreach::registerDoSEQ()
   }
   
   options <- list(infm_maxit = infm.maxit,
@@ -238,7 +238,8 @@ W2IP <- function(X, Y=NULL, theta,
   output <- foreach::foreach(idx=1:p_star, .combine='comb', .multicombine=TRUE,
                              .init=list(list(), list()),
                              .errorhandling = 'pass', 
-                             .inorder = FALSE) %dorng% 
+                             .inorder = FALSE,
+                             .options.future = list(seed = TRUE)) %dofuture% 
     {
        m <- options$model_size[idx]
        QP <- QP_orig
@@ -246,7 +247,7 @@ W2IP <- function(X, Y=NULL, theta,
        results <- list(NULL, NULL)
        obj_save <- Inf
        for(inf in 1:options$infm_maxit) {
-         TP <- translate(QP, solution.method)
+         penalty <- if (algorithm == "augmented.lagrangian") augmented_lagrangian_penalty(QP) else NULL
          # sol.meth <- if ( solution.method == "cone" && !("cone" %in% names(TP)) ) {
          #   "lp"
          # } else {
@@ -255,12 +256,10 @@ W2IP <- function(X, Y=NULL, theta,
          # browser()
          # sol <- ROI::ROI_solve(LP, "glpk")
          # can use ROI.plugin.glpk:::.onLoad("ROI.plugin.glpk","ROI.plugin.glpk") to use base solver ^
-         sol <- solver(TP, control, solution.method=solution.method, start=alpha)
-         # print(ROI::solution(sol))
-         alpha <- switch(solution.method,
-                         "gurobi" = sol,
-                         "mosek" = sol,
-                         ROI::solution(sol)[1:p])
+         alpha <- solve_binary_program(QP, control, solution.method, start = alpha, penalty = penalty)
+         if (!is.null(penalty) && (anyNA(alpha) || sum(round(alpha)) != m)) {
+           alpha <- solve_binary_program(QP, control, solution.method, start = alpha)
+         }
          obj <- c(0.5 * t(alpha) %*% (QP$objective$Q) %*% alpha - QP$objective$L %*% alpha)
          if(all(is.na(alpha))) {
            warning("Likely terminated early")
@@ -374,38 +373,177 @@ qp_w2 <- function(xtx, xty, K) {
 #   return(sol)
 # }
 
+# Augmented Lagrangian binary program (Gu, Ahmed, and Dey 2020, SIAM J. Optim.):
+# exact penalty for the cardinality constraint sum(a) = k:
+# it is softened to sum(a) + t = k with penalty -nu * t + rho * |t|, where nu
+# is the multiplier of the continuous relaxation. By duality, any a with
+# sum(a) != k has penalized objective >= z_relax + rho, so setting rho to the
+# gap between a feasible point and z_relax keeps the solution exact.
+# Returns NULL if no penalty is needed or the relaxation can't be solved.
+augmented_lagrangian_penalty <- function(problem) {
+  Q <- as.matrix(problem$objective$Q)
+  L <- as.numeric(as.matrix(problem$objective$L))
+  p <- length(L)
+  k <- problem$constraints$rhs[1L]
+  if (k >= p) return(NULL)
+  
+  obj_fun <- function(a) c(0.5 * crossprod(a, Q %*% a)) + sum(L * a)
+  
+  # continuous relaxation min 0.5 a'Qa + L'a s.t. sum(a) = k via its KKT system
+  kkt <- rbind(cbind(Q, 1), c(rep(1, p), 0))
+  relax <- tryCatch(solve(kkt, c(-L, k)), error = function(e) NULL)
+  if (is.null(relax)) return(NULL) # singular Q, keep the hard constraint
+  
+  a_relax <- relax[1:p]
+  z_relax <- obj_fun(a_relax)
+  
+  # feasible point from the k largest relaxed values
+  a_feas <- as.numeric(rank(-a_relax, ties.method = "first") <= k)
+  rho    <- max(obj_fun(a_feas) - z_relax, 0)
+  rho    <- rho * (1 + 1e-6) + 1e-8 # so infeasible points can't tie
+  
+  return(list(nu = relax[p + 1L], rho = rho))
+}
+
+# adds slack t (free) and |t| bound u to an ROI OP whose first constraint is
+# the cardinality constraint
+add_cardinality_penalty <- function(op, nu, rho) {
+  A <- op$constraints$L
+  m <- nrow(A)
+  n <- ncol(A)
+  
+  A <- cbind(A, slam::simple_triplet_matrix(i = 1L, j = 1L, v = 1, nrow = m, ncol = 2L))
+  A <- rbind(A, slam::simple_triplet_matrix(i = c(1L, 1L, 2L, 2L), j = n + c(1L, 2L, 1L, 2L),
+                                            v = c(1, -1, 1, 1), nrow = 2L, ncol = n + 2L))
+  
+  L <- c(as.numeric(as.matrix(op$objective$L)), -nu, rho)
+  Q <- op$objective$Q
+  objective <- if (is.null(Q)) {
+    ROI::L_objective(L)
+  } else {
+    Q <- slam::as.simple_triplet_matrix(Q)
+    ROI::Q_objective(Q = slam::simple_triplet_matrix(i = Q$i, j = Q$j, v = Q$v,
+                                                     nrow = n + 2L, ncol = n + 2L),
+                     L = L)
+  }
+  
+  vtypes <- ROI::types(op)
+  if (is.null(vtypes)) vtypes <- rep("C", n)
+  bnds <- op_bounds(op)
+  
+  out <- ROI::OP(objective = objective,
+                 constraints = ROI::L_constraint(A, c(op$constraints$dir, "<=", ">="),
+                                                 c(op$constraints$rhs, 0, 0)),
+                 types = c(vtypes, "C", "C"),
+                 bounds = ROI::V_bound(li = seq_len(n + 2L), ui = seq_len(n + 2L),
+                                       lb = c(bnds$lb, -Inf, 0), ub = c(bnds$ub, Inf, Inf),
+                                       nobj = n + 2L),
+                 maximum = FALSE)
+  if (!is.null(op$Upper)) out$Upper <- cbind(op$Upper, matrix(0, nrow(op$Upper), 2L))
+  return(out)
+}
+
+# dense lower and upper variable bounds of an ROI OP
+op_bounds <- function(op) {
+  n  <- ncol(op$constraints$L)
+  lb <- rep(0, n)
+  ub <- rep(Inf, n)
+  vtypes <- ROI::types(op)
+  if (!is.null(vtypes)) ub[vtypes == "B"] <- 1
+  b <- ROI::bounds(op)
+  if (!is.null(b)) {
+    if (length(b$lower$ind)) lb[b$lower$ind] <- b$lower$val
+    if (length(b$upper$ind)) ub[b$upper$ind] <- b$upper$val
+  }
+  return(list(lb = lb, ub = ub))
+}
+
+scip_solver <- function(problem, opts = NULL) {
+  # mixed binary QP min 0.5 a'Qa + L'a s.t. linear constraints, written as
+  # min t s.t. 0.5 a'Qa + L'a - t <= 0 since SCIP needs a linear objective
+  Q <- as.matrix(problem$objective$Q)
+  L <- as.numeric(as.matrix(problem$objective$L))
+  num_param <- length(L)
+  
+  ctrl <- if (inherits(opts, "scip_control")) {
+    opts
+  } else {
+    do.call(scip::scip_control, utils::modifyList(list(verbose = FALSE), as.list(opts)))
+  }
+  
+  model <- scip::scip_model("W2IP")
+  on.exit(scip::scip_model_free(model))
+  for (nm in names(ctrl$scip_params)) {
+    scip::scip_set_param(model, nm, ctrl$scip_params[[nm]])
+  }
+  
+  vtypes <- ROI::types(problem)
+  if (is.null(vtypes)) vtypes <- rep("C", num_param)
+  bnds <- op_bounds(problem)
+  scip::scip_add_vars(model, obj = rep(0, num_param), lb = bnds$lb, ub = bnds$ub, vtype = vtypes)
+  t_idx <- scip::scip_add_var(model, obj = 1, lb = -Inf, ub = Inf, vtype = "C")
+  
+  # a_i^2 = a_i for binaries so their diagonal of Q moves to the linear term
+  bin  <- vtypes == "B"
+  keep <- upper.tri(Q)
+  diag(keep) <- !bin
+  quad <- which(keep & Q != 0, arr.ind = TRUE)
+  quadcoefs <- ifelse(quad[, 1] == quad[, 2], 0.5, 1) * Q[quad]
+  scip::scip_add_quadratic_cons(model,
+                                linvars = c(seq_len(num_param), t_idx),
+                                lincoefs = c(L + 0.5 * diag(Q) * bin, -1),
+                                quadvars1 = quad[, 1],
+                                quadvars2 = quad[, 2],
+                                quadcoefs = quadcoefs,
+                                rhs = 0)
+  
+  A   <- as.matrix(problem$constraints$L)
+  dir <- problem$constraints$dir
+  rhs <- problem$constraints$rhs
+  for (k in seq_len(nrow(A))) {
+    nz <- which(A[k, ] != 0)
+    scip::scip_add_linear_cons(model, vars = nz, coefs = A[k, nz],
+                               lhs = if (dir[k] %in% c(">=", "==")) rhs[k] else -Inf,
+                               rhs = if (dir[k] %in% c("<=", "==")) rhs[k] else Inf)
+  }
+  
+  scip::scip_set_objective_sense(model, "minimize")
+  scip::scip_optimize(model)
+  
+  if (scip::scip_get_nsols(model) == 0) return(rep(NA_real_, num_param))
+  
+  sol <- round(scip::scip_get_solution(model)$x[1:num_param])
+  
+  return(sol)
+}
+
 mosek_solver <- function(problem, opts = NULL, start) {
   
-  cc        <- as.numeric(problem$objective$L$v)
+  cc        <- as.numeric(as.matrix(problem$objective$L))
   num_param <- length(cc)
-  # Q <- Matrix::sparseMatrix(i = problem$objective$Q$i,
-  #                              j = problem$objective$Q$j,
-  #                              x = problem$objective$Q$v )
-  Upper<- problem$Upper
-  prob <- mosek_qptoprob(F = Upper, f = cc, 
-                                 Aeq = Matrix::sparseMatrix(i=problem$constraints$L$i,
-                                                          j = problem$constraints$L$j,
-                                                          x = problem$constraints$L$v),
-                                 beq = problem$constraints$rhs,
-                                 lb = rep(0,num_param),
-                                 ub = rep(1, num_param))
   
-  # lower.tri <- which(problem$objective$Q$j <= problem$objective$Q$i)
-  # trimat <- Matrix::tril(qobj)
-  # prob$sol = list(int = list(xx = start))
-  prob$intsub = 1:num_param
-  # prob <-  list(sense = "min",
-  #               c = cc,
-  #               A = Matrix::sparseMatrix(i=problem$constraints$L$i,
-  #                                        j = problem$constraints$L$j,
-  #                                        x = problem$constraints$L$v),
-  #               bc = rbind(problem$constraints$rhs, problem$constraints$rhs),
-  #               bx = rbind(rep(0,num_param), rep(1, num_param)),
-  #               qobj = list(i =  problem$objective$Q$i[lower.tri],
-  #                            j =  problem$objective$Q$j[lower.tri],
-  #                            v =  problem$objective$Q$v[lower.tri]/2),
-  #               sol = list(int = list(xx = start)),
-  #               intsub = 1:num_param)
+  # Upper is chol(Q) so the objective is 0.5 ||Upper a||^2 + cc'a
+  Upper <- problem$Upper
+  if (ncol(Upper) < num_param) Upper <- cbind(Upper, matrix(0, nrow(Upper), num_param - ncol(Upper)))
+  
+  A   <- problem$constraints$L
+  A   <- Matrix::sparseMatrix(i = A$i, j = A$j, x = A$v, dims = c(A$nrow, A$ncol))
+  dir <- problem$constraints$dir
+  rhs <- problem$constraints$rhs
+  eq  <- dir == "=="
+  ineq_sign <- ifelse(dir[!eq] == ">=", -1, 1) # mosek_qptoprob wants A a <= b
+  
+  bnds <- op_bounds(problem)
+  prob <- mosek_qptoprob(F = Upper, f = cc, 
+                         A = if (any(!eq)) ineq_sign * A[!eq, , drop = FALSE] else NA,
+                         b = if (any(!eq)) ineq_sign * rhs[!eq] else NA,
+                         Aeq = A[eq, , drop = FALSE],
+                         beq = rhs[eq],
+                         lb = bnds$lb,
+                         ub = bnds$ub)
+  
+  vtypes <- ROI::types(problem)
+  prob$intsub <- if (is.null(vtypes)) seq_len(num_param) else which(vtypes == "B")
   
   if(is.null(opts) | length(opts) == 0) opts <- list(verbose = 0)
   

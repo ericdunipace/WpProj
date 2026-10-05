@@ -14,7 +14,8 @@ W2IP(
   maxit = 100L,
   infimum.maxit = 100L,
   tol = 1e-07,
-  solver = c("cone", "lp", "mosek", "cplex", "gurobi"),
+  solver = c("scip", "cone", "lp", "highs", "mosek", "cplex", "gurobi"),
+  algorithm = c("exact", "augmented.lagrangian"),
   display.progress = FALSE,
   parallel = NULL,
   ...
@@ -39,11 +40,13 @@ W2IP(
 
 \item{tol}{Tolerance for convergence of coefficients}
 
-\item{solver}{The solver to use. Must be one of "cone","lp", "cplex", "gurobi","mosek".}
+\item{solver}{The solver to use. Must be one of "scip", "cone","lp", "highs", "cplex", "gurobi","mosek".}
+
+\item{algorithm}{How the cardinality constraint is handled. "exact" (default) enforces it directly. "augmented.lagrangian" is the augmented Lagrangian binary program of Gu, Ahmed, and Dey (2020) \url{doi:10.1137/19M1271695}: the constraint is softened with an augmented Lagrangian penalty from the continuous relaxation that is large enough to give the same solution. Works with any solver. See details.}
 
 \item{display.progress}{Should progress be printed?}
 
-\item{parallel}{foreach back end. See \code{\link[foreach:foreach]{foreach::foreach()}} for more details.}
+\item{parallel}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{\link[future:plan]{future::plan()}} to run the computations in parallel instead. A cluster from \code{\link[parallel:makeCluster]{parallel::makeCluster()}} or a number of workers is still accepted for now and is used as the plan for the duration of the call.}
 
 \item{...}{Extra args to Wasserstein distance methods}
 }
@@ -51,6 +54,8 @@ W2IP(
 2-Wasserstein distance selection by Integer Programming
 }
 \details{
-For argument \code{solution.method}, options "cone" and "lp" use the free solvers "ECOS" and "lpSolver", respectively. "cplex", "gurobi" and "mosek" require installing the corresponding commercial solvers.
+For argument \code{solver}, the default "scip" solves the binary quadratic program directly with the free SCIP solver (requires package \code{scip}; "lp" is used by default if it is not installed). Pass \verb{control = list(time_limit = <seconds>)} to return the best solution found within a time limit. Options "cone" and "lp" use the free solvers "ECOS" and "lpSolver", respectively. Option "highs" uses the free HiGHS mixed-integer solver on the same linear reformulation as "lp" and requires package \code{ROI.plugin.highs}. "cplex", "gurobi" and "mosek" require installing the corresponding commercial solvers.
+
+For \code{algorithm = "augmented.lagrangian"}, the constraint \eqn{\sum_j \alpha_j = k} is replaced by \eqn{\sum_j \alpha_j + t = k} with penalty \eqn{-\nu t + \rho |t|} in the objective, where \eqn{\nu} is the Lagrange multiplier of the continuous relaxation and \eqn{\rho} is the gap between a feasible solution and the relaxation's objective. Following Gu, Ahmed, and Dey (2020) \url{doi:10.1137/19M1271695}, a finite \eqn{\rho} closes the duality gap: by Lagrangian duality any \eqn{\alpha} with \eqn{t \neq 0} has penalized objective no better than that feasible solution, so the solution is the same as for \code{algorithm = "exact"}; how fast it is found depends on the solver. If the penalized problem ever returns a solution of the wrong size, the hard constrained problem is solved instead.
 }
 \keyword{internal}

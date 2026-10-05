@@ -16,7 +16,8 @@
 #' 
 #' @description 
 #' `r lifecycle::badge("experimental")`
-#' This function will plot the distribution of predictions for a range of active coefficients
+#' 
+#' This function will plot the distribution of predictions for a range of active coefficients. This function requires the `ggridges` package to run and uses colors from the JAMA palette (as in `ggsci`).
 #' 
 #' @examples
 #' if(rlang::is_installed("stats")) {
@@ -31,7 +32,7 @@
 #' fit <-  WpProj(X=x, eta=post_mu, 
 #'              power = 2
 #' )
-#' if(rlang::is_installed(c("ggplot2","ggsci","ggridges"))) {
+#' if(rlang::is_installed(c("ggplot2","ggridges"))) {
 #' ridgePlot(fit)
 #' }
 #' }
@@ -41,7 +42,6 @@ ridgePlot <- function(fit, index = 1, minCoef = 1,maxCoef = 10,
                       bandwidth = NULL) {
   stopifnot("'ggplot2' must be installed to use this function" = rlang::is_installed("ggplot2"))
   stopifnot("'ggridges' must be installed to use this function" = rlang::is_installed("ggridges"))
-  stopifnot("'ggsci' must be installed to use this function" = rlang::is_installed("ggsci"))
   idx <- index
   conditions <- list(idx = idx,
                      maxCoef = maxCoef,
@@ -172,11 +172,11 @@ ridgePlot <- function(fit, index = 1, minCoef = 1,maxCoef = 10,
     if (!inherits(fit, "WpProj")) {
       levs <- levels(df_ridge$Method)
       levs <- levs[levs != "Full"]
-      cols <- c(ggsci::pal_jama("default")(length(levs)), "#e41a1c")
+      cols <- c(pal_jama(length(levs)), "#e41a1c")
       ridgeplot <- ridgeplot +
         ggplot2::scale_fill_manual(breaks=levs, values=cols)
     } else {
-      ridgeplot <- ridgeplot + ggsci::scale_fill_jama()
+      ridgeplot <- ridgeplot + scale_fill_jama()
     }
   }
   

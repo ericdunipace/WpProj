@@ -8,7 +8,7 @@
 #' @param transport.method Method for Wasserstein distance calculation. Should be one of the outputs of [transport_options()].
 #' @param epsilon hyperparameter for sinkhorn iterations
 #' @param OTmaxit max iteration for sinkhorn iterations
-#' @param parallel foreach backend
+#' @param parallel `r lifecycle::badge("deprecated")` Use [future::plan()] to run the computations in parallel instead. A cluster from [parallel::makeCluster()] or a number of workers is still accepted for now and is used as the plan for the duration of the call.
 #'
 #' @return `WpProj` object
 #' @keywords internal
@@ -89,18 +89,15 @@ WPL0 <- function(X, Y = NULL, theta, power = 2,
   min_w2 <- Inf
   min_idx <- c(NULL,NULL)
   
-  if(!is.null(parallel)){
-    if(!inherits(parallel, "cluster")) {
-      stop("parallel must be a registered cluster backend or NULL")
-    }
-    doParallel::registerDoParallel(parallel)
+  oplan <- set_parallel_plan(parallel)
+  if (!is.null(oplan)) {
+    on.exit(future::plan(oplan), add = TRUE)
     display.progress <- FALSE
-  } else{
-    foreach::registerDoSEQ()
   }
   
   i <- NULL
-  w2 <- foreach::foreach(i  = seq_along(combos)) %dorng% {
+  w2 <- foreach::foreach(i  = seq_along(combos),
+                         .options.future = list(seed = TRUE)) %dofuture% {
     w2out <- rep(NA, ncol(combos[[ i]]))
     for(j in 1:ncol(combos[[i]])) {
       cur_idx <- c(combos[[i]][,j])

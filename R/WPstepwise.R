@@ -12,7 +12,7 @@
 #' @param OTmaxit maximum number of iterations for the opt?imal transport methods
 #' @param calc.theta should we get the linear coefficients
 #' @param model.size Maximum model size
-#' @param parallel foreach backend
+#' @param parallel `r lifecycle::badge("deprecated")` Use [future::plan()] to run the computations in parallel instead. A cluster from [parallel::makeCluster()] or a number of workers is still accepted for now and is used as the plan for the duration of the call.
 #' @param display.progress Display intermediate progress
 #'
 #' @return An object of class `WpProj`
@@ -76,14 +76,10 @@ WPSW <- function(X, Y, theta, power = 2,
   if(!is.null(force)) stopifnot(is.numeric(force))
   if(is.null(epsilon)) epsilon <- 0.05
   
-  if(!is.null(parallel)){
-    if(!inherits(parallel, "cluster")) {
-      stop("parallel must be a registered cluster backend")
-    }
-    doParallel::registerDoParallel(parallel)
+  oplan <- set_parallel_plan(parallel)
+  if (!is.null(oplan)) {
+    on.exit(future::plan(oplan), add = TRUE)
     # display.progress <- FALSE
-  } else{
-    foreach::registerDoSEQ()
   }
   # stopifnot(is.character(diretction))
   
@@ -237,7 +233,7 @@ WPSW <- function(X, Y, theta, power = 2,
     cand <- NULL
     for(i in 1:max_iter){
       candidates <- which(!in.idx & not.force.logical )
-      wP_list <- foreach::foreach(cand = candidates) %dopar% {
+      wP_list <- foreach::foreach(cand = candidates) %dofuture% {
         return(add.idx(cand, in.idx = in.idx, X= X_, sort_mu = Y_, p = p, 
                        ground_p = ground_p, OToptions = OToptions, 
                        obs.direction = obs.direction,
@@ -261,7 +257,7 @@ WPSW <- function(X, Y, theta, power = 2,
     
     for(i in 1:max_iter){
       candidates <- which( in.idx & not.force.logical )
-      wP_list <- foreach::foreach(cand = candidates) %dopar% {
+      wP_list <- foreach::foreach(cand = candidates) %dofuture% {
         return(minus.idx(cand, in.idx = in.idx, X=X_, sort_mu = Y_, p = p, 
                          ground_p = ground_p,
                          OToptions = OToptions, obs.direction = obs.direction,

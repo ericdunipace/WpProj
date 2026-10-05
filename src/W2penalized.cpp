@@ -312,7 +312,7 @@ SEXP W2penalized(SEXP X_,
     }
     
     // save coefficient otherwise
-      beta.col(i)  = res;
+      beta.col(i)  = Eigen::Map<const vectorxd>(res.data(), res.size()); // vec(res), column-major
       
     // break if larger than max coef
     if( countNonZero(res) > model_size) {

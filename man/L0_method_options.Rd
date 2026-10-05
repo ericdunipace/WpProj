@@ -22,7 +22,7 @@ L0_method_options(
 
 \item{OTmaxit}{The number of iterations to run the Wasserstein distance solvers.}
 
-\item{parallel}{A cluster backend to be used by \code{\link[foreach:foreach]{foreach::foreach()}} if parallelization is desired.}
+\item{parallel}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{\link[future:plan]{future::plan()}} to run the computations in parallel instead. A cluster from \code{\link[parallel:makeCluster]{parallel::makeCluster()}} or a number of workers is still accepted for now and is used as the plan for the duration of the call.}
 
 \item{...}{Not used}
 }

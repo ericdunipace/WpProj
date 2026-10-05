@@ -14,6 +14,7 @@ A vector of \eqn{W_p R^2} objects
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+
 Will combine \eqn{W_p R ^2} objects into a single object.
 }
 \examples{

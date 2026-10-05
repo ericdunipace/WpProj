@@ -1,8 +1,7 @@
 #' @useDynLib WpProj, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
-#' @importFrom foreach %dopar%
 #' @importFrom foreach %do%
-#' @importFrom doRNG %dorng%
+#' @importFrom doFuture %dofuture%
 #' @importFrom foreach %:% 
 #' @import ROI.plugin.ecos
 #' @import ROI.plugin.lpsolve

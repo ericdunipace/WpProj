@@ -710,7 +710,7 @@ testthat::test_that("W2L1 function for grouped projection", {
   testthat::expect_equal(c(theta), c(coef(lm(post_mu ~ x + 0))))#should be pretty close
   
   
-  projectionmcp_nogroup <-WpProj::: W2L1(X=x, Y=NULL, 
+  projectionmcp_nogroup <-WpProj:::W2L1(X=x, Y=NULL, 
                         theta=theta, penalty="mcp",
                         nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
                         infimum.maxit=1, maxit = 1e3, gamma = gamma,
@@ -777,4 +777,67 @@ testthat::test_that("W2L1 function for grouped projection", {
   testthat::expect_equal(c(projectionscad.net$beta[,11]), c(projectionols$beta)) #should be pretty close
   for(i in 1:10) testthat::expect_true(length(unique(abs(projectionscad.net$beta[seq(i,p*s,10),1])<1e-14))==1)  
   
+})
+
+testthat::test_that("W2L1 function gets correct beta", {
+  set.seed(283947)
+  
+  n <- 32
+  p <- 20
+  s <- 10
+  
+  x <- matrix(stats::rnorm(p*n), nrow=n, ncol=p)
+  beta <- (1:p)/p
+  y <- x %*% beta + stats::rnorm(n)
+  
+  #posterior
+  prec <- crossprod(x) + diag(1,p,p)*1
+  mu_post <- solve(prec, crossprod(x,y))
+  alpha <- 1 + n/2
+  
+  beta <- 1 + 0.5 * (crossprod(y) + t(mu_post) %*% prec %*% mu_post )
+  sigma_post <- 1/stats::rgamma(s, alpha, 1/beta)
+  theta <- sapply(sigma_post, function(ss) mu_post + t(chol(ss * solve(prec))) %*% matrix(stats::rnorm(p, 0, 1),p,1))
+  
+  post_mu <- x %*% theta
+  
+  theta_hat <- qr.coef(qr(x), post_mu )
+  
+  nlambda <- 10
+  lambda.min.ratio <- 1e-10
+  gamma <- 1
+  
+  out.theta <- WpProj:::W2L1(X=x, Y=NULL, 
+                 theta=theta, penalty="lasso",
+                 nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                 infimum.maxit=1, maxit = 1e3, gamma = gamma,
+                 display.progress = FALSE,
+                 penalty.factor = NULL, method="projection",
+                 tol = 0)
+  testthat::expect_equal(out.theta$theta[[length(out.theta$theta)]], theta_hat, tolerance = 1e-8) #should be almost exact
+  testthat::expect_true(out.theta$niter[1,ncol(out.theta$niter)] == 0)
+  
+  
+  out <- WpProj:::W2L1(X=x, Y=post_mu, 
+                             theta=NULL, penalty="lasso",
+                             nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                             infimum.maxit=1, maxit = 1e3, gamma = gamma,
+                             display.progress = FALSE,
+                             penalty.factor = NULL, method="projection",
+                             tol = 0)
+  testthat::expect_equal(c(out$theta[[length(out$theta)]]), c(theta_hat), tolerance = 1e-8) #should be almost exact
+  testthat::expect_true(out$niter[1,ncol(out$niter)] == 0)
+  
+  x_corrupt <- x
+  x_corrupt[,2] <- x[,3] * 4 - 2
+  mu_corrupt <- x_corrupt %*% theta
+  out.error <- WpProj:::W2L1(X=cbind(1,x_corrupt), Y=mu_corrupt, 
+                       theta=NULL, penalty="lasso",
+                       nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
+                       infimum.maxit=1, maxit = 1e3, gamma = gamma,
+                       display.progress = FALSE,
+                       penalty.factor = NULL, method="projection",
+                       tol = 0)
+  # expect to have used the SVD pseudo inverse iterations to get to an answer
+  testthat::expect_true(out.error$niter[1,ncol(out.error$niter)] > 0)
 })

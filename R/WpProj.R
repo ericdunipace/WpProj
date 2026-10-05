@@ -5,7 +5,7 @@
 #' @param theta An optional An \eqn{p \times s} parameter matrix for selection methods. Only makes sense if the original model is a linear model.
 #' @param power The power of the Wasserstein distance to use. Must be `>= 1.0`. Will default to `2.0`.
 #' @param method The algorithm to calculate the Wasserstein projections. One of "L1", "binary program", "IP", "stepwise","simulated annealing", or "L0". Will default to "L1" if not provided. See details for more information.
-#' @param solver Which solver to use? One of "lasso", "ecos", "lpsolve", or "mosek". See details for more information
+#' @param solver Which solver to use? One of "lasso", "clarabel", "ecos", "scip", "lpsolve", "highs", or "mosek". See details for more information
 #' @param options Options passed to the particular method and desired solver. See details for more information.
 #'
 #' @returns object of class `WpProj`, which is a list with the following slots:
@@ -22,6 +22,7 @@
 #' 
 #' @description 
 #' `r lifecycle::badge("experimental")`
+#' 
 #' This function will calculate linear projections from a set of predictions into the space of the covariates in terms of the p-Wasserstein distance.
 #'
 #' @details
@@ -31,6 +32,9 @@
 #' For the L1 methods, see [L1_method_options()] for more information. For the binary program methods, see [binary_program_method_options()] for more information. For the stepwise methods, see [stepwise_method_options()] for more information. For the simulated annealing methods, see [simulated_annealing_method_options()] for more information.
 #' 
 #' In most cases, we recommend using the L1 methods or binary program methods. The L1 methods are the fastest and applicable to Wasserstein powers of any value greater than 1 and function as direct linear projections into the space of the covariates. The binary program methods instead preserve the coefficients of the original model if this is of interest, such as when the original model was already a linear model. The binary program will instead function as a way of turning on and off certain coefficients in a way that minimizes the Wasserstein distance between reduced and original models. Of note, we also have available an approximate binary program method using a lasso solver. This method is faster than the exact binary program method but is not guaranteed to find the optimal solution. It is recommended to use the exact binary program method if possible. See [binary_program_method_options()] for more information on how to set up the approximate method as some arguments for the lasso solver should be specified. For more information on how this works, please also see the referenced paper.
+#' 
+#' ## Solvers
+#' The "lasso" solver uses approximate, free penalized regression routines. For `power = 1` and `power = Inf` with `method = "L1"`, the projections are second-order cone programs that can be solved with the free solvers "clarabel" (default) or "ecos", or the commercial solver "mosek". For `method = "binary program"`, the default "lasso" solver gives a fast approximate solution. The exact solution can be found with the free solvers "scip" (recommended), "lpsolve", "highs", or "ecos", or the commercial solver "mosek". The "scip" solver works on the binary quadratic program directly rather than a linearized version and accepts a time limit, e.g. `options = list(solver.options = list(control = list(time_limit = 60)))`, after which it returns the best solution found. Any exact solver can also use the augmented Lagrangian binary program by setting `algorithm = "augmented.lagrangian"` in [binary_program_method_options()]. The "clarabel", "scip", and "highs" solvers require the packages `ROI.plugin.clarabel`, `scip`, and `ROI.plugin.highs`, respectively. If "clarabel" or "scip" would be used by default but is not installed, "ecos" or "lpsolve" is used instead.
 #' 
 #' The stepwise, simulated annealing, and L0 methods also select covariates like the binary program methods but they can be slower. They are presented merely for comparison purposes given they were used in the original paper.
 #' 
@@ -79,7 +83,7 @@
 #' 
 #' ## compare performance by measuring distance from full model
 #' dc <- distCompare(models = list("L1" = fit.p2, "BP" = fit.p2.bp))
-#' if(rlang::is_installed(c("ggplot2","ggsci"))) {
+#' if(rlang::is_installed("ggplot2")) {
 #' plot(dc)
 #' }
 #' 
@@ -87,18 +91,18 @@
 #' ## and the predictions of interest as a pseudo R^2
 #' r2.expect <- WPR2(predictions = post_mu, projected_model = dc) # can have negative values
 #' r2.null  <- WPR2(projected_model = dc) # should be between 0 and 1
-#' if(rlang::is_installed(c("ggplot2","ggsci"))) {
+#' if(rlang::is_installed("ggplot2")) {
 #' plot(r2.null)
 #' }
 #' 
 #' ## we can also examine how predictions change in the models for individual observations
-#' if(rlang::is_installed(c("ggplot2","ggsci","ggridges"))) {
+#' if(rlang::is_installed(c("ggplot2","ggridges"))) {
 #' ridgePlot(fit.p2, index = 21, minCoef = 0, maxCoef = 10)
 #' }
 #' }
 WpProj <- function(X, eta=NULL, theta = NULL, power = 2.0,
                  method = c("L1", "binary program", "stepwise","simulated annealing","L0"),
-                 solver = c("lasso", "ecos", "lpsolve", "mosek"),
+                 solver = c("lasso", "clarabel", "ecos", "scip", "lpsolve", "highs", "mosek"),
                  options = NULL)
 {
   # save call
@@ -137,11 +141,11 @@ method_lookup <- function(power, method, solver, options) {
   # don't want visible function everywhere but keeping independent to not pollute namespace
   warn_for_overuse_of_lasso <- function(out) {
     if (out$power == 1.0 && out$method == "L1" && out$solver == "lasso") {
-      warning("Using the lasso solver for Wasserstein power == 1 is inefficient. We recommend using 'ecos', which is a free solver already imported by this package, or 'mosek' instead.")
+      warning("Using the lasso solver for Wasserstein power == 1 is inefficient. We recommend using 'clarabel', which is a free solver already imported by this package, or 'mosek' instead.")
     }
     
     if ( is.infinite(out$power) && out$method == "L1" && out$solver == "lasso") {
-      warning("Using the lasso solvers for Wasserstein power == Inf (max norm) is inefficient and likely to fail. We recommend using 'ecos', which is a free solver already imported by this package, or 'mosek' instead.")
+      warning("Using the lasso solvers for Wasserstein power == Inf (max norm) is inefficient and likely to fail. We recommend using 'clarabel', which is a free solver already imported by this package, or 'mosek' instead.")
     }
   }
   
@@ -165,12 +169,13 @@ method_lookup <- function(power, method, solver, options) {
       warning(sprintf("Using method %s with Wasserstein power %s is not allowed. Switching to method %s.", method, power,  pwr$method[1L]))
     }
     
-    if ( is.null(solver) ) solver <- meth$solver[1L]
+    default_solver <- if (all(is.na(meth$solver))) NA else resolve_default_solver(meth$solver[1L])
+    if ( is.null(solver) ) solver <- default_solver
     sol <- meth %>% dplyr::filter(solver == !!solver | is.na(solver))
     
     if ( nrow(sol) == 0 ) {
-      sol <- meth %>% dplyr::filter(solver == meth$solver[1L] | is.na(solver))
-      warning(sprintf("Using solver %s with Wasserstein power %s and method %s is not allowed. Switching to solver %s.", solver, power, method, meth$solver[1L]))
+      sol <- meth %>% dplyr::filter(solver == default_solver | is.na(solver))
+      warning(sprintf("Using solver %s with Wasserstein power %s and method %s is not allowed. Switching to solver %s.", solver, power, method, default_solver))
     } else if (nrow(sol) > 1) {
       stop(sprintf("Returning multiple rows with solver '%s'", solver))
     }
@@ -202,10 +207,10 @@ method_lookup <- function(power, method, solver, options) {
 table_lookup <- list(
   # all L1 penalized methods
   data.frame(method = "L1",
-             solver = c("ecos","mosek","lasso"),
+             solver = c("clarabel","ecos","mosek","lasso"),
              power = 1.0,
              penalty = TRUE,
-             fun = c("W1L1","W1L1","WPL1")),
+             fun = c("W1L1","W1L1","W1L1","WPL1")),
   data.frame(method = "L1",
              solver = c("lasso"),
              power = 2.0,
@@ -227,15 +232,15 @@ table_lookup <- list(
              penalty = TRUE,
              fun = c("WPL1")),
   data.frame(method = "L1",
-             solver = c("ecos","mosek","lasso"),
+             solver = c("clarabel","ecos","mosek","lasso"),
              power = Inf,
              penalty = TRUE,
-             fun = c("WInfL1","WInfL1","WPL1")),
+             fun = c("WInfL1","WInfL1","WInfL1","WPL1")),
   data.frame(method = "binary program",
-             solver = c("lasso","lpsolve","ecos","mosek"),
+             solver = c("lasso","scip","lpsolve","highs","ecos","mosek"),
              power = 2.0,
-             penalty = c(FALSE, FALSE, FALSE, TRUE),
-             fun = c("WPL1", "W2IP","W2IP","W2IP")),
+             penalty = c(FALSE, FALSE, FALSE, FALSE, FALSE, TRUE),
+             fun = c("WPL1", "W2IP","W2IP","W2IP","W2IP","W2IP")),
   
   # other methods
   data.frame(method = "stepwise",

@@ -12,6 +12,6 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{approxOT}{\code{\link[approxOT]{transport_options}}, \code{\link[approxOT]{wasserstein}}}
+  \item{approxOT}{\code{\link[approxOT:transport_options]{transport_options()}}, \code{\link[approxOT:wasserstein]{wasserstein()}}}
 }}
 
