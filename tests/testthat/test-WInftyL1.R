@@ -318,3 +318,26 @@ testthat::test_that("WInfL1 changes penalty appropriately for net penalties", {
   
 })
 
+
+testthat::test_that("WInfL1 clarabel matches ecos", {
+  check_clarabel()
+  
+  set.seed(87897)
+  
+  n <- 32
+  p <- 10
+  s <- 21
+  
+  x <- matrix(stats::rnorm(p*n), nrow=n, ncol=p)
+  theta <- matrix((1:p)/p, nrow=p, ncol=s) + stats::rnorm(p*s, 0, 0.1)
+  post_mu <- x %*% theta
+  
+  for (pen in c("none", "lasso", "mcp")) {
+    projection_ecos <- WInfL1(X=x, Y=post_mu, penalty=pen, solver = "cone",
+                              nlambda = 5, lambda.min.ratio = 1e-4, gamma = 2.1)
+    projection_clarabel <- WInfL1(X=x, Y=post_mu, penalty=pen, solver = "clarabel",
+                                  nlambda = 5, lambda.min.ratio = 1e-4, gamma = 2.1)
+    testthat::expect_equal(projection_clarabel$beta, projection_ecos$beta, tolerance = 1e-4)
+    testthat::expect_equal(projection_clarabel$nzero, projection_ecos$nzero)
+  }
+})

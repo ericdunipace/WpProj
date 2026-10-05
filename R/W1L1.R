@@ -10,7 +10,7 @@
 #' @param nlambda number of lambdas to look through
 #' @param gamma parameter for SCAD and MCP methods
 #' @param display.progress Print intermediate output?
-#' @param solver Solver to use. Must be one of "rqPen", "gurobi", "mosek", though "mosek" is preferred.
+#' @param solver Solver to use. Must be one of "clarabel", "cone", "rqPen", "gurobi", "mosek". "clarabel" (default) uses the free Clarabel solver (requires package `ROI.plugin.clarabel`; "cone" is used by default if it is not installed) and "cone" the free ECOS solver.
 #' @param ... options to pass to solvers
 #'
 #' @return `WpProj` object
@@ -23,7 +23,7 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none", "lasso","scad","mcp"),
                  nlambda = 10, 
                  gamma = 1, 
                  display.progress = FALSE,
-                 solver = c( "cone", "rqPen", "gurobi", "mosek"),
+                 solver = c( "clarabel", "cone", "rqPen", "gurobi", "mosek"),
                  ...) {
   
   this.call <- as.list(match.call()[-1])
@@ -36,7 +36,11 @@ W1L1 <- function(X, Y, theta = NULL, penalty = c("none", "lasso","scad","mcp"),
   if(any(grepl("scad", penalty))) penalty <- "scad"
   penalty <- match.arg(penalty, choices = c("none","lasso","scad","mcp"))
   
-  solver <- match.arg(solver)
+  solver <- if (missing(solver) || is.null(solver)) {
+    resolve_default_solver("clarabel", internal = TRUE)
+  } else {
+    match.arg(solver)
+  }
   
   n <- nrow(X)
   d <- ncol(X)

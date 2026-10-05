@@ -43,7 +43,7 @@ verify_solver_options <- function(solver.options, function_name) {
 #' @param model.size What is the maximum number of coefficients to have in the final model. Default is NULL. If NULL, will find models from the minimum size, 0, to the number of columns in `X`.
 #' @param tol The tolerance for convergence
 #' @param display.progress Logical. Should intermediate progress be displayed? TRUE or FALSE. Default is FALSE.
-#' @param solver.options Options to be passed on to the solver. Only used for "ecos" and "mosek" solvers.
+#' @param solver.options Options to be passed on to the solver. Only used for "clarabel", "ecos", and "mosek" solvers.
 #' 
 #' @return A list with names corresponding to each argument above.
 #' 
@@ -135,13 +135,14 @@ L1_method_options <- function(penalty =  L1_penalty_options(),
 #' @param nvars The number of variables to explore. Should be an integer vector of model sizes. Default is NULL which will explore all models from 1 to `model.size`.
 #' @param tol The tolerance for convergence
 #' @param display.progress Logical. Should intermediate progress be displayed? TRUE or FALSE. Default is FALSE.
-#' @param parallel A cluster backend to be used by [foreach::foreach()]. See [foreach::foreach()] for details about how to set them up. The `WpProj` functions will register the cluster with the [doParallel::registerDoParallel()] function internally.
+#' @param parallel `r lifecycle::badge("deprecated")` Use [future::plan()] to run the computations in parallel instead. A cluster from [parallel::makeCluster()] or a number of workers is still accepted for now and is used as the plan for the duration of the call.
+#' @param algorithm How the exact binary program handles the constraint on the number of coefficients. "exact" (default) enforces it directly and "augmented.lagrangian" uses the augmented Lagrangian binary program of Gu, Ahmed, and Dey (2020) <doi:10.1137/19M1271695>, which softens the constraint with a penalty large enough to give the same solution and can be faster with some solvers. Ignored by the "lasso" solver.
 #' @param solver.options Options to be passed on to the solver. See details
 #'
 #' @return A list with names corresponding to each argument above.
 #' 
 #' @details
-#' This function will setup the default arguments used by the binary program method. Of note, for the argument `solver.options`, If using the "lasso" solver, you should provide arguments such as "penalty", "nlambda", "lambda.min.ratio", "gamma", and "lambda" in a list. A simple way to do this is to feed the output of the [L1_method_options()] function to the argument `solver.options.` This will tell the approximate solver, which uses a lasso method that then will project the parameters back to the \eqn{\{0,1\}} space. For the other solvers, you can see the options in the ECOS solver package, [ECOSolveR::ecos.control()], and the options for the mosek solver, [Rmosek::mosek()].
+#' This function will setup the default arguments used by the binary program method. Of note, for the argument `solver.options`, If using the "lasso" solver, you should provide arguments such as "penalty", "nlambda", "lambda.min.ratio", "gamma", and "lambda" in a list. A simple way to do this is to feed the output of the [L1_method_options()] function to the argument `solver.options.` This will tell the approximate solver, which uses a lasso method that then will project the parameters back to the \eqn{\{0,1\}} space. For the other solvers, pass solver controls as `solver.options = list(control = list(...))`. See [scip::scip_control()] for the options of the "scip" solver, such as `time_limit`, the ECOS solver package, [ECOSolveR::ecos.control()], and the options for the mosek solver, [Rmosek::mosek()].
 #' 
 #' @seealso [WpProj()]
 #' 
@@ -162,7 +163,9 @@ binary_program_method_options <- function(
                                           nvars = NULL,
                                           tol = 1e-7,
                                           display.progress=FALSE, 
-                                          parallel = NULL, solver.options = NULL) {
+                                          parallel = NULL, 
+                                          algorithm = c("exact", "augmented.lagrangian"),
+                                          solver.options = NULL) {
   # W2IP(X, Y=NULL, theta,
   #      transport.method = transport_options(),
   #      model.size = NULL,
@@ -212,7 +215,10 @@ binary_program_method_options <- function(
   # check parallel
   if(!is.null(parallel)) {
     stopifnot(inherits(parallel, "cluster") || is.numeric(parallel))
+    deprecate_parallel("binary_program_method_options")
   }
+  
+  algorithm <- match.arg(algorithm)
   
   solver.options <- verify_solver_options(solver.options, "binary_program_method_options")
   
@@ -225,7 +231,8 @@ binary_program_method_options <- function(
                 nvars = nvars,
                 tol = tol,
                 display.progress=display.progress, 
-           parallel = parallel), solver.options)
+           parallel = parallel,
+           algorithm = algorithm), solver.options)
   
   class(out) <- c("wpproj_options_list", "binary_program_options")
   return(out)
@@ -243,7 +250,7 @@ binary_program_method_options <- function(
 #' @param OTmaxit The number of iterations to run the Wasserstein distance solvers.
 #' @param model.size How many coefficients should the maximum final model have?
 #' @param display.progress Logical. Should intermediate progress be displayed? TRUE or FALSE. Default is FALSE.
-#' @param parallel A cluster backend to be used by [foreach::foreach()]. See [foreach::foreach()] for details about how to set them up. The `WpProj` functions will register the cluster with the [doParallel::registerDoParallel()] function internally.
+#' @param parallel `r lifecycle::badge("deprecated")` Use [future::plan()] to run the computations in parallel instead. A cluster from [parallel::makeCluster()] or a number of workers is still accepted for now and is used as the plan for the duration of the call.
 #' @param calc.theta Return the linear coefficients? Default is TRUE.
 #' @param ... Not used
 #'
@@ -320,6 +327,7 @@ stepwise_method_options <- function(force = NULL,
   if(!is.null(parallel)) {
     stopifnot(inherits(parallel, "cluster") || is.numeric(parallel))
     if (is.numeric(parallel)) parallel <- as.integer(parallel)
+    deprecate_parallel("stepwise_method_options")
   }
   
   out <- list(
@@ -354,7 +362,7 @@ stepwise_method_options <- function(force = NULL,
 #' @param model.size How many coefficients should the maximum final model have? Ignored if `nvars` set.
 #' @param nvars What model sizes should one check? Should be a numeric vector with maximum less than number of variables or `NULL.` Default is NULL. Overrides `model.size` if is not `NULL`
 #' @param display.progress Logical. Should intermediate progress be displayed? TRUE or FALSE. Default is `FALSE.`
-#' @param parallel A cluster backend to be used by [foreach::foreach()]. See [foreach::foreach()] for details about how to set them up. The `WpProj` functions will register the cluster with the [doParallel::registerDoParallel()] function internally.
+#' @param parallel `r lifecycle::badge("deprecated")` Use [future::plan()] to run the computations in parallel instead. A cluster from [parallel::makeCluster()] or a number of workers is still accepted for now and is used as the plan for the duration of the call.
 #' @param calc.theta Return the linear coefficients? Default is TRUE.
 #' @param ... Not used.
 #'
@@ -470,6 +478,7 @@ simulated_annealing_method_options <- function(
   if(!is.null(parallel)) {
     stopifnot(inherits(parallel, "cluster") || is.numeric(parallel))
     if (is.numeric(parallel)) parallel <- as.integer(parallel)
+    deprecate_parallel("simulated_annealing_method_options")
   }
   
   if (!is.null(model.size)) {
@@ -506,7 +515,7 @@ simulated_annealing_method_options <- function(
 #' @param transport.method Method for Wasserstein distance calculation. Should be one the outputs of [transport_options()].
 #' @param epsilon A value > 0 for the penalty parameter if using the Sinkhorn method for optimal transport
 #' @param OTmaxit The number of iterations to run the Wasserstein distance solvers.
-#' @param parallel A cluster backend to be used by [foreach::foreach()] if parallelization is desired.
+#' @param parallel `r lifecycle::badge("deprecated")` Use [future::plan()] to run the computations in parallel instead. A cluster from [parallel::makeCluster()] or a number of workers is still accepted for now and is used as the plan for the duration of the call.
 #' @param ... Not used
 #' 
 #' @export
@@ -558,6 +567,7 @@ L0_method_options <- function(method = c("binary program", "projection"),
       parallel <- as.integer(parallel)
       stopifnot("parallel should be a cluster object or an integer > 0" = parallel > 0)
     }
+    deprecate_parallel("L0_method_options")
   }
   
   out <- list(

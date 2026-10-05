@@ -14,7 +14,7 @@
 #' @param proposal Proposal function. There is a default method but can provide your own with parameters `xty`, `cur`, `idx`, `force`, `d`, `method`
 #' @param options Options for simulated annealing
 #' @param display.progress Whether to display solver progress. TRUE or FALSE. Default is FALSE.
-#' @param parallel A [foreach::foreach()] backend
+#' @param parallel `r lifecycle::badge("deprecated")` Use [future::plan()] to run the computations in parallel instead. A cluster from [parallel::makeCluster()] or a number of workers is still accepted for now and is used as the plan for the duration of the call.
 #' @param calc.theta Should the model save the linear coefficients? TRUE or FALSE. Default is TRUE
 #' @param xtx precomputed crossproduct \code{crossprod(X,X)}
 #' @param xty precomputed \code{crossprod(X, Y)}
@@ -147,14 +147,10 @@ WPSA <- function(X, Y=NULL, theta,
     xty <- augmat$XtY
   }
   
-  if(!is.null(parallel)){
-    if(!inherits(parallel, "cluster")) {
-      stop("parallel must be a registered cluster backend")
-    }
-    doParallel::registerDoParallel(parallel)
+  oplan <- set_parallel_plan(parallel)
+  if (!is.null(oplan)) {
+    on.exit(future::plan(oplan), add = TRUE)
     display.progress <- FALSE
-  } else{
-    foreach::registerDoSEQ()
   }
   
   message <- "completed"
@@ -181,7 +177,8 @@ WPSA <- function(X, Y=NULL, theta,
         return(selVarMeanGen(X, theta, beta))
       }
     }
-    w2s <- foreach::foreach(i = idx, .combine = "unlist") %dopar%
+    w2s <- foreach::foreach(i = idx, .combine = "unlist",
+                            .options.future = list(seed = TRUE)) %dofuture%
       {
         beta_temp <- calc.beta(xtx=xtx, xty=xty, i, meth, OToptions = OToptions, x=X_, theta_, Y_, niter=500)
         temp_mu <- mu_calc(X_, theta_, beta_temp)
@@ -399,7 +396,8 @@ WPSA <- function(X, Y=NULL, theta,
     if(display.progress) pb <- utils::txtProgressBar(min = 0, max = length(nvars), style = 3)
     # vector("list", length(nvars))
     out <- foreach::foreach( i = seq_along(nvars), 
-                             .inorder = FALSE) %dorng% {
+                             .inorder = FALSE,
+                             .options.future = list(seed = TRUE)) %dofuture% {
       mm <- nvars[i]
       if(display.progress) utils::setTxtProgressBar(pb, i)
       if ( time.exceed(max.time, start.time) ) { # doesn't work in parallel

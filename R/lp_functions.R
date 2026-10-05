@@ -1,5 +1,5 @@
 GroupLambda <- function(X, Y, groups, lambda, penalty = "lasso", power = 1,
-                             gamma = 1.5, solver = c("ecos","mosek","gurobi"),
+                             gamma = 1.5, solver = c("clarabel","ecos","mosek","gurobi"),
                              model.size = NULL,
                              options = list(solver_opts = NULL,
                                             init = NULL,
@@ -11,10 +11,10 @@ GroupLambda <- function(X, Y, groups, lambda, penalty = "lasso", power = 1,
   nlambda <- length(lambda)
   stopifnot(nlambda >= 1)
   return_val <- vector("list", nlambda)
-  if(is.null(solver)) solver <- "ecos"
+  if(missing(solver) || is.null(solver)) solver <- resolve_default_solver("clarabel")
   
   if (solver == "ecos") solver <- "cone"
-  register_solver(solver) #register ecos or gurobi or cplex
+  register_solver(solver) #register ecos, clarabel, or cplex
   
   if(is.null(options$init)) options$init <- rep(0, ncol(X))
   
@@ -52,7 +52,7 @@ GroupLambda <- function(X, Y, groups, lambda, penalty = "lasso", power = 1,
         model$obj[problem$lambda_idx] <- lambda[[pos]]
       } else if (solver == "mosek") {
         model$c[problem$lambda_idx] <- lambda[[pos]]
-      } else if (solver == "cone") {
+      } else if (solver %in% roi_cone_solvers()) {
         model$objective$L[problem$lambda_idx] <- lambda[[pos]]
       }
       # return_val[[pos]] <- rqPen::rq.group.fit(x = x, y = y, groups = groups, 
@@ -116,7 +116,7 @@ lp_norm <- function(X, Y, power = 1, problem = NULL, model = NULL, deriv_func, t
       model$c[problem$lambda_idx] <- lambda_update[[1L]]
     } else if (solver == "gurobi") {
       model$obj[problem$lambda_idx] <- lambda_update[[1L]]
-    } else if (solver == "cone") {
+    } else if (solver %in% roi_cone_solvers()) {
       model$objective$L[problem$lambda_idx] <- lambda_update[[1L]]
       # browser()
     }
@@ -127,13 +127,14 @@ lp_norm <- function(X, Y, power = 1, problem = NULL, model = NULL, deriv_func, t
 
 lp_solve <- function(problem, beta.idx, lambda, gamma, opts, solver, thresholder, groups) {
   
-  register_solver(solver) # registers ecos solver if needed
+  register_solver(solver) # registers ecos or clarabel solver if needed
   # if (solver == "cone") {
   #   ROI::ROI_require_solver("ecos")
   # }
   
   res <- switch(solver,
                 "cone" = ROI::ROI_solve(problem, "ecos", opts),
+                "clarabel" = ROI::ROI_solve(problem, "clarabel", opts),
                 "mosek" = Rmosek::mosek(problem, opts)#,
                 # "gurobi" = gurobi::gurobi(problem,opts)
   )
@@ -142,7 +143,7 @@ lp_solve <- function(problem, beta.idx, lambda, gamma, opts, solver, thresholder
     param <- res$sol$itr$xx
   } else if (solver == "gurobi") {
     param <- res$x
-  } else if (solver == "cone") {
+  } else if (solver %in% roi_cone_solvers()) {
     param <- res$solution
   }
   
@@ -215,7 +216,7 @@ lp_prob_to_model <- function(problem, solver, init, opts) {
       opts <- list(OutputFlag = 0)
     }
     # opts$NonConvex <- 2
-  } else if (solver == "cone") {
+  } else if (solver %in% roi_cone_solvers()) {
     # browser()
     nvars <- length(problem$C)
     equiv.indices <- which(problem$Const_upper == problem$Const_lower)

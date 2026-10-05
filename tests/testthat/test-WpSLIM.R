@@ -11,12 +11,12 @@ test_that("method_lookup works with typical inputs", {
   )
   expect_equal(
     method_lookup(1.0, "L1", NULL, NULL)$solver, 
-    "ecos"
+    resolve_default_solver("clarabel")
   )
   
   expect_equal(
     method_lookup(Inf, "L1", NULL, NULL)$solver, 
-    "ecos"
+    resolve_default_solver("clarabel")
   )
   
   expect_equal(
@@ -56,7 +56,7 @@ test_that("method_lookup handles different power values correctly", {
 test_that("method_lookup handles method and solver edge cases correctly", {
   # Valid method but invalid solver for a power
   expect_warning(result <- method_lookup(1.0, "L1", "nonexistent_solver", NULL))
-  expect_equal(result$solver, "ecos") # Default to first valid solver
+  expect_equal(result$solver, resolve_default_solver("clarabel")) # Default to first valid solver
   
   # Invalid method and valid solver for a power
   expect_warning(result <- method_lookup(1.0, "nonexistent_method", "ecos", NULL))
@@ -65,7 +65,7 @@ test_that("method_lookup handles method and solver edge cases correctly", {
   # Invalid method and solver
   expect_warning(result <- method_lookup(1.0, "nonexistent_method", "nonexistent_solver", NULL))
   expect_equal(result$method, "L1")
-  expect_equal(result$solver, "ecos")
+  expect_equal(result$solver, resolve_default_solver("clarabel"))
   
 })
 
@@ -109,7 +109,7 @@ test_that("method_lookup handles method and solver inputs correctly", {
   # Default method and solver for a given power
   result <- method_lookup(1.0, NULL, NULL, NULL)
   expect_equal(result$method, "L1")
-  expect_equal(result$solver, "ecos")
+  expect_equal(result$solver, resolve_default_solver("clarabel"))
   
   # Non-existent method for a power should give a warning and default to first method
   expect_warning(result <- method_lookup(1.0, "nonexistent", NULL, NULL))
@@ -117,7 +117,7 @@ test_that("method_lookup handles method and solver inputs correctly", {
   
   # Non-existent solver for a method should give a warning and default to first solver
   expect_warning(result <- method_lookup(1.0, "L1", "nonexistent", NULL))
-  expect_equal(result$solver, "ecos")
+  expect_equal(result$solver, resolve_default_solver("clarabel"))
   
   result <- method_lookup(3.0, NULL, NULL, NULL)
   expect_equal(result$method, "L1")
@@ -229,3 +229,114 @@ testthat::test_that("WpProj works with typical inputs", {
 })
 
 
+
+test_that("method_lookup routes open-source solvers", {
+  expect_silent(result <- method_lookup(1.0, "L1", "clarabel", NULL))
+  expect_equal(result$solver, "clarabel")
+  expect_equal(result$fun, "W1L1")
+  
+  expect_silent(result <- method_lookup(Inf, "L1", "clarabel", NULL))
+  expect_equal(result$solver, "clarabel")
+  expect_equal(result$fun, "WInfL1")
+  
+  expect_silent(result <- method_lookup(2.0, "binary program", "highs", NULL))
+  expect_equal(result$solver, "highs")
+  expect_equal(result$fun, "W2IP")
+  
+  expect_silent(result <- method_lookup(2.0, "binary program", "scip", NULL))
+  expect_equal(result$solver, "scip")
+  expect_equal(result$fun, "W2IP")
+  
+  # clarabel can't solve binary programs and highs can't solve the cone programs
+  expect_warning(result <- method_lookup(2.0, "binary program", "clarabel", NULL))
+  expect_equal(result$solver, "lasso")
+  expect_warning(result <- method_lookup(1.0, "L1", "highs", NULL))
+  expect_equal(result$solver, resolve_default_solver("clarabel"))
+})
+
+test_that("WpProj runs with open-source solvers", {
+  set.seed(87897)
+  n <- 32
+  p <- 10
+  s <- 21
+  x <- matrix(stats::rnorm(p*n), nrow=n, ncol=p)
+  post_beta <- matrix((1:p)/p, nrow=p, ncol=s) + stats::rnorm(p*s, 0, 0.1)
+  post_mu <- x %*% post_beta
+  
+  check_clarabel()
+  fit_ecos <- WpProj(X=x, eta=post_mu, power = 1.0, method = "L1", solver = "ecos",
+                     options = list(nlambda = 5))
+  fit_clarabel <- WpProj(X=x, eta=post_mu, power = 1.0, method = "L1", solver = "clarabel",
+                         options = list(nlambda = 5))
+  expect_equal(fit_clarabel$solver, "clarabel")
+  expect_equal(fit_clarabel$nzero, fit_ecos$nzero)
+  
+  check_highs()
+  fit_highs <- WpProj(X=x, eta=post_mu, theta = post_beta, power = 2.0, 
+                      method = "binary program", solver = "highs",
+                      options = list(nvars = c(2, 4)))
+  expect_equal(fit_highs$solver, "highs")
+  expect_equal(fit_highs$nzero, c(2, 4))
+  
+  check_scip()
+  fit_scip <- WpProj(X=x, eta=post_mu, theta = post_beta, power = 2.0, 
+                     method = "binary program", solver = "scip",
+                     options = list(nvars = c(2, 4),
+                                    solver.options = list(control = list(time_limit = 30))))
+  expect_equal(fit_scip$solver, "scip")
+  expect_equal(fit_scip$nzero, c(2, 4))
+})
+
+test_that("default solvers fall back when optional solver packages are missing", {
+  local_mocked_bindings(solver_installed = function(pkg) FALSE)
+  
+  expect_equal(suppressMessages(method_lookup(1.0, "L1", NULL, NULL))$solver, "ecos")
+  expect_equal(suppressMessages(method_lookup(Inf, "L1", NULL, NULL))$solver, "ecos")
+  expect_equal(suppressMessages(resolve_default_solver("clarabel", internal = TRUE)), "cone")
+  expect_equal(suppressMessages(resolve_default_solver("scip", internal = TRUE)), "lp")
+  expect_equal(resolve_default_solver("highs"), "highs")
+  
+  # explicitly requested solvers are not swapped
+  expect_equal(method_lookup(1.0, "L1", "clarabel", NULL)$solver, "clarabel")
+  
+  # the fitting functions fall back too
+  set.seed(87897)
+  n <- 32
+  p <- 5
+  s <- 21
+  x <- matrix(stats::rnorm(p*n), nrow=n, ncol=p)
+  post_beta <- matrix((1:p)/p, nrow=p, ncol=s) + stats::rnorm(p*s, 0, 0.1)
+  post_mu <- x %*% post_beta
+  
+  fit_default <- suppressMessages(W2IP(X = x, Y = post_mu, theta = post_beta, nvars = c(2, 3)))
+  fit_lp <- W2IP(X = x, Y = post_mu, theta = post_beta, nvars = c(2, 3), solver = "lp")
+  expect_equal(fit_default$beta, fit_lp$beta)
+  
+  fit_default <- suppressMessages(W1L1(X = x, Y = post_mu, penalty = "lasso", nlambda = 3))
+  fit_ecos <- W1L1(X = x, Y = post_mu, penalty = "lasso", nlambda = 3, solver = "cone")
+  expect_equal(fit_default$beta, fit_ecos$beta)
+})
+
+test_that("WpProj passes the augmented lagrangian algorithm to the binary program", {
+  check_scip()
+  set.seed(87897)
+  n <- 32
+  p <- 10
+  s <- 21
+  x <- matrix(stats::rnorm(p*n), nrow=n, ncol=p)
+  post_beta <- matrix((1:p)/p, nrow=p, ncol=s) + stats::rnorm(p*s, 0, 0.1)
+  post_mu <- x %*% post_beta
+  
+  fit_exact <- WpProj(X=x, eta=post_mu, theta = post_beta, power = 2.0, 
+                      method = "binary program", solver = "scip",
+                      options = list(nvars = c(2, 4)))
+  fit_lagr <- WpProj(X=x, eta=post_mu, theta = post_beta, power = 2.0, 
+                     method = "binary program", solver = "scip",
+                     options = list(nvars = c(2, 4), algorithm = "augmented.lagrangian"))
+  expect_equal(fit_lagr$theta, fit_exact$theta)
+  
+  # ignored by the approximate lasso method
+  expect_silent(WpProj(X=x, eta=post_mu, theta = post_beta, power = 2.0, 
+                       method = "binary program", solver = "lasso",
+                       options = list(algorithm = "augmented.lagrangian")))
+})

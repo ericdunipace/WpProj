@@ -67,14 +67,15 @@ Imports:
   Matrix,
   rqPen,
   quantreg,
-  doParallel,
+  doFuture (>= 1.0.0),
   foreach,
-  doRNG,
+  future,
   dplyr,
   stats,
   magrittr,
   methods,
   slam,
+  utils,
   lifecycle
 LinkingTo: 
   approxOT (>= 1.2),
@@ -86,17 +87,20 @@ LinkingTo:
   RSpectra
 Suggests: 
   ggplot2,
-  ggsci,
+  parallel,
   ggridges,
   testthat (>= 2.1.0),
   transport,
   Rmosek,
   spelling,
-  ECOSolveR
-RoxygenNote: 7.3.3
+  ECOSolveR,
+  ROI.plugin.clarabel,
+  scip,
+  ROI.plugin.highs
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/ericdunipace/WpProj
 BugReports: https://github.com/ericdunipace/WpProj/issues
 SystemRequirements: C++17
 Encoding: UTF-8
 Language: en-US
+Config/roxygen2/version: 8.1.0

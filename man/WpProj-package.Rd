@@ -18,6 +18,11 @@ Useful links:
 \author{
 \strong{Maintainer}: Eric Dunipace \email{edunipace@mail.harvard.edu} (\href{https://orcid.org/0000-0001-8909-213X}{ORCID})
 
+Authors:
+\itemize{
+  \item Eric Dunipace \email{edunipace@mail.harvard.edu} (\href{https://orcid.org/0000-0001-8909-213X}{ORCID})
+}
+
 Other contributors:
 \itemize{
   \item Clemens Schmid \email{clemens@nevrome.de} (\href{https://orcid.org/0000-0003-3448-5715}{ORCID}) (ETA progres bar is adapted from their code) [contributor]

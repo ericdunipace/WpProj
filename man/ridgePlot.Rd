@@ -46,7 +46,7 @@ a \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} plot
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
-This function will plot the distribution of predictions for a range of active coefficients. This function requires the \code{ggpridges} package to run and uses colors from \code{ggsci}.
+This function will plot the distribution of predictions for a range of active coefficients. This function requires the \code{ggridges} package to run and uses colors from the JAMA palette (as in \code{ggsci}).
 }
 \examples{
 if(rlang::is_installed("stats")) {
@@ -61,7 +61,7 @@ post_mu <- x \%*\% post_beta
 fit <-  WpProj(X=x, eta=post_mu, 
              power = 2
 )
-if(rlang::is_installed(c("ggplot2","ggsci","ggridges"))) {
+if(rlang::is_installed(c("ggplot2","ggridges"))) {
 ridgePlot(fit)
 }
 }

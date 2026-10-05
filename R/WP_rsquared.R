@@ -226,7 +226,6 @@ methods::setMethod("WPR2", signature = c("predictions" = "ANY", projected_model 
 
 plot.WPR2 <- function(x, xlim = NULL, ylim = NULL, linesize = 0.5, pointsize = 1.5, facet.group = NULL, ...) {
   stopifnot("'ggplot2' must be installed to use this function" = rlang::is_installed("ggplot2"))
-  stopifnot("'ggsci' must be installed to use this function" = rlang::is_installed("ggsci"))
   
   object <- x
   obj <- object
@@ -302,8 +301,8 @@ plot.WPR2 <- function(x, xlim = NULL, ylim = NULL, linesize = 0.5, pointsize = 1
     }
     plot <- plot + ggplot2::geom_line(position = ggplot2::position_dodge(width=0.25), linewidth = linesize) +
       ggplot2::geom_point(position = ggplot2::position_dodge(width=0.25), size = pointsize) +
-      ggsci::scale_color_jama() + 
-      ggsci::scale_fill_jama() +
+      scale_color_jama() + 
+      scale_fill_jama() +
       ggplot2::labs(fill ="Method", color="Method") +
       ggplot2::xlab(xlab) + 
       ggplot2::ylab(ylab) + ggplot2::theme_bw(base_size) +
@@ -312,7 +311,7 @@ plot.WPR2 <- function(x, xlim = NULL, ylim = NULL, linesize = 0.5, pointsize = 1
       ggplot2::theme(legend.position = leg.pos)
   } else {
     plot <- ggplot2::ggplot(data = obj, mapping = ggplot2::aes(y = r2, fill = groups)) +
-      ggplot2::geom_bar() + ggsci::scale_fill_jama() +
+      ggplot2::geom_bar() + scale_fill_jama() +
       ggplot2::labs(fill ="Method", color="Method") +
       ggplot2::xlab(xlab) + 
       ggplot2::ylab(ylab) + ggplot2::theme_bw(base_size) +

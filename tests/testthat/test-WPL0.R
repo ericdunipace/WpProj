@@ -30,19 +30,18 @@ test_that("WPL0 with exact transport", {
   
   nc <- parallel::detectCores()-1
   if (nc > 2) nc <- 2
-    cl <- parallel::makeCluster(nc)
-    doParallel::registerDoParallel(cl)
+    oplan <- future::plan(future::multisession, workers = nc)
     l0.2 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
                  method = c("selection.variable"),
                  transport.method = transp,
                  epsilon = 0.05, OTmaxit = 100,
-                 parallel = cl)
+                 parallel = NULL)
     l0.3 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
                  method = c("projection"),
                  transport.method = transp,
                  epsilon = 0.05, OTmaxit = 100,
-                 parallel = cl)
-    parallel::stopCluster(cl)
+                 parallel = NULL)
+    future::plan(oplan)
     
     testthat::expect_equal(l0$min_combination, l0.2$min_combination)
     testthat::expect_equal(l0.1$min_combination, l0.3$min_combination)
@@ -82,19 +81,18 @@ testthat::test_that("WPL0 with sinkhorn transport", {
   
   nc <- parallel::detectCores()-1
   if (nc > 2) nc <- 2
-  cl <- parallel::makeCluster(nc)
-  doParallel::registerDoParallel(cl)
+  oplan <- future::plan(future::multisession, workers = nc)
   l0.2 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
                method = c("selection.variable"),
                transport.method = transp,
                epsilon = 0.05, OTmaxit = 100,
-               parallel = cl)
+               parallel = NULL)
   l0.3 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
                method = c("projection"),
                transport.method = transp,
                epsilon = 0.05, OTmaxit = 100,
-               parallel = cl)
-  parallel::stopCluster(cl)
+               parallel = NULL)
+  future::plan(oplan)
   
   testthat::expect_equal(l0$min_combination, l0.2$min_combination)
   testthat::expect_equal(l0.1$min_combination, l0.3$min_combination)
@@ -131,19 +129,18 @@ testthat::test_that("WPL0 with greenkhorn transport", {
   
   nc <- parallel::detectCores()-1
   if (nc > 2) nc <- 2
-  cl <- parallel::makeCluster(nc)
-  doParallel::registerDoParallel(cl)
+  oplan <- future::plan(future::multisession, workers = nc)
   l0.2 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
                method = c("selection.variable"),
                transport.method = transp,
                epsilon = 0.05, OTmaxit = 100,
-               parallel = cl)
+               parallel = NULL)
   l0.3 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
                method = c("projection"),
                transport.method = transp,
                epsilon = 0.05, OTmaxit = 100,
-               parallel = cl)
-  parallel::stopCluster(cl)
+               parallel = NULL)
+  future::plan(oplan)
   
   testthat::expect_equal(l0$min_combination, l0.2$min_combination)
   testthat::expect_equal(l0.1$min_combination, l0.3$min_combination)
@@ -179,13 +176,11 @@ testthat::test_that("WPL0 with greenkhorn transport", {
 #                parallel = NULL)
 #   
 #   cl <- parallel::makeCluster(parallel::detectCores()-1)
-#   doParallel::registerDoParallel(cl)
 #   l0.2 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
 #                method = c("selection.variable"),
 #                transport.method = transp,
 #                epsilon = 0.05, OTmaxit = 100,
 #                parallel = cl)
-#   doParallel::registerDoParallel(cl)
 #   l0.3 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
 #                method = c("projection"),
 #                transport.method = transp,
@@ -227,13 +222,11 @@ testthat::test_that("WPL0 with greenkhorn transport", {
 #                parallel = NULL)
 #   
 #   cl <- parallel::makeCluster(parallel::detectCores()-1)
-#   doParallel::registerDoParallel(cl)
 #   l0.2 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
 #                method = c("selection.variable"),
 #                transport.method = transp,
 #                epsilon = 0.05, OTmaxit = 100,
 #                parallel = cl)
-#   doParallel::registerDoParallel(cl)
 #   l0.3 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
 #                method = c("projection"),
 #                transport.method = transp,
@@ -276,19 +269,18 @@ testthat::test_that("WPL0 with hilbert transport", {
   
   nc <- parallel::detectCores()-1
   if (nc > 2) nc <- 2
-  cl <- parallel::makeCluster(nc)
-  doParallel::registerDoParallel(cl)
+  oplan <- future::plan(future::multisession, workers = nc)
   l0.2 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
                method = c("selection.variable"),
                transport.method = transp,
                epsilon = 0.05, OTmaxit = 100,
-               parallel = cl)
+               parallel = NULL)
   l0.3 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
                method = c("projection"),
                transport.method = transp,
                epsilon = 0.05, OTmaxit = 100,
-               parallel = cl)
-  parallel::stopCluster(cl)
+               parallel = NULL)
+  future::plan(oplan)
   
   testthat::expect_equal(l0$min_combination, l0.2$min_combination)
   testthat::expect_equal(l0.1$min_combination, l0.3$min_combination)
@@ -325,19 +317,18 @@ testthat::test_that("WPL0 with rank transport", {
   
   nc <- parallel::detectCores()-1
   if (nc > 2) nc <- 2
-  cl <- parallel::makeCluster(nc)
-  doParallel::registerDoParallel(cl)
+  oplan <- future::plan(future::multisession, workers = nc)
   l0.2 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
                method = c("selection.variable"),
                transport.method = transp,
                epsilon = 0.05, OTmaxit = 100,
-               parallel = cl)
+               parallel = NULL)
   l0.3 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
                method = c("projection"),
                transport.method = transp,
                epsilon = 0.05, OTmaxit = 100,
-               parallel = cl)
-  parallel::stopCluster(cl)
+               parallel = NULL)
+  future::plan(oplan)
   
   testthat::expect_equal(l0$min_combination, l0.2$min_combination)
   testthat::expect_equal(l0.1$min_combination, l0.3$min_combination)
@@ -374,19 +365,18 @@ testthat::test_that("WPL0 with univariate.approximation.pwr transport", {
   
   nc <- parallel::detectCores()-1
   if (nc > 2) nc <- 2
-  cl <- parallel::makeCluster(nc)
-  doParallel::registerDoParallel(cl)
+  oplan <- future::plan(future::multisession, workers = nc)
   l0.2 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
                method = c("selection.variable"),
                transport.method = transp,
                epsilon = 0.05, OTmaxit = 100,
-               parallel = cl)
+               parallel = NULL)
   l0.3 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
                method = c("projection"),
                transport.method = transp,
                epsilon = 0.05, OTmaxit = 100,
-               parallel = cl)
-  parallel::stopCluster(cl)
+               parallel = NULL)
+  future::plan(oplan)
   
   testthat::expect_equal(l0$min_combination, l0.2$min_combination)
   testthat::expect_equal(l0.1$min_combination, l0.3$min_combination)

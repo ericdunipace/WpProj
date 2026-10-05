@@ -8,7 +8,7 @@
 #' @param lambda.min.ratio Minimum lambda ratio for self selected lambda.
 #' @param gamma tuning parameters for SCAD and MCP. 
 #' @param nlambda Number of lambda values. 
-#' @param solver Which solver to use. One of "cone","mosek", or "gurobi". Note "mosek" and "gurobi" are commercial installers.
+#' @param solver Which solver to use. One of "clarabel", "cone", "mosek", or "gurobi". "clarabel" (default) uses the free Clarabel solver (requires package `ROI.plugin.clarabel`; "cone" is used by default if it is not installed) and "cone" the free ECOS solver. Note "mosek" and "gurobi" are commercial installers.
 #' @param options A list containing slots `solver_opts`, options for each solver, `init`, initial conditions fed into each solver, `tol`, tolerance for convergence, and `iter`, the maximum number of iterations
 #' @param model.size The maximum number of paramters to consider. Should be an integer greater than 1 and less than or equal to the number of covariates
 #' @param display.progress Whether to display progress. TRUE or FALSE
@@ -38,7 +38,7 @@ WInfL1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "mcp","scad")
                  lambda.min.ratio = 1e-4, 
                  gamma = 1.5,
                  nlambda = 10, 
-                 solver = c("cone","mosek","gurobi"),
+                 solver = c("clarabel","cone","mosek","gurobi"),
                  options = list(solver_opts = NULL,
                                 init = NULL,
                                 tol = 1e-7,
@@ -50,13 +50,18 @@ WInfL1 <- function(X, Y, theta = NULL, penalty = c("none","lasso", "mcp","scad")
   mosek_found <- rlang::is_installed("Rmosek")
   gurobi_found <- rlang::is_installed("gurobi")
   ecos_found <- rlang::is_installed("ROI.plugin.ecos")
-  if (!mosek_found && !gurobi_found && !ecos_found) {
-    stop("One of `Rmosek`, `gurobi`, or `ROI` with `ROI.plugin.ecos` must be installed to use this function")
+  clarabel_found <- rlang::is_installed("ROI.plugin.clarabel")
+  if (!mosek_found && !gurobi_found && !ecos_found && !clarabel_found) {
+    stop("One of `Rmosek`, `gurobi`, or `ROI` with `ROI.plugin.ecos` or `ROI.plugin.clarabel` must be installed to use this function")
   }
   
   this.call <- as.list(match.call()[-1])
   
-  solver <- match.arg(solver)
+  solver <- if (missing(solver) || is.null(solver)) {
+    resolve_default_solver("clarabel", internal = TRUE)
+  } else {
+    match.arg(solver)
+  }
   
   if(any(penalty == "ols")) penalty <- "none"
   if(any(grepl("lasso", penalty))) penalty <- "lasso"

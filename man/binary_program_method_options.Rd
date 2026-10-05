@@ -15,6 +15,7 @@ binary_program_method_options(
   tol = 1e-07,
   display.progress = FALSE,
   parallel = NULL,
+  algorithm = c("exact", "augmented.lagrangian"),
   solver.options = NULL
 )
 }
@@ -37,7 +38,9 @@ binary_program_method_options(
 
 \item{display.progress}{Logical. Should intermediate progress be displayed? TRUE or FALSE. Default is FALSE.}
 
-\item{parallel}{A cluster backend to be used by \code{\link[foreach:foreach]{foreach::foreach()}}. See \code{\link[foreach:foreach]{foreach::foreach()}} for details about how to set them up. The \code{WpProj} functions will register the cluster with the \code{\link[doParallel:registerDoParallel]{doParallel::registerDoParallel()}} function internally.}
+\item{parallel}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{\link[future:plan]{future::plan()}} to run the computations in parallel instead. A cluster from \code{\link[parallel:makeCluster]{parallel::makeCluster()}} or a number of workers is still accepted for now and is used as the plan for the duration of the call.}
+
+\item{algorithm}{How the exact binary program handles the constraint on the number of coefficients. "exact" (default) enforces it directly and "augmented.lagrangian" uses the augmented Lagrangian binary program of Gu, Ahmed, and Dey (2020) \url{doi:10.1137/19M1271695}, which softens the constraint with a penalty large enough to give the same solution and can be faster with some solvers. Ignored by the "lasso" solver.}
 
 \item{solver.options}{Options to be passed on to the solver. See details}
 }
@@ -48,7 +51,7 @@ A list with names corresponding to each argument above.
 Options For Use With the Binary Program Method
 }
 \details{
-This function will setup the default arguments used by the binary program method. Of note, for the argument \code{solver.options}, If using the "lasso" solver, you should provide arguments such as "penalty", "nlambda", "lambda.min.ratio", "gamma", and "lambda" in a list. A simple way to do this is to feed the output of the \code{\link[=L1_method_options]{L1_method_options()}} function to the argument \code{solver.options.} This will tell the approximate solver, which uses a lasso method that then will project the parameters back to the \eqn{\{0,1\}} space. For the other solvers, you can see the options in the ECOS solver package, \code{\link[ECOSolveR:ecos.control]{ECOSolveR::ecos.control()}}, and the options for the mosek solver, \code{\link[Rmosek:mosek]{Rmosek::mosek()}}.
+This function will setup the default arguments used by the binary program method. Of note, for the argument \code{solver.options}, If using the "lasso" solver, you should provide arguments such as "penalty", "nlambda", "lambda.min.ratio", "gamma", and "lambda" in a list. A simple way to do this is to feed the output of the \code{\link[=L1_method_options]{L1_method_options()}} function to the argument \code{solver.options.} This will tell the approximate solver, which uses a lasso method that then will project the parameters back to the \eqn{\{0,1\}} space. For the other solvers, pass solver controls as \code{solver.options = list(control = list(...))}. See \code{\link[scip:scip_control]{scip::scip_control()}} for the options of the "scip" solver, such as \code{time_limit}, the ECOS solver package, \code{\link[ECOSolveR:ecos.control]{ECOSolveR::ecos.control()}}, and the options for the mosek solver, \code{\link[Rmosek:mosek]{Rmosek::mosek()}}.
 }
 \examples{
 binary_program_method_options()

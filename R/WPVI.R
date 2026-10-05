@@ -10,7 +10,7 @@
 #' @param epsilon Hyperparameter for Sinkhorn iterations
 #' @param OTmaxit Maximum number of iterations for the Wasserstein method
 #' @param display.progress Display intermediate progress
-#' @param parallel a foreach backend if already created
+#' @param parallel `r lifecycle::badge("deprecated")` Use [future::plan()] to run the computations in parallel instead. A cluster from [parallel::makeCluster()] or a number of workers is still accepted for now and is used as the plan for the duration of the call.
 #'
 #' @return Returns an integer vector ranking covariate importance from most to least important.
 #' 
@@ -73,17 +73,14 @@ WPVI <- function(X, eta, theta, pred.fun = NULL, p = 2, ground_p = 2,
   transport.method <- match.arg(transport.method)
   if(missing(OTmaxit) ||is.null(OTmaxit)) OTmaxit <- switch(transport.method, "exact" = 0L, 100L)
   
-  if(!is.null(parallel)){
-    if(!inherits(parallel, "cluster")) {
-      stop("parallel must be a registered cluster backend or NULL")
-    }
-    doParallel::registerDoParallel(parallel)
+  oplan <- set_parallel_plan(parallel)
+  if (!is.null(oplan)) {
+    on.exit(future::plan(oplan), add = TRUE)
+    deprecate_parallel("WPVI")
     display.progress <- FALSE
-  } else{
-    foreach::registerDoSEQ()
   }
   i <- NULL
-  wp <- foreach::foreach(i  = 1:d) %dorng% {
+  wp <- foreach::foreach(i  = 1:d, .options.future = list(seed = TRUE)) %dofuture% {
     x_temp <- X
     x_temp[,i] <- 0
     mu <- pred.fun(x_temp, theta)
