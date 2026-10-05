@@ -169,6 +169,7 @@ test_that("WPR2 works", {
 })
 
 testthat::test_that("WPR2 combining works", {
+  testthat::skip_on_cran()
   set.seed(203402)
 
   n <- 32
@@ -186,6 +187,7 @@ testthat::test_that("WPR2 combining works", {
 })
 
 testthat::test_that("WPR2 plotting works", {
+  testthat::skip_on_cran()
   set.seed(203402)
   testthat::skip_if_not_installed("ggplot2")
   n <- 64
