@@ -1,11 +1,11 @@
 # WpProj 
 
-## Version 0.2.9000 (development version)
+## Version 0.3
 
 ### Breaking Changes
 * Clarabel (`solver = "clarabel"`) replaces ECOS as the default solver for the `power = 1` and `power = Inf` L1 methods, and SCIP replaces ECOS as the default exact solver in the binary program (`W2IP`), where ECOS's branch and bound could return suboptimal subsets. ECOS remains available with `solver = "ecos"`. Both new solvers are suggested packages: if `ROI.plugin.clarabel` or `scip` is not installed (e.g., no Rust toolchain to build Clarabel from source), the defaults fall back to ECOS and lpSolve, respectively, with a once-per-session message.
 * Moving from `doRNG` to `doFuture`. There had been some
-issues with getting replies from the `doParallel` team so
+issues with getting replies from the `doRNG` team so
 concerned about ongoing support/updating. Parallel computation is now set up
 with `future::plan()`, e.g. `future::plan(future::multisession, workers = 4)`,
 and all functions use whatever plan is set.
@@ -20,9 +20,9 @@ still accepted and used as the plan for the duration of the call.
 
 ### Minor Improvements and Bug Fixes
 * Making sure that final step of projection method will try to use an OLS regression rather than SVD iterations if possible
-* Fixing some bugs (eg Eigen not doing explicit flattening anymroe, etc)
+* Fixing some bugs (e.g., Eigen not doing explicit flattening anymore, etc)
 * Adding some more tests
-* Merging PR from RcppEigen mainteners so they can update Eigen version!
+* Merging PR from RcppEigen maintainers so they can update the Eigen version!
 
 ## Version 0.2.3
 
