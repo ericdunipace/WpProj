@@ -105,7 +105,7 @@ p$parameters + ggplot2::ggtitle("Parameters")
 p$predictions + ggplot2::ggtitle("Predictions")
 ```
 
-<img src="man/figures/README-example_continued_plot_noecho-1.png" width="70%" />
+<img src="man/figures/README-example_continued_plot_noecho-1.png" alt="" width="70%" />
 
 We can also compare performance by measure the relative distance between
 a null model and the predictions of interest as a pseudo $R^2$
@@ -115,7 +115,7 @@ r2.null  <- WPR2(projected_model = dc) # should be between 0 and 1
 plot(r2.null)
 ```
 
-<img src="man/figures/README-r2_plots_noecho-1.png" width="70%" />
+<img src="man/figures/README-r2_plots_noecho-1.png" alt="" width="70%" />
 
 We can also examine how the predictions change in the models as more
 covariates are added for individual observations.
@@ -124,7 +124,7 @@ covariates are added for individual observations.
 ridgePlot(fit.p2, index = 21, minCoef = 0, maxCoef = 10)
 ```
 
-<img src="man/figures/README-ridgeplots_noecho-1.png" width="70%" />
+<img src="man/figures/README-ridgeplots_noecho-1.png" alt="" width="70%" />
 
 Note how the predictions get better the more coefficients are added and
 the distribution looks closer to the full posterior predictive.
@@ -135,26 +135,26 @@ We can also compare the two models like so:
 ridgePlot(list("L1" = fit.p2, "Binary Program" = fit.p2.bp), index = 21, minCoef = 0, maxCoef = 10, full = post_mu[21,])
 ```
 
-<img src="man/figures/README-ridgeplots2_noecho-1.png" width="70%" />
+<img src="man/figures/README-ridgeplots2_noecho-1.png" alt="" width="70%" />
+
+# References
+
+[Eric Dunipace and Lorenzo Trippa
+(2020).](https://arxiv.org/abs/2012.09999)
 
 ## Repository Overview
 
 The package is structured like a typical R project with the following
 key directories:
 
-* `R/` – user-facing R functions and helper utilities
-* `src/` – C++ source code accessed through Rcpp for performance
+- `R/` – user-facing R functions and helper utilities
+- `src/` – C++ source code accessed through Rcpp for performance
   critical computations
-* `man/` – generated documentation for each exported function
-* `tests/` – automated tests written with `testthat`
-* `inst/` – package extras such as the spell checking word list
+- `man/` – generated documentation for each exported function
+- `tests/` – automated tests written with `testthat`
+- `inst/` – package extras such as the spell checking word list
 
 Supporting files such as `DESCRIPTION` and `NAMESPACE` define package
-metadata and exported functions. New contributors may find it helpful
-to start by exploring the R functions in `R/` and the corresponding C++
+metadata and exported functions. New contributors may find it helpful to
+start by exploring the R functions in `R/` and the corresponding C++
 implementations in `src/`.
-
-# References
-
-[Eric Dunipace and Lorenzo Trippa
-(2020).](https://arxiv.org/abs/2012.09999)
