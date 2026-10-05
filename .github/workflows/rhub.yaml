@@ -62,7 +62,12 @@ jobs:
           job-config: ${{ matrix.config.job-config }}
           # clarabel (via savvy-ffi) fails to compile against R-devel headers
           # in the sanitizer containers; tests skip when the plugin is missing.
-          extra-packages: any::rcmdcheck, ROI.plugin.clarabel=?ignore
+          # R-hub's Fedora binaries of quantreg/RcppEigen/RcppArmadillo link
+          # libflexiblas.so.3, which the valgrind container lacks, so build
+          # them from source against R's own BLAS/LAPACK instead.
+          extra-packages: >-
+            any::rcmdcheck, ROI.plugin.clarabel=?ignore,
+            quantreg=?source, RcppEigen=?source, RcppArmadillo=?source
       - uses: r-hub/actions/run-check@v1
         with:
           token: ${{ secrets.RHUB_TOKEN }}
