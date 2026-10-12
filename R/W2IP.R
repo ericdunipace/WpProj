@@ -151,7 +151,7 @@ W2IP <- function(X, Y=NULL, theta,
     } else{
       Y_ <- t(Y)
     }
-    if(all(Y_==crossprod(X_, theta_))) same <- TRUE
+    if(same_as_fit(Y_, X_, theta_)) same <- TRUE
   }
   if(ncol(Y_) != ncol(theta_)) stop("ncol of Y should be same as ncols of theta")
   if(nrow(Y_) != ncol(X_)) stop("The number of observations in Y and X don't line up. Make sure X is input with observations in rows.")

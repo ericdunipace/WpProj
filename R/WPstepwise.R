@@ -68,7 +68,7 @@ WPSW <- function(X, Y, theta, power = 2,
       Y_ <- Y
     }
     same <- FALSE
-    if(all(Y_==crossprod(X_, theta))) same <- TRUE
+    if(same_as_fit(Y_, X_, theta)) same <- TRUE
   }
   method <- match.arg(method)
   transport.method <- match.arg(transport.method, transport_options())

@@ -31,6 +31,7 @@ test_that("WPL0 with exact transport", {
   nc <- parallel::detectCores()-1
   if (nc > 2) nc <- 2
     oplan <- future::plan(future::multisession, workers = nc)
+    withr::defer(future::plan(oplan))
     l0.2 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
                  method = c("selection.variable"),
                  transport.method = transp,
@@ -41,7 +42,6 @@ test_that("WPL0 with exact transport", {
                  transport.method = transp,
                  epsilon = 0.05, OTmaxit = 100,
                  parallel = NULL)
-    future::plan(oplan)
     
     testthat::expect_equal(l0$min_combination, l0.2$min_combination)
     testthat::expect_equal(l0.1$min_combination, l0.3$min_combination)
@@ -82,6 +82,7 @@ testthat::test_that("WPL0 with sinkhorn transport", {
   nc <- parallel::detectCores()-1
   if (nc > 2) nc <- 2
   oplan <- future::plan(future::multisession, workers = nc)
+  withr::defer(future::plan(oplan))
   l0.2 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
                method = c("selection.variable"),
                transport.method = transp,
@@ -92,7 +93,6 @@ testthat::test_that("WPL0 with sinkhorn transport", {
                transport.method = transp,
                epsilon = 0.05, OTmaxit = 100,
                parallel = NULL)
-  future::plan(oplan)
   
   testthat::expect_equal(l0$min_combination, l0.2$min_combination)
   testthat::expect_equal(l0.1$min_combination, l0.3$min_combination)
@@ -130,6 +130,7 @@ testthat::test_that("WPL0 with greenkhorn transport", {
   nc <- parallel::detectCores()-1
   if (nc > 2) nc <- 2
   oplan <- future::plan(future::multisession, workers = nc)
+  withr::defer(future::plan(oplan))
   l0.2 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
                method = c("selection.variable"),
                transport.method = transp,
@@ -140,7 +141,6 @@ testthat::test_that("WPL0 with greenkhorn transport", {
                transport.method = transp,
                epsilon = 0.05, OTmaxit = 100,
                parallel = NULL)
-  future::plan(oplan)
   
   testthat::expect_equal(l0$min_combination, l0.2$min_combination)
   testthat::expect_equal(l0.1$min_combination, l0.3$min_combination)
@@ -270,6 +270,7 @@ testthat::test_that("WPL0 with hilbert transport", {
   nc <- parallel::detectCores()-1
   if (nc > 2) nc <- 2
   oplan <- future::plan(future::multisession, workers = nc)
+  withr::defer(future::plan(oplan))
   l0.2 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
                method = c("selection.variable"),
                transport.method = transp,
@@ -280,7 +281,6 @@ testthat::test_that("WPL0 with hilbert transport", {
                transport.method = transp,
                epsilon = 0.05, OTmaxit = 100,
                parallel = NULL)
-  future::plan(oplan)
   
   testthat::expect_equal(l0$min_combination, l0.2$min_combination)
   testthat::expect_equal(l0.1$min_combination, l0.3$min_combination)
@@ -318,6 +318,7 @@ testthat::test_that("WPL0 with rank transport", {
   nc <- parallel::detectCores()-1
   if (nc > 2) nc <- 2
   oplan <- future::plan(future::multisession, workers = nc)
+  withr::defer(future::plan(oplan))
   l0.2 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
                method = c("selection.variable"),
                transport.method = transp,
@@ -328,7 +329,6 @@ testthat::test_that("WPL0 with rank transport", {
                transport.method = transp,
                epsilon = 0.05, OTmaxit = 100,
                parallel = NULL)
-  future::plan(oplan)
   
   testthat::expect_equal(l0$min_combination, l0.2$min_combination)
   testthat::expect_equal(l0.1$min_combination, l0.3$min_combination)
@@ -366,6 +366,7 @@ testthat::test_that("WPL0 with univariate.approximation.pwr transport", {
   nc <- parallel::detectCores()-1
   if (nc > 2) nc <- 2
   oplan <- future::plan(future::multisession, workers = nc)
+  withr::defer(future::plan(oplan))
   l0.2 <- WPL0(X = x, Y = NULL, theta = post_beta, power = 2,
                method = c("selection.variable"),
                transport.method = transp,
@@ -376,7 +377,6 @@ testthat::test_that("WPL0 with univariate.approximation.pwr transport", {
                transport.method = transp,
                epsilon = 0.05, OTmaxit = 100,
                parallel = NULL)
-  future::plan(oplan)
   
   testthat::expect_equal(l0$min_combination, l0.2$min_combination)
   testthat::expect_equal(l0.1$min_combination, l0.3$min_combination)
