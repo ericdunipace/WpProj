@@ -104,6 +104,7 @@ test_that("model sizes work for mosek", {
 # })
 
 test_that("model sizes work for highs and match lpsolve", {
+  skip_on_valgrind()
   check_highs()
   set.seed(84370158)
   
@@ -132,6 +133,7 @@ test_that("model sizes work for highs and match lpsolve", {
 })
 
 test_that("model sizes work for scip and match lpsolve", {
+  skip_on_valgrind()
   check_scip()
   set.seed(84370158)
   
@@ -167,6 +169,7 @@ test_that("model sizes work for scip and match lpsolve", {
 })
 
 test_that("augmented lagrangian algorithm matches the exact algorithm", {
+  skip_on_valgrind()
   set.seed(84370158)
   
   n <- 100

@@ -320,6 +320,7 @@ testthat::test_that("WInfL1 changes penalty appropriately for net penalties", {
 
 
 testthat::test_that("WInfL1 clarabel matches ecos", {
+  skip_on_valgrind()
   check_clarabel()
   
   set.seed(87897)

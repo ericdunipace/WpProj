@@ -1,4 +1,5 @@
 test_that("combine.distcompare works", {
+  skip_on_valgrind()
   n <- 32
   p <- 10
   s <- 21
