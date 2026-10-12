@@ -130,7 +130,7 @@ WPSA <- function(X, Y=NULL, theta,
       Y_ <- Y
     }
     same <- FALSE
-    if(all(Y_==crossprod(X_, theta_))) same <- TRUE
+    if(same_as_fit(Y_, X_, theta_)) same <- TRUE
   }
   OToptions <- list(same = as.logical(same),
                     method = as.character(meth),

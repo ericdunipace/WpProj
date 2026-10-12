@@ -66,7 +66,7 @@ WPL0 <- function(X, Y = NULL, theta, power = 2,
     Y <- crossprod(X_,theta)
   } else {
     if(nrow(Y) != nrow(X)) Y <- t(Y)
-    if(all(Y==crossprod(X_, theta))) same <- TRUE
+    if(same_as_fit(Y, X_, theta)) same <- TRUE
   }
   
   if(method == "projection") {

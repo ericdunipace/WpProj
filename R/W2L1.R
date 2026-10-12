@@ -153,7 +153,7 @@ W2L1 <- function(X, Y=NULL, theta = NULL,
   }
   
   if(!any(dim(Y) %in% dim(X_))) stop("Number of observations of Y must match X")
-  if(method != "projection") if(all(Y_==crossprod(X_, theta_))) same <- TRUE
+  if(method != "projection") if(same_as_fit(Y_, X_, theta_)) same <- TRUE
   
   # create dummy theta for projection method
   if (!is.null(Y_) && method == "projection") {
@@ -425,6 +425,8 @@ W2L1 <- function(X, Y=NULL, theta = NULL,
       options_ols$model_size <- p
       
       ols.out <- tryCatch({
+        # qr ols gives coefficients, not selection weights
+        if (method == "selection.variable") stop("use W2penalized")
         # attempt ols
         # get qr
         qr_result <- qr(t(X_))

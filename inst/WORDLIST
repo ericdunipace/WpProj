@@ -33,6 +33,7 @@ distCompare
 distcompare
 doi
 ecos
+eg
 einstein
 ggplot
 greenkhorn
@@ -48,6 +49,7 @@ lp
 lpSolve
 lpSolver
 lpsolve
+mainteners
 mathbb
 mathop
 mcp

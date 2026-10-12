@@ -28,7 +28,7 @@ WPRM <- function(X, Y, theta, force = NULL, p = 2, ground_p = 2,
       Y_ <- Y
     }
     same <- FALSE
-    if(all(Y_==crossprod(X_, theta))) same <- TRUE
+    if(same_as_fit(Y_, X_, theta)) same <- TRUE
   }
   method <- match.arg(method)
   transport.method <- match.arg(transport.method)
