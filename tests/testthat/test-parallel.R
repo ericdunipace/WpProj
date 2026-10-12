@@ -11,9 +11,11 @@ parallel_test_data <- function() {
   list(x = x, theta = theta)
 }
 
-# the workers only load WpProj if a loop was sent to them
+# the workers only load WpProj if a loop was sent to them. Only check that some
+# worker was used: future reuses a node once its future has resolved, so on a
+# fast machine every chunk can land on the same worker.
 workers_used <- function(cl) {
-  all(unlist(parallel::clusterEvalQ(cl, "WpProj" %in% loadedNamespaces())))
+  any(unlist(parallel::clusterEvalQ(cl, "WpProj" %in% loadedNamespaces())))
 }
 
 test_that("loops run on the workers of the plan set with future::plan()", {
