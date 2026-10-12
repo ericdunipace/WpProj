@@ -1,7 +1,8 @@
 # WpProj 
 
 ## Version 0.3.1
-## Minor bug fix
+
+### Minor bug fix
 * BLIS version of linear algebra led to test errors due to handling `%*%` and `crossprod()` differently. Fixed in current release.
 
 ## Version 0.3
