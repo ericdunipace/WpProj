@@ -10,7 +10,7 @@
 |collate  |en_US.UTF-8                               |
 |ctype    |en_US.UTF-8                               |
 |tz       |America/Los_Angeles                       |
-|date     |2026-10-12                                |
+|date     |2026-10-14                                |
 |pandoc   |3.12 @ /opt/homebrew/bin/ (via rmarkdown) |
 |quarto   |1.10.19 @ /Applications/quarto/bin/quarto |
 
@@ -56,7 +56,7 @@
 |rbibutils          |2.4.1         |2.4.1         |   |
 |Rcpp               |1.1.2         |1.1.2         |   |
 |RcppArmadillo      |15.6.0-1      |15.6.0-1      |   |
-|RcppCGAL           |6.2.1         |6.2.1         |   |
+|RcppCGAL           |6.2.1.1       |6.2.1.1       |   |
 |RcppEigen          |0.3.4.0.2     |0.3.4.0.2     |   |
 |RcppProgress       |0.4.2         |0.4.2         |   |
 |Rdpack             |2.6.6         |2.6.6         |   |
