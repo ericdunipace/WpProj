@@ -109,6 +109,7 @@ WPL0 <- function(
   }
 
   dist_fun_worker <- dist.fun
+  i <- NULL # save to avoid global variable warning
 
   w2 <- foreach::foreach(
     i = seq_along(combos),
