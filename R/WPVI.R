@@ -80,7 +80,12 @@ WPVI <- function(X, eta, theta, pred.fun = NULL, p = 2, ground_p = 2,
     display.progress <- FALSE
   }
   i <- NULL
-  wp <- foreach::foreach(i  = 1:d, .options.future = list(seed = TRUE)) %dofuture% {
+  # explicit globals skip doFuture's slow automatic scan
+  wp <- foreach::foreach(i  = 1:d, .options.future = list(
+    seed = TRUE,
+    globals = c("X", "pred.fun", "theta", "Y_", "p", "ground_p",
+                "transport.method", "epsilon", "OTmaxit")
+  )) %dofuture% {
     x_temp <- X
     x_temp[,i] <- 0
     mu <- pred.fun(x_temp, theta)

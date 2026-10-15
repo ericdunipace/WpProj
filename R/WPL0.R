@@ -115,7 +115,12 @@ WPL0 <- function(
     i = seq_along(combos),
     .options.future = list(
       seed = TRUE,
-      globals = structure(TRUE, add = "dist_fun_worker")
+      # explicit globals skip doFuture's slow automatic scan
+      globals = c(
+        "combos", "dist_fun_worker", "X_", "theta", "Y", "xtx", "xty",
+        "OToptions", "obs.direction", "p", "ground_p"
+      ),
+      packages = "WpProj"
     )
   ) %dofuture%
     {

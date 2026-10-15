@@ -234,12 +234,30 @@ W2IP <- function(X, Y=NULL, theta,
   }
   
   idx <- NULL
+  # local copies: future drops namespace-internal functions from globals, and
+  # workers can't see them
+  not_converged_worker <- not.converged
+  al_penalty_worker <- augmented_lagrangian_penalty
+  sel_var_mean_gen_worker <- selVarMeanGen
+  xty_update_worker <- xtyUpdate
   
   output <- foreach::foreach(idx=1:p_star, .combine='comb', .multicombine=TRUE,
                              .init=list(list(), list()),
                              .errorhandling = 'pass', 
-                             .inorder = FALSE,
-                             .options.future = list(seed = TRUE)) %dofuture% 
+                             .inorder = TRUE,
+                             # explicit globals skip doFuture's slow automatic scan
+                             .options.future = list(
+                               seed = TRUE,
+                               globals = c(
+                                 "options", "QP_orig", "algorithm", "alpha",
+                                 "alpha_save", "solve_binary_program", "control",
+                                 "solution.method", "tol", "X", "X_", "theta_",
+                                 "OToptions", "display.progress", "pb", "p",
+                                 "not_converged_worker", "al_penalty_worker",
+                                 "sel_var_mean_gen_worker", "xty_update_worker"
+                               ),
+                               packages = "WpProj"
+                             )) %dofuture%
     {
        m <- options$model_size[idx]
        QP <- QP_orig
@@ -247,7 +265,7 @@ W2IP <- function(X, Y=NULL, theta,
        results <- list(NULL, NULL)
        obj_save <- Inf
        for(inf in 1:options$infm_maxit) {
-         penalty <- if (algorithm == "augmented.lagrangian") augmented_lagrangian_penalty(QP) else NULL
+         penalty <- if (algorithm == "augmented.lagrangian") al_penalty_worker(QP) else NULL
          # sol.meth <- if ( solution.method == "cone" && !("cone" %in% names(TP)) ) {
          #   "lp"
          # } else {
@@ -265,13 +283,13 @@ W2IP <- function(X, Y=NULL, theta,
            warning("Likely terminated early")
            break
          }
-         if(not.converged(alpha, alpha_save, tol) || 
-            not.converged(obj, obj_save, tol)){
+         if(not_converged_worker(alpha, alpha_save, tol) || 
+            not_converged_worker(obj, obj_save, tol)){
            alpha_save <- alpha
            obj_save <- obj
            
-           Ytemp <- selVarMeanGen(X_, theta_, as.double(alpha))
-           xty   <- xtyUpdate(X, Ytemp, theta_, result_ = alpha, 
+           Ytemp <- sel_var_mean_gen_worker(X_, theta_, as.double(alpha))
+           xty   <- xty_update_worker(X, Ytemp, theta_, result_ = alpha, 
                                              OToptions)
            QP$objective$L$v <- c(-2*xty)
            

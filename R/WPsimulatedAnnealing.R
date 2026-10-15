@@ -236,7 +236,12 @@ WPSA <- function(
       .combine = "unlist",
       .options.future = list(
         seed = TRUE,
-        globals = structure(TRUE, add = "calc_beta_worker")
+        # explicit globals skip doFuture's slow automatic scan
+        globals = c(
+          "calc_beta_worker", "mu_calc", "xtx", "xty", "meth", "OToptions",
+          "X_", "theta_", "Y_", "p", "ground_p", "obs.direction", "transmeth"
+        ),
+        packages = "WpProj"
       )
     ) %dofuture%
       {
@@ -566,7 +571,13 @@ WPSA <- function(
       .inorder = TRUE,
       .options.future = list(
         seed = TRUE,
-        globals = structure(TRUE, add = "wpsa_worker")
+        # explicit globals skip doFuture's slow automatic scan
+        globals = c(
+          "wpsa_worker", "time.exceed", "start.time", "max.time", "nvars",
+          "display.progress", "pb", "X", "Y_", "theta_", "force", "p",
+          "iter", "temps", "const", "proposal", "options", "xtx", "xty"
+        ),
+        packages = "WpProj"
       )
     ) %dofuture%
       {

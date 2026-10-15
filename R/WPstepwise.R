@@ -233,7 +233,12 @@ WPSW <- function(X, Y, theta, power = 2,
     cand <- NULL
     for(i in 1:max_iter){
       candidates <- which(!in.idx & not.force.logical )
-      wP_list <- foreach::foreach(cand = candidates) %dofuture% {
+      # explicit globals skip doFuture's slow automatic scan
+      wP_list <- foreach::foreach(cand = candidates, .options.future = list(
+        globals = c("add.idx", "in.idx", "X_", "Y_", "p", "ground_p",
+                    "OToptions", "obs.direction", "xtx", "xty", "theta"),
+        packages = "WpProj"
+      )) %dofuture% {
         return(add.idx(cand, in.idx = in.idx, X= X_, sort_mu = Y_, p = p, 
                        ground_p = ground_p, OToptions = OToptions, 
                        obs.direction = obs.direction,
@@ -257,7 +262,11 @@ WPSW <- function(X, Y, theta, power = 2,
     
     for(i in 1:max_iter){
       candidates <- which( in.idx & not.force.logical )
-      wP_list <- foreach::foreach(cand = candidates) %dofuture% {
+      wP_list <- foreach::foreach(cand = candidates, .options.future = list(
+        globals = c("minus.idx", "in.idx", "X_", "Y_", "p", "ground_p",
+                    "OToptions", "obs.direction", "xtx", "xty", "theta"),
+        packages = "WpProj"
+      )) %dofuture% {
         return(minus.idx(cand, in.idx = in.idx, X=X_, sort_mu = Y_, p = p, 
                          ground_p = ground_p,
                          OToptions = OToptions, obs.direction = obs.direction,
