@@ -516,7 +516,7 @@ WPSA <- function(
       }
       if (j %% 10) {
         if (time.exceed(max.time, start.time)) {
-          messages <- "Hit max time. Did not reach final temperature"
+          message <- "Hit max time. Did not reach final temperature"
           break
         }
       }
@@ -563,7 +563,7 @@ WPSA <- function(
 
     out <- foreach::foreach(
       i = seq_along(nvars),
-      .inorder = FALSE,
+      .inorder = TRUE,
       .options.future = list(
         seed = TRUE,
         globals = structure(TRUE, add = "wpsa_worker")
