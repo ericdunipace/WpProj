@@ -16,11 +16,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Eric Dunipace \email{edunipace@mail.harvard.edu} (\href{https://orcid.org/0000-0001-8909-213X}{ORCID})
+\strong{Maintainer}: Eric Dunipace \email{edunipace@post.harvard.edu} (\href{https://orcid.org/0000-0001-8909-213X}{ORCID})
 
 Authors:
 \itemize{
-  \item Eric Dunipace \email{edunipace@mail.harvard.edu} (\href{https://orcid.org/0000-0001-8909-213X}{ORCID})
+  \item Eric Dunipace \email{edunipace@post.harvard.edu} (\href{https://orcid.org/0000-0001-8909-213X}{ORCID})
 }
 
 Other contributors:
