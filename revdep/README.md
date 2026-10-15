@@ -10,7 +10,7 @@
 |collate  |en_US.UTF-8                               |
 |ctype    |en_US.UTF-8                               |
 |tz       |America/Los_Angeles                       |
-|date     |2026-10-14                                |
+|date     |2026-10-15                                |
 |pandoc   |3.12 @ /opt/homebrew/bin/ (via rmarkdown) |
 |quarto   |1.10.19 @ /Applications/quarto/bin/quarto |
 
@@ -19,7 +19,7 @@
 |package            |old           |new           |Δ  |
 |:------------------|:-------------|:-------------|:--|
 |WpProj             |0.3           |0.3.1         |*  |
-|approxOT           |1.2           |1.2           |   |
+|approxOT           |1.3           |1.3           |   |
 |backports          |1.5.1         |1.5.1         |   |
 |BH                 |1.90.0-1      |1.90.0-1      |   |
 |bigmemory          |4.6.6         |4.6.6         |   |
