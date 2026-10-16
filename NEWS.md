@@ -1,5 +1,11 @@
 # WpProj 
 
+## Version 0.3.1
+
+### Minor bug fix
+* BLIS version of linear algebra led to test errors due to handling `%*%` and `crossprod()` differently. Fixed in current release.
+* Updating tests to reflect changes to the underlying `approxOT` algorithm
+
 ## Version 0.3
 
 ### Breaking Changes

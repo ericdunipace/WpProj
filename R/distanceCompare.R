@@ -149,7 +149,11 @@ is.distcompare <- function(x) inherits(x, "distcompare")
 dist_fun <- function(mulist, mu, p, ground_p, method, observation.orientation, projection, ...) {
   m <- NULL
   dist <-
-    foreach::foreach(m=mulist, .combine = c) %dofuture% {
+    # explicit globals skip doFuture's slow automatic scan
+    foreach::foreach(m=mulist, .combine = c, .options.future = list(
+      globals = c("projection", "method", "p", "mu", "ground_p",
+                  "observation.orientation", "...")
+    )) %dofuture% {
         wp <- if(projection & method == "exact" & p == 2) {
           denom <- max(ncol(mu), ncol(m))
           sqrt(sum((c(m) - c(mu))^2)/denom)

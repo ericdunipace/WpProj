@@ -139,7 +139,7 @@ test_that("method_lookup handles method and solver inputs correctly", {
 
 # Test for typical use cases of WpProj
 testthat::test_that("WpProj works with typical inputs", {
-  testthat::skip_on_cran()
+  skip_on_valgrind()
   set.seed(84370158)
 
   n <- 32
@@ -318,6 +318,7 @@ test_that("method_lookup routes open-source solvers", {
 })
 
 test_that("WpProj runs with open-source solvers", {
+  skip_on_valgrind()
   set.seed(87897)
   n <- 32
   p <- 10
@@ -378,6 +379,7 @@ test_that("WpProj runs with open-source solvers", {
 })
 
 test_that("default solvers fall back when optional solver packages are missing", {
+  skip_on_valgrind()
   local_mocked_bindings(solver_installed = function(pkg) FALSE)
 
   expect_equal(
@@ -443,6 +445,7 @@ test_that("default solvers fall back when optional solver packages are missing",
 })
 
 test_that("WpProj passes the augmented lagrangian algorithm to the binary program", {
+  skip_on_valgrind()
   check_scip()
   set.seed(87897)
   n <- 32

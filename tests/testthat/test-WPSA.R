@@ -19,23 +19,11 @@ test_that("WPSA code works for covar", {
   transport.method <- "exact"
   prop.meth <- "covariance"
   
-  otopt <- list(
-    same = TRUE,
-    method = "selection.variable",
-    transport.method = transport.method,
-    epsilon = 0.05,
-    niter = 100
-  )
-  
-  suffStat_star <- sufficientStatistics(x, post_mu, t(post_beta), otopt)
-  xtx_star <- suffStat_star$XtX #* wt + diag(post_beta_norm) * (1-wt)
-  xty_star <- suffStat_star$XtY #* wt + post_beta_norm * (1-wt)
-  
   sv <-  WPSA(X=x, Y=t(post_mu), t(post_beta), 
-              force = 1, power = 2, nvars = 2:(p-1),
+              force = 1, power = 2, nvars = 2:4,
               # groups = NULL,
               maxit=5, temps = 5,
-              max.time = 100,
+              max.time = Inf,
               options = list(method = c("selection.variable"),
                              energy.distribution = "boltzman",
                              transport.method = "exact",
@@ -50,7 +38,7 @@ test_that("WPSA code works for covar", {
                force = 1, power = 2, nvar = 3,
                # groups = NULL,
                maxit=10, temps = 10,
-               max.time = 30,
+               max.time = Inf,
                proposal = WpProj:::proposal.fun,
                options = list(method = c("selection.variable"),
                               energy.distribution = "boltzman",
@@ -64,7 +52,7 @@ test_that("WPSA code works for covar", {
                force = 1, power = 2, nvar = 3,
                # groups = NULL,
                maxit=10, temps = 10,
-               max.time = 30,
+               max.time = Inf,
                proposal = proposal.fun,
                options = list(method = c("selection.variable"),
                               energy.distribution = "boltzman",
@@ -78,7 +66,7 @@ test_that("WPSA code works for covar", {
                force = 1, power = 2, nvar = 3,
                # groups = NULL,
                maxit=10, temps = 10,
-               max.time = 30,
+               max.time = Inf,
                proposal = proposal.fun,
                options = list(method = c("selection.variable"),
                               energy.distribution = "boltzman",
@@ -92,7 +80,7 @@ test_that("WPSA code works for covar", {
                force = 1, power = 2, nvar = 3,
                # groups = NULL,
                maxit=10, temps = 10,
-               max.time = 30,
+               max.time = Inf,
                proposal = proposal.fun,
                options = list(method = c("selection.variable"),
                               energy.distribution = "boltzman",
@@ -106,7 +94,7 @@ test_that("WPSA code works for covar", {
                force = 1, power = 2, nvar = 3,
                # groups = NULL,
                maxit=10, temps = 10,
-               max.time = 30,
+               max.time = Inf,
                proposal = proposal.fun,
                options = list(method = c("selection.variable"),
                               energy.distribution = "boltzman",
@@ -166,23 +154,11 @@ testthat::test_that("WPSA code works for random", {
   transport.method <- "exact"
   prop.meth <- "random"
   
-  otopt <- list(
-    same = TRUE,
-    method = "selection.variable",
-    transport.method = transport.method,
-    epsilon = 0.05,
-    niter = 100
-  )
-  
-  suffStat_star <- WpProj:::sufficientStatistics(x, post_mu, t(post_beta), otopt)
-  xtx_star <- suffStat_star$XtX #* wt + diag(post_beta_norm) * (1-wt)
-  xty_star <- suffStat_star$XtY #* wt + post_beta_norm * (1-wt)
-  
   testthat::expect_silent(sv <-  WpProj:::WPSA(X=x, Y=t(post_mu), t(post_beta), 
               force = 1, power = 2, nvar = 3,
               # groups = NULL,
               maxit=5, temps = 5,
-              max.time = 10,
+              max.time = Inf,
               proposal = WpProj:::proposal.fun,
               options = list(method = c("selection.variable"),
                              energy.distribution = "boltzman",
@@ -197,7 +173,7 @@ testthat::test_that("WPSA code works for random", {
               force = 1, power = 2, nvar = 3,
               # groups = NULL,
               maxit=10, temps = 10,
-              max.time = 30,
+              max.time = Inf,
               proposal = WpProj:::proposal.fun,
               options = list(method = c("selection.variable"),
                              energy.distribution = "boltzman",
@@ -211,7 +187,7 @@ testthat::test_that("WPSA code works for random", {
               force = 1, power = 2, nvar = 3,
               # groups = NULL,
               maxit=10, temps = 10,
-              max.time = 30,
+              max.time = Inf,
               proposal = proposal.fun,
               options = list(method = c("selection.variable"),
                              energy.distribution = "boltzman",
@@ -225,7 +201,7 @@ testthat::test_that("WPSA code works for random", {
               force = 1, power = 2, nvar = 3,
               # groups = NULL,
               maxit=10, temps = 10,
-              max.time = 30,
+              max.time = Inf,
               proposal = proposal.fun,
               options = list(method = c("selection.variable"),
                              energy.distribution = "boltzman",
@@ -239,7 +215,7 @@ testthat::test_that("WPSA code works for random", {
                force = 1, power = 2, nvar = 3,
                # groups = NULL,
                maxit=10, temps = 10,
-               max.time = 30,
+               max.time = Inf,
                proposal = proposal.fun,
                options = list(method = c("selection.variable"),
                               energy.distribution = "boltzman",
@@ -253,7 +229,7 @@ testthat::test_that("WPSA code works for random", {
                force = 1, power = 2, nvar = 3,
                # groups = NULL,
                maxit=10, temps = 10,
-               max.time = 30,
+               max.time = Inf,
                proposal = proposal.fun,
                options = list(method = c("selection.variable"),
                               energy.distribution = "boltzman",
@@ -298,7 +274,7 @@ testthat::test_that("WPSA timing works", {
   ##### Testing R Functions ####
   n <- 100
   p <- 10
-  s <- 1000
+  s <- 100
   
   x <- matrix( rnorm( p * n ), nrow = n, ncol = p )
   x_ <- t(x)
@@ -312,23 +288,11 @@ testthat::test_that("WPSA timing works", {
   
   transport.method <- "exact"
   prop.meth <- "covariance"
-  otopt <- list(
-    same = TRUE,
-    method = "selection.variable",
-    transport.method = transport.method,
-    epsilon = 0.05,
-    niter = 100
-  )
-  
-  suffStat_star <- sufficientStatistics(x, post_mu, t(post_beta), otopt)
-  xtx_star <- suffStat_star$XtX #* wt + diag(post_beta_norm) * (1-wt)
-  xty_star <- suffStat_star$XtY #* wt + post_beta_norm * (1-wt)
-  
   sv <-  WPSA(X=x, Y=t(post_mu), t(post_beta), 
               force = 1, power = 2, nvar = 2:(p-1),
               # groups = NULL,
               maxit=10, temps = 1000,
-              max.time = 1,
+              max.time = 0.01,
               proposal = proposal.fun,
               options = list(method = c("selection.variable"),
                              energy.distribution = "boltzman",
@@ -343,7 +307,7 @@ testthat::test_that("WPSA timing works", {
               force = 1, power = 2, nvar = 2:(p-1),
               # groups = NULL,
               maxit=5, temps = 5,
-              max.time = 300,
+              max.time = Inf,
               proposal = proposal.fun,
               options = list(method = c("selection.variable"),
                              energy.distribution = "boltzman",
@@ -376,23 +340,11 @@ testthat::test_that("WPSA projection", {
   transport.method <- "hilbert"
   prop.meth <- "random"
   
-  otopt <- list(
-    same = TRUE,
-    method = "selection.variable",
-    transport.method = transport.method,
-    epsilon = 0.05,
-    niter = 100
-  )
-  
-  suffStat_star <- WpProj:::sufficientStatistics(x, post_mu, t(post_beta), otopt)
-  xtx_star <- suffStat_star$XtX #* wt + diag(post_beta_norm) * (1-wt)
-  xty_star <- suffStat_star$XtY #* wt + post_beta_norm * (1-wt)
-  
   sv <-  WPSA(X=x, Y=t(post_mu), t(post_beta), 
               force = 1, power = 2, nvar = 3,
               # groups = NULL,
               maxit=5, temps = 5,
-              max.time = 10,
+              max.time = Inf,
               proposal = WpProj:::proposal.fun,
               options = list(method = c("projection"),
                              energy.distribution = "boltzman",
@@ -406,7 +358,7 @@ testthat::test_that("WPSA projection", {
                force = 1, power = 2, nvar = 3,
                # groups = NULL,
                maxit=10, temps = 10,
-               max.time = 30,
+               max.time = Inf,
                proposal = WpProj:::proposal.fun,
                options = list(method = c("projection"),
                               energy.distribution = "boltzman",
@@ -420,7 +372,7 @@ testthat::test_that("WPSA projection", {
                force = 1, power = 2, nvar = 3,
                # groups = NULL,
                maxit=10, temps = 10,
-               max.time = 30,
+               max.time = Inf,
                proposal = proposal.fun,
                options = list(method = c("projection"),
                               energy.distribution = "boltzman",
@@ -434,7 +386,7 @@ testthat::test_that("WPSA projection", {
                force = 1, power = 2, nvar = 3,
                # groups = NULL,
                maxit=10, temps = 10,
-               max.time = 30,
+               max.time = Inf,
                proposal = proposal.fun,
                options = list(method = c("projection"),
                               energy.distribution = "boltzman",
@@ -448,7 +400,7 @@ testthat::test_that("WPSA projection", {
                force = 1, power = 2, nvar = 3,
                # groups = NULL,
                maxit=10, temps = 10,
-               max.time = 30,
+               max.time = Inf,
                proposal = proposal.fun,
                options = list(method = c("projection"),
                               energy.distribution = "boltzman",

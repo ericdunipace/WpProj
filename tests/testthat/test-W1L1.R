@@ -457,6 +457,7 @@ testthat::test_that("W1L1 works for mosek", {
 # }) 
 
 testthat::test_that("W1L1 clarabel matches ecos", {
+  skip_on_valgrind()
   check_clarabel()
   
   set.seed(87897)

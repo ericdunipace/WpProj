@@ -1,25 +1,25 @@
 # Platform
 
-|field    |value                                    |
-|:--------|:----------------------------------------|
-|version  |R version 4.6.1 (2026-06-24)             |
-|os       |macOS Golden Gate 27.0.1                 |
-|system   |aarch64, darwin23                        |
-|ui       |Positron                                 |
-|language |(EN)                                     |
-|collate  |en_US.UTF-8                              |
-|ctype    |en_US.UTF-8                              |
-|tz       |America/Los_Angeles                      |
-|date     |2026-10-05                               |
-|pandoc   |3.9 @ /opt/homebrew/bin/pandoc           |
-|quarto   |1.9.36 @ /Applications/quarto/bin/quarto |
+|field    |value                                     |
+|:--------|:-----------------------------------------|
+|version  |R version 4.6.1 (2026-06-24)              |
+|os       |macOS Golden Gate 27.0.1                  |
+|system   |aarch64, darwin23                         |
+|ui       |Positron                                  |
+|language |(EN)                                      |
+|collate  |en_US.UTF-8                               |
+|ctype    |en_US.UTF-8                               |
+|tz       |America/Los_Angeles                       |
+|date     |2026-10-15                                |
+|pandoc   |3.12 @ /opt/homebrew/bin/ (via rmarkdown) |
+|quarto   |1.10.19 @ /Applications/quarto/bin/quarto |
 
 # Dependencies
 
 |package            |old           |new           |Δ  |
 |:------------------|:-------------|:-------------|:--|
-|WpProj             |0.2.3         |0.3           |*  |
-|approxOT           |1.2           |1.2           |   |
+|WpProj             |0.3           |0.3.1         |*  |
+|approxOT           |1.3           |1.3           |   |
 |backports          |1.5.1         |1.5.1         |   |
 |BH                 |1.90.0-1      |1.90.0-1      |   |
 |bigmemory          |4.6.6         |4.6.6         |   |
@@ -28,28 +28,26 @@
 |cli                |3.6.6         |3.6.6         |   |
 |data.table         |1.18.6.1      |1.18.6.1      |   |
 |digest             |0.6.39        |0.6.39        |   |
-|doFuture           |NA            |1.4.0         |*  |
-|doParallel         |1.0.17        |NA            |*  |
-|doRNG              |1.8.6.3       |NA            |*  |
+|doFuture           |1.4.0         |1.4.0         |   |
 |dplyr              |1.2.1         |1.2.1         |   |
 |ECOSolveR          |0.6.1         |0.6.1         |   |
 |foreach            |1.5.2         |1.5.2         |   |
-|future             |NA            |1.76.0        |*  |
-|future.apply       |NA            |1.20.2        |*  |
+|future             |1.76.0        |1.76.0        |   |
+|future.apply       |1.20.2        |1.20.2        |   |
 |generics           |0.1.4         |0.1.4         |   |
 |glmnet             |5.1           |5.1           |   |
-|globals            |NA            |0.19.1        |*  |
+|globals            |0.20.0        |0.20.0        |   |
 |glue               |1.8.1         |1.8.1         |   |
 |hqreg              |1.4-1         |1.4-1         |   |
 |hrqglas            |1.1.2         |1.1.2         |   |
 |iterators          |1.0.14        |1.0.14        |   |
 |lifecycle          |1.0.5         |1.0.5         |   |
-|listenv            |NA            |1.1.0         |*  |
+|listenv            |1.1.0         |1.1.0         |   |
 |lpSolveAPI         |5.5.2.0-17.15 |5.5.2.0-17.15 |   |
 |magrittr           |2.0.5         |2.0.5         |   |
 |MatrixModels       |0.5-4         |0.5-4         |   |
 |oem                |2.0.12        |2.0.12        |   |
-|parallelly         |NA            |1.48.0        |*  |
+|parallelly         |1.48.0        |1.48.0        |   |
 |pillar             |1.11.1        |1.11.1        |   |
 |pkgconfig          |2.0.3         |2.0.3         |   |
 |plyr               |1.8.9         |1.8.9         |   |
@@ -58,13 +56,12 @@
 |rbibutils          |2.4.1         |2.4.1         |   |
 |Rcpp               |1.1.2         |1.1.2         |   |
 |RcppArmadillo      |15.6.0-1      |15.6.0-1      |   |
-|RcppCGAL           |6.2.1         |6.2.1         |   |
+|RcppCGAL           |6.2.1.1       |6.2.1.1       |   |
 |RcppEigen          |0.3.4.0.2     |0.3.4.0.2     |   |
 |RcppProgress       |0.4.2         |0.4.2         |   |
 |Rdpack             |2.6.6         |2.6.6         |   |
 |registry           |0.5-1         |0.5-1         |   |
 |rlang              |1.3.0         |1.3.0         |   |
-|rngtools           |1.5.2         |NA            |*  |
 |ROI                |1.0-2         |1.0-2         |   |
 |ROI.plugin.ecos    |1.0-2         |1.0-2         |   |
 |ROI.plugin.lpsolve |1.0-2         |1.0-2         |   |

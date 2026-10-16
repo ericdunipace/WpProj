@@ -68,6 +68,14 @@ check_scip <- function() {
   }
 }
 
+# skip tests that don't touch the package's compiled code when running
+# under valgrind. valgrind adds its vgpreload libraries to LD_PRELOAD.
+skip_on_valgrind <- function() {
+  if (grepl("vgpreload", Sys.getenv("LD_PRELOAD"), fixed = TRUE)) {
+    testthat::skip("Running under valgrind")
+  }
+}
+
 # Suggested solver packages. Defaults with a fallback are swapped for an
 # always-installed solver when their package is missing (e.g., clarabel needs
 # Rust to build from source). `fallback` is the name used by WpProj() and
